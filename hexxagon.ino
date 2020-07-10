@@ -22,7 +22,7 @@ Color displayColor = OFF;
 void rcv_message_handler(byte message_id, byte* payload) {
   byte selected_target_type = TARGET_TYPE_NONE;
   for (byte i = 0; i < 3; ++i) {
-    byte distance = abs(payload[i]);
+    byte distance = abs(int8_t(payload[i]));
     if (distance > 2) {
       selected_target_type = TARGET_TYPE_NONE;
       break;
@@ -70,7 +70,7 @@ void set_payload_for_face(byte* payload, byte f) {
       payload[PAYLOAD_Z]--;
   }
 
-  payload[PAYLOAD_Z] = f;
+  payload[PAYLOAD_FACE] = f;
 }
 
 void fwd_message_handler(byte id, byte src_face, byte dst_face, byte* payload) {
