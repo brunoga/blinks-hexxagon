@@ -162,7 +162,7 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 
 void HandleReceiveMessage(byte message_id, byte* payload) {
   switch (message_id) {
-    case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
+    case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS: {
       if (blink::state::GetType() == BLINK_STATE_TYPE_EMPTY) {
         byte selected_target_type = BLINK_STATE_TARGET_TYPE_NONE;
         for (byte i = 0; i < 3; ++i) {
@@ -177,8 +177,13 @@ void HandleReceiveMessage(byte message_id, byte* payload) {
           }
         }
 
+        LOGF("target type ");
+        LOGLN(selected_target_type);
+
         blink::state::SetTargetType(selected_target_type);
       }
+      break;
+    }
   }
 }
 

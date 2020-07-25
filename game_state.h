@@ -24,7 +24,7 @@ void Reset();
 
 bool Changed(bool include_specific = true);
 
-bool Propagate();
+bool Propagate(bool force = false);
 
 }  // namespace state
 
