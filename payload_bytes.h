@@ -1,8 +1,3 @@
-#ifndef PAYLOAD_BYTES_H_
-#define PAYLOAD_BYTES_H_
-
-// The first 3 bytes are the X, Y and Z coordinates in the hexagonal
-// coordinate system. The 4th byte is the face the message was sent to.
+// This is the maximum payload we will need which is 4 bytes for the
+// MESSAGE_FIND_TARGETS message.
 #define MESSAGE_PAYLOAD_BYTES 4
-
-#endif

@@ -1,134 +1,81 @@
-#include "manager.h"
-#include "message.h"
+#include "blink_state.h"
+#include "debug.h"
+#include "game_message.h"
+#include "game_state.h"
+#include "game_state_idle.h"
+#include "game_state_play.h"
+#include "game_state_setup.h"
 
-#define MESSAGE_FIND_TARGETS 1
+extern int __bss_end;
+extern void *__brkval;
 
-#define TARGET_TYPE_NONE 0
-#define TARGET_TYPE_MOVE 1
-#define TARGET_TYPE_COPY 2
+int get_free_memory() {
+  int free_memory;
 
-// Coordinates stored in the payload.
-#define PAYLOAD_X 0
-#define PAYLOAD_Y 1
-#define PAYLOAD_Z 2
+  if ((int)__brkval == 0)
+    free_memory = ((int)&free_memory) - ((int)&__bss_end);
+  else
+    free_memory = ((int)&free_memory) - ((int)__brkval);
 
-// Face the payload was originally sent to.
-#define PAYLOAD_FACE 3
-
-byte target_type = TARGET_TYPE_NONE;
-
-Color displayColor = OFF;
-
-void rcv_message_handler(byte message_id, byte* payload) {
-  byte selected_target_type = TARGET_TYPE_NONE;
-  for (byte i = 0; i < 3; ++i) {
-    byte distance = abs(int8_t(payload[i]));
-    if (distance > 2) {
-      selected_target_type = TARGET_TYPE_NONE;
-      break;
-    }
-
-    if (distance > selected_target_type) {
-      selected_target_type = distance;
-    }
-  }
-
-  target_type = selected_target_type;
-  if (target_type == TARGET_TYPE_COPY) {
-    displayColor = YELLOW;
-  } else if (target_type == TARGET_TYPE_MOVE) {
-    displayColor = GREEN;
-  } else {
-    displayColor = OFF;
-  }
+  return free_memory;
 }
 
-void set_payload_for_face(byte* payload, byte f) {
-  switch (f) {
-    case 0:
-      payload[PAYLOAD_Y]--;
-      payload[PAYLOAD_Z]--;
-      break;
-    case 1:
-      payload[PAYLOAD_X]--;
-      payload[PAYLOAD_Y]--;
-      break;
-    case 2:
-      payload[PAYLOAD_X]--;
-      payload[PAYLOAD_Z]++;
-      break;
-    case 3:
-      payload[PAYLOAD_Y]++;
-      payload[PAYLOAD_Z]++;
-      break;
-    case 4:
-      payload[PAYLOAD_X]++;
-      payload[PAYLOAD_Y]++;
-      break;
-    case 5:
-      payload[PAYLOAD_X]++;
-      payload[PAYLOAD_Z]--;
-  }
+void setup() { game::message::Setup(); }
 
-  payload[PAYLOAD_FACE] = f;
+void logState() {
+  LOG(game::state::Get());
+  LOGF(" ");
+  LOGLN(game::state::GetSpecific());
 }
-
-void fwd_message_handler(byte id, byte src_face, byte dst_face, byte* payload) {
-  if (src_face == FACE_COUNT) {
-    // We are the source of the coordinate system. Set payload using the real
-    // face number.
-    set_payload_for_face(payload, dst_face);
-
-    target_type = TARGET_TYPE_NONE;
-
-    return;
-  }
-
-  // The input face is the face opposite to the face the message was sent to.
-  byte input_face = ((payload[3] + 3) % 6);
-
-  // The output face is the normalized face in relation to the input face.
-  byte output_face = ((dst_face - src_face) + input_face + 6) % 6;
-
-  // Set payload using the normalized output face.
-  set_payload_for_face(payload, output_face);
-}
-
-void fwd_reply_handler(byte id, byte* payload) {
-  if (target_type != TARGET_TYPE_NONE) {
-    // Just indicate we have a target for now.
-    payload[0] = 1;
-  }
-}
-
-message::Message find_targets;
-
-void setup() {
-  message::Set(find_targets, MESSAGE_FIND_TARGETS, nullptr, false);
-  message::manager::Set(rcv_message_handler, fwd_message_handler, nullptr,
-                        fwd_reply_handler);
-}
-
-byte result[MESSAGE_PAYLOAD_BYTES];
 
 void loop() {
-  if (buttonSingleClicked()) {
-    if (message::manager::Send(find_targets)) {
-      displayColor = dim(BLUE, 127);
-    } else {
-      displayColor = RED;
+  LOGF("loop top ");
+  logState();
+
+  // Process any pending game messages.
+  game::message::Process();
+
+  LOGF("after process ");
+  logState();
+
+  if (game::state::Propagate()) {
+    // Cache current state and if we changed state since the previous iteration.
+    byte state = game::state::Get();
+    bool state_changed = game::state::Changed(false);
+
+    // Check escape hatch. Reset to idle state if button is long pressed.
+    if (buttonLongPressed()) {
+      game::state::Reset();
+      blink::state::Reset();
+
+      game::state::Set(GAME_STATE_IDLE, true, true);
+
+      return;
     }
+
+    // Run our state machine.
+    switch (state) {
+      case GAME_STATE_IDLE:
+        state = game::state::idle::Handler(state_changed);
+        break;
+      case GAME_STATE_SETUP:
+        state = game::state::setup::Handler(state_changed);
+        break;
+      case GAME_STATE_PLAY:
+        state = game::state::play::Handler(state_changed);
+        break;
+    }
+
+    LOGF("after switch ");
+    logState();
+
+    // Switch our state to the computed one and enable propagation.
+    game::state::Set(state, true);
+
+    LOGLN(game::state::Changed());
   }
 
-  if (message::manager::Process(result)) {
-    if (result[0] == 1) {
-      // We have targets.
-      displayColor = BLUE;
-    } else {
-      // No targets.
-      displayColor = RED;
-    }
-  }
+  blink::state::Render(game::state::Get());
 
-  setColor(displayColor);
+  // LOGLN(get_free_memory());
 }

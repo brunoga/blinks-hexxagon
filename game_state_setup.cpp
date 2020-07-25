@@ -1,0 +1,68 @@
+#include "game_state_setup.h"
+
+#include "blink_state.h"
+#include "debug.h"
+#include "game_message.h"
+#include "game_state.h"
+
+namespace game {
+
+namespace state {
+
+namespace setup {
+
+bool checking_board_ = false;
+
+byte Handler(bool state_changed) {
+  (void)state_changed;
+
+  if (buttonDoubleClicked() || checking_board_) {
+    checking_board_ = true;
+
+    broadcast::message::Message reply;
+    if (!game::message::SendCheckBoard(reply)) return GAME_STATE_SETUP;
+
+    checking_board_ = false;
+
+    const byte* payload = broadcast::message::Payload(reply);
+    if (payload[1] == 0 || payload[2] == 0) {
+      // We need at least one piece for player one and one piece for player two.
+
+      // TODO(bga): Add some visual feedback to indicate something is wrong.
+      return GAME_STATE_SETUP;
+    }
+
+    return GAME_STATE_PLAY;
+  }
+
+  if (buttonSingleClicked()) {
+    switch (blink::state::GetType()) {
+      case BLINK_STATE_TYPE_EMPTY:
+        blink::state::SetType(BLINK_STATE_TYPE_PLAYER);
+        blink::state::SetPlayer(1);
+        break;
+      case BLINK_STATE_TYPE_PLAYER: {
+        if (blink::state::GetPlayer() == 1) {
+          blink::state::SetPlayer(2);
+        } else {
+          blink::state::SetType(BLINK_STATE_TYPE_EMPTY);
+          blink::state::SetPlayer(0);
+        }
+        break;
+      }
+    }
+  }
+
+  return GAME_STATE_SETUP;
+}
+
+void HandleReceiveMessage(byte message_id, byte* payload) {
+  (void)message_id;
+  (void)payload;
+}
+
+}  // namespace setup
+
+}  // namespace state
+
+}  // namespace game
