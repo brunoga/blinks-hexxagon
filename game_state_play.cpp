@@ -64,7 +64,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 
   switch (game::state::GetSpecific()) {
     case GAME_STATE_PLAY_SELECT_ORIGIN:
-      LOGFLN("select origin");
       blink::state::SetOrigin(false);
       blink::state::SetTarget(false);
       blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
@@ -80,34 +79,24 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       *specific_state = GAME_STATE_PLAY_ORIGIN_SELECTED;
       break;
     case GAME_STATE_PLAY_ORIGIN_SELECTED: {
-      LOGFLN("origin selected");
       blink::state::SetTarget(false);
       // blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
 
       if (!blink::state::GetOrigin()) break;
 
-      LOGFLN("finding targets");
-
       broadcast::message::Message reply;
       if (!game::message::SendGameStatePlayFindTargets(reply)) break;
 
-      LOGFLN("done");
-
       if (broadcast::message::Payload(reply)[0] == 0) {
         // No targets.
-        LOGFLN("no targets");
         *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
-
         break;
-      } else {
-        LOGFLN("got targets");
       }
 
       *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
       break;
     }
     case GAME_STATE_PLAY_SELECT_TARGET:
-      LOGFLN("select target");
       blink::state::SetTarget(false);
 
       if (blink::state::GetOrigin()) break;
@@ -119,11 +108,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       }
 
       if (!buttonSingleClicked()) break;
-
-      if (blink::state::GetPlayer() == game::state::GetNextPlayer()) {
-        blink::state::SetOrigin(true);
-        *specific_state = GAME_STATE_PLAY_ORIGIN_SELECTED;
-      }
 
       blink::state::SetTarget(true);
 
@@ -176,9 +160,6 @@ void HandleReceiveMessage(byte message_id, byte* payload) {
             selected_target_type = distance;
           }
         }
-
-        LOGF("target type ");
-        LOGLN(selected_target_type);
 
         blink::state::SetTargetType(selected_target_type);
       }
