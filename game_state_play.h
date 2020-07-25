@@ -17,7 +17,7 @@ namespace state {
 
 namespace play {
 
-byte Handler(bool state_changed);
+void Handler(bool state_changed, byte* state, byte* specific_state);
 
 void HandleReceiveMessage(byte message_id, byte* payload);
 void HandleForwardMessage(byte message_id, byte src_face, byte dst_face,

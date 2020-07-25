@@ -18,14 +18,11 @@ namespace message {
 
 static byte message_state_ = MESSAGE_STATE_SEND_MESSAGE;
 
-static broadcast::message::Message scratch_message_;
-
 static void rcv_message_handler(byte message_id, byte* payload) {
   switch (message_id) {
     case MESSAGE_GAME_STATE_CHANGE:
-      LOGFLN("remote game state change");
-      game::state::Set(payload[0]);
-      game::state::SetSpecific(payload[1]);
+      game::state::Set(payload[0], true);
+      game::state::SetSpecific(payload[1], true);
       game::state::SetNextPlayer(payload[2]);
   }
 }
@@ -108,9 +105,10 @@ static bool sendOrWaitForReply(broadcast::message::Message message,
 
 static bool sendOrWaitForReply(byte message_id, const byte* payload,
                                broadcast::message::Message reply) {
-  broadcast::message::Set(scratch_message_, message_id, payload, false);
+  broadcast::message::Message message;
+  broadcast::message::Set(message, message_id, payload, false);
 
-  return sendOrWaitForReply(scratch_message_, reply);
+  return sendOrWaitForReply(message, reply);
 }
 
 void Setup() {
@@ -122,14 +120,14 @@ void Process() { ::broadcast::manager::Process(); }
 
 bool SendGameStateChange(byte game_state, byte specific_state,
                          byte next_player) {
-  broadcast::message::Set(scratch_message_, MESSAGE_GAME_STATE_CHANGE, nullptr,
-                          false);
+  broadcast::message::Message message;
+  broadcast::message::Set(message, MESSAGE_GAME_STATE_CHANGE, nullptr, false);
 
-  broadcast::message::MutablePayload(scratch_message_)[0] = game_state;
-  broadcast::message::MutablePayload(scratch_message_)[1] = specific_state;
-  broadcast::message::MutablePayload(scratch_message_)[2] = next_player;
+  broadcast::message::MutablePayload(message)[0] = game_state;
+  broadcast::message::MutablePayload(message)[1] = specific_state;
+  broadcast::message::MutablePayload(message)[2] = next_player;
 
-  return sendOrWaitForReply(scratch_message_, nullptr);
+  return sendOrWaitForReply(message, nullptr);
 }
 
 bool SendCheckBoard(broadcast::message::Message reply) {
@@ -140,8 +138,6 @@ bool SendGameStatePlayFindTargets(broadcast::message::Message reply) {
   return sendOrWaitForReply(MESSAGE_GAME_STATE_PLAY_FIND_TARGETS, nullptr,
                             reply);
 }
-
-byte* ScratchMessage() { return scratch_message_; }
 
 }  // namespace message
 

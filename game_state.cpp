@@ -11,9 +11,8 @@ namespace state {
 struct State {
   byte current : 2;
   byte previous : 2;
-  bool propagate : 1;
-  bool force_propagate : 1;
   byte next_player : 2;
+  bool from_network : 1;
 };
 static State state_;
 
@@ -23,22 +22,30 @@ struct SpecificState {
 };
 static SpecificState specific_state_;
 
-void Set(byte state, bool propagate, bool force_propagate) {
-  state_.previous = state_.current;
-  state_.current = state;
+void Set(byte state, bool from_network) {
+  if (from_network) {
+    state_.previous = state;
+    state_.current = state;
+  } else {
+    state_.previous = state_.current;
+    state_.current = state;
+  }
 
-  state_.propagate = propagate;
-  state_.force_propagate = force_propagate;
+  state_.from_network = from_network;
 }
 
 byte Get() { return state_.current; }
 
-void SetSpecific(byte specific_state, bool propagate, bool force_propagate) {
-  specific_state_.previous = specific_state_.current;
-  specific_state_.current = specific_state;
+void SetSpecific(byte specific_state, bool from_network) {
+  if (from_network) {
+    specific_state_.previous = specific_state;
+    specific_state_.current = specific_state;
+  } else {
+    specific_state_.previous = specific_state_.current;
+    specific_state_.current = specific_state;
+  }
 
-  state_.propagate = propagate;
-  state_.force_propagate = force_propagate;
+  state_.from_network = from_network;
 }
 
 byte GetSpecific() { return specific_state_.current; }
@@ -50,9 +57,8 @@ byte GetNextPlayer() { return state_.next_player + 1; }
 void Reset() {
   state_.current = GAME_STATE_IDLE;
   state_.previous = GAME_STATE_IDLE;
-  state_.propagate = false;
-  state_.force_propagate = false;
   state_.next_player = 1;
+  state_.from_network = false;
   specific_state_.current = 0;
   specific_state_.previous = 0;
 }
@@ -65,27 +71,12 @@ bool Changed(bool include_specific) {
 }
 
 bool Propagate() {
-  if ((!state_.propagate || !Changed()) && !state_.force_propagate) {
-    LOGFLN("already propagated");
-    return true;
-  }
-
-  LOGF("propagating ");
-  LOG(state_.current);
-  LOGF(" ");
-  LOG(specific_state_.current);
-  LOGF(" ");
-  LOGLN(state_.next_player);
+  if (!Changed()) return true;
 
   if (!game::message::SendGameStateChange(
           state_.current, specific_state_.current, state_.next_player + 1)) {
     return false;
   }
-
-  LOGFLN("propagated");
-
-  state_.propagate = false;
-  state_.force_propagate = false;
 
   return true;
 }

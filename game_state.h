@@ -11,11 +11,10 @@ namespace game {
 
 namespace state {
 
-void Set(byte state, bool propagate = false, bool force_propagate = false);
+void Set(byte state, bool from_network = false);
 byte Get();
 
-void SetSpecific(byte specific_state, bool propagate = false,
-                 bool force_propagate = false);
+void SetSpecific(byte specific_state, bool from_network = false);
 byte GetSpecific();
 
 void SetNextPlayer(byte next_player);

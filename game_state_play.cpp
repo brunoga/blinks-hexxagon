@@ -52,10 +52,14 @@ static void set_payload_for_face(byte* payload, byte f) {
   payload[PAYLOAD_FACE] = f;
 }
 
-byte Handler(bool state_changed) {
+void Handler(bool state_changed, byte* state, byte* specific_state) {
   if (state_changed) {
-    game::state::SetSpecific(GAME_STATE_PLAY_SELECT_ORIGIN);
+    *state = GAME_STATE_PLAY;
+    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
+
     game::state::SetNextPlayer(1);
+
+    return;
   }
 
   switch (game::state::GetSpecific()) {
@@ -73,31 +77,37 @@ byte Handler(bool state_changed) {
 
       blink::state::SetOrigin(true);
 
-      game::state::SetSpecific(GAME_STATE_PLAY_ORIGIN_SELECTED);
+      *specific_state = GAME_STATE_PLAY_ORIGIN_SELECTED;
       break;
     case GAME_STATE_PLAY_ORIGIN_SELECTED: {
       LOGFLN("origin selected");
       blink::state::SetTarget(false);
-      blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
+      // blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
 
       if (!blink::state::GetOrigin()) break;
 
-      if (!game::message::SendGameStatePlayFindTargets(
-              game::message::ScratchMessage()))
-        break;
+      LOGFLN("finding targets");
 
-      if (broadcast::message::Payload(game::message::ScratchMessage())[0] ==
-          0) {
+      broadcast::message::Message reply;
+      if (!game::message::SendGameStatePlayFindTargets(reply)) break;
+
+      LOGFLN("done");
+
+      if (broadcast::message::Payload(reply)[0] == 0) {
         // No targets.
-        game::state::SetSpecific(GAME_STATE_PLAY_SELECT_ORIGIN);
+        LOGFLN("no targets");
+        *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
 
         break;
+      } else {
+        LOGFLN("got targets");
       }
 
-      game::state::SetSpecific(GAME_STATE_PLAY_SELECT_TARGET);
+      *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
       break;
     }
     case GAME_STATE_PLAY_SELECT_TARGET:
+      LOGFLN("select target");
       blink::state::SetTarget(false);
 
       if (blink::state::GetOrigin()) break;
@@ -112,16 +122,16 @@ byte Handler(bool state_changed) {
 
       if (blink::state::GetPlayer() == game::state::GetNextPlayer()) {
         blink::state::SetOrigin(true);
-        game::state::SetSpecific(GAME_STATE_PLAY_ORIGIN_SELECTED);
+        *specific_state = GAME_STATE_PLAY_ORIGIN_SELECTED;
       }
 
       blink::state::SetTarget(true);
 
-      game::state::SetSpecific(GAME_STATE_PLAY_TARGET_SELECTED);
+      *specific_state = GAME_STATE_PLAY_TARGET_SELECTED;
       break;
     case GAME_STATE_PLAY_TARGET_SELECTED:
       if (buttonDoubleClicked()) {
-        game::state::SetSpecific(GAME_STATE_PLAY_CONFIRM_MOVE);
+        *specific_state = GAME_STATE_PLAY_CONFIRM_MOVE;
 
         break;
       }
@@ -130,14 +140,14 @@ byte Handler(bool state_changed) {
 
       if (blink::state::GetOrigin()) {
         // Unselect origin.
-        game::state::SetSpecific(GAME_STATE_PLAY_SELECT_ORIGIN);
+        *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
 
         break;
       }
 
       if (blink::state::GetTarget()) {
         // Unselect origin.
-        game::state::SetSpecific(GAME_STATE_PLAY_SELECT_TARGET);
+        *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
 
         break;
       }
@@ -147,7 +157,7 @@ byte Handler(bool state_changed) {
       break;
   }
 
-  return GAME_STATE_PLAY;
+  *state = GAME_STATE_PLAY;
 }
 
 void HandleReceiveMessage(byte message_id, byte* payload) {

@@ -26,8 +26,6 @@ bool SendCheckBoard(broadcast::message::Message reply);
 // Indexes: 0 = target found.
 bool SendGameStatePlayFindTargets(broadcast::message::Message reply);
 
-byte* ScratchMessage();
-
 }  // namespace message
 
 }  // namespace game

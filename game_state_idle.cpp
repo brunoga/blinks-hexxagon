@@ -11,7 +11,7 @@ namespace state {
 
 namespace idle {
 
-byte Handler(bool state_changed) {
+void Handler(bool state_changed, byte* state, byte* specific_state) {
   if (state_changed) {
     game::state::Reset();
     blink::state::Reset();
@@ -19,13 +19,17 @@ byte Handler(bool state_changed) {
 
   if (buttonSingleClicked()) {
     // Switch to setup state.
-    return GAME_STATE_SETUP;
+    *state = GAME_STATE_SETUP;
+    *specific_state = 0;
+
+    return;
   }
 
-  return GAME_STATE_IDLE;
+  *state = GAME_STATE_IDLE;
+  *specific_state = 0;
 }
 
-void HandleReceiveMessage(byte message_id, byte *payload) {
+void HandleReceiveMessage(byte message_id, byte* payload) {
   (void)message_id;
   (void)payload;
 }

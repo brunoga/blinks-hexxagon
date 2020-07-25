@@ -13,26 +13,38 @@ namespace setup {
 
 bool checking_board_ = false;
 
-byte Handler(bool state_changed) {
+void Handler(bool state_changed, byte* state, byte* specific_state) {
   (void)state_changed;
 
   if (buttonDoubleClicked() || checking_board_) {
     checking_board_ = true;
 
     broadcast::message::Message reply;
-    if (!game::message::SendCheckBoard(reply)) return GAME_STATE_SETUP;
+    if (!game::message::SendCheckBoard(reply)) {
+      *state = GAME_STATE_SETUP;
+      *specific_state = 0;
+
+      return;
+    }
 
     checking_board_ = false;
 
     const byte* payload = broadcast::message::Payload(reply);
     if (payload[1] == 0 || payload[2] == 0) {
-      // We need at least one piece for player one and one piece for player two.
+      // We need at least one piece for player one and one piece for player
+      // two.
 
       // TODO(bga): Add some visual feedback to indicate something is wrong.
-      return GAME_STATE_SETUP;
+      *state = GAME_STATE_SETUP;
+      *specific_state = 0;
+
+      return;
     }
 
-    return GAME_STATE_PLAY;
+    *state = GAME_STATE_PLAY;
+    *specific_state = 0;
+
+    return;
   }
 
   if (buttonSingleClicked()) {
@@ -53,7 +65,8 @@ byte Handler(bool state_changed) {
     }
   }
 
-  return GAME_STATE_SETUP;
+  *state = GAME_STATE_SETUP;
+  *specific_state = 0;
 }
 
 void HandleReceiveMessage(byte message_id, byte* payload) {
