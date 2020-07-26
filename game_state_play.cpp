@@ -188,7 +188,7 @@ static void target_selected(byte* state, byte* specific_state) {
   }
 }
 
-static bool neighboorTarget() {
+static bool neighboor_target() {
   FOREACH_FACE(f) {
     if (isValueReceivedOnFaceExpired(f)) continue;
 
@@ -206,7 +206,7 @@ static bool neighboorTarget() {
 
 static void confirm_move(byte* state, byte* specific_state) {
   if (blink::state::GetOrigin()) {
-    if (!neighboorTarget()) {
+    if (!neighboor_target()) {
       // We are the origin and the target is not an immediate neighboor. We are
       // moving from here so reset ourselves.
       blink::state::Reset();
