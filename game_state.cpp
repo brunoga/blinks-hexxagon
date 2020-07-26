@@ -57,7 +57,7 @@ byte GetNextPlayer() { return state_.next_player + 1; }
 void Reset() {
   state_.current = GAME_STATE_IDLE;
   state_.previous = GAME_STATE_IDLE;
-  state_.next_player = 1;
+  state_.next_player = 0;
   state_.from_network = false;
   specific_state_.current = 0;
   specific_state_.previous = 0;
