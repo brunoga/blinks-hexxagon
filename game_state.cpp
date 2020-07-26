@@ -23,13 +23,8 @@ struct SpecificState {
 static SpecificState specific_state_;
 
 void Set(byte state, bool from_network) {
-  if (from_network) {
-    state_.previous = state;
-    state_.current = state;
-  } else {
-    state_.previous = state_.current;
-    state_.current = state;
-  }
+  state_.previous = state_.current;
+  state_.current = state;
 
   state_.from_network = from_network;
 }
@@ -37,13 +32,8 @@ void Set(byte state, bool from_network) {
 byte Get() { return state_.current; }
 
 void SetSpecific(byte specific_state, bool from_network) {
-  if (from_network) {
-    specific_state_.previous = specific_state;
-    specific_state_.current = specific_state;
-  } else {
-    specific_state_.previous = specific_state_.current;
-    specific_state_.current = specific_state;
-  }
+  specific_state_.previous = specific_state_.current;
+  specific_state_.current = specific_state;
 
   state_.from_network = from_network;
 }
@@ -71,7 +61,7 @@ bool Changed(bool include_specific) {
 }
 
 bool Propagate(bool force) {
-  if (!Changed() && !force) return true;
+  if ((!Changed() || state_.from_network) && !force) return true;
 
   if (!game::message::SendGameStateChange(
           state_.current, specific_state_.current, state_.next_player + 1)) {
