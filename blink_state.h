@@ -14,6 +14,18 @@ namespace blink {
 
 namespace state {
 
+union FaceValue {
+  struct {
+    byte reserved : 2;
+    byte unused : 1;  // Unused for now.
+    bool origin : 1;  // Is it the current origin?
+    bool target : 1;  // Is it the current target?
+    byte player : 3;  // 0 means empty.
+  };
+
+  byte value;
+};
+
 void SetType(byte type);
 byte GetType();
 
