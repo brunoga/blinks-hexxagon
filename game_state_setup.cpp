@@ -14,35 +14,31 @@ namespace setup {
 bool checking_board_ = false;
 
 void Handler(bool state_changed, byte* state, byte* specific_state) {
-  (void)state_changed;
+  if (state_changed) {
+    blink::state::Reset();
+  }
 
   if (buttonDoubleClicked() || checking_board_) {
     checking_board_ = true;
 
     broadcast::message::Message reply;
     if (!game::message::SendCheckBoard(reply)) {
-      *state = GAME_STATE_SETUP;
-      *specific_state = 0;
-
       return;
     }
 
     checking_board_ = false;
 
     const byte* payload = broadcast::message::Payload(reply);
-    if (payload[1] == 0 || payload[2] == 0) {
-      // We need at least one piece for player one and one piece for player
-      // two.
+    byte empty_blinks = payload[0] - (payload[1] + payload[2]);
+    if (payload[1] == 0 || payload[2] == 0 || empty_blinks == 0) {
+      // We need at least one piece for player one and one piece for player two
+      // and one empty piece.
 
       // TODO(bga): Add some visual feedback to indicate something is wrong.
-      *state = GAME_STATE_SETUP;
-      *specific_state = 0;
-
       return;
     }
 
     *state = GAME_STATE_PLAY;
-    *specific_state = 0;
 
     return;
   }
