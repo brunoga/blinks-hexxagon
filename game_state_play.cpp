@@ -52,6 +52,152 @@ static void set_payload_for_face(byte* payload, byte f) {
   payload[PAYLOAD_FACE] = f;
 }
 
+static bool auto_select_ = false;
+
+static void select_origin(byte* state, byte* specific_state) {
+  LOGFLN("select origin");
+  // We are going to select an origin, so reset any blink that is currently one.
+  blink::state::SetOrigin(false);
+
+  // Also, if there is a target selected. It must be reset (as we have no
+  // origin).
+  blink::state::SetTarget(false);
+
+  // Also reset any potential targets.
+  blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
+
+  // This blink does not belong to a player. Nothing to do.
+  if (blink::state::GetType() != BLINK_STATE_TYPE_PLAYER) return;
+
+  // It belongs to a player, but not the current one. Nothing to do.
+  if (blink::state::GetPlayer() != game::state::GetNextPlayer()) return;
+
+  LOGFLN("waiting for click");
+
+  // We pass all checks, but we do nothing until we get a click.
+  if (!buttonSingleClicked() && !auto_select_) return;
+
+  if (auto_select_) {
+    LOGFLN("auto selected");
+  }
+
+  auto_select_ = false;
+
+  // Ok, we are now the origin.
+  blink::state::SetOrigin(true);
+
+  // Indicate that an origin was selected. This will be automatically propagated
+  // to all blinks.
+  *specific_state = GAME_STATE_PLAY_ORIGIN_SELECTED;
+}
+
+static void origin_selected(byte* state, byte* specific_state) {
+  LOGFLN("origin selected");
+  // Only the origin blink has anything to do here.
+  if (!blink::state::GetOrigin()) return;
+
+  // Look for possible targets. Only continue when all other blinks report in.
+  broadcast::message::Message reply;
+  if (!game::message::SendGameStatePlayFindTargets(reply)) return;
+
+  // Did we find any targets?
+  if (broadcast::message::Payload(reply)[0] == 0) {
+    // Nope. Reset to selecting an origin (hoppefully a different one).
+    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
+
+    return;
+  }
+
+  // We have at least one possible target.
+  *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
+}
+
+static void select_target(byte* state, byte* specific_state) {
+  LOGFLN("select target");
+  // We are going to select a target, so reset any blink that is currently one.
+  blink::state::SetTarget(false);
+
+  // If this blink is the origin, there is nothing for it to do at this stage.
+  if (blink::state::GetOrigin()) return;
+
+  // If we are not a possible target or a blink that belongs to the current
+  // player, then there is also nothing to do.
+  if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE &&
+      (blink::state::GetType() != BLINK_STATE_TYPE_PLAYER ||
+       blink::state::GetPlayer() != game::state::GetNextPlayer())) {
+    return;
+  }
+
+  // We pass all checks, but we do nothing until we get a click or auto
+  // selection is enabled for this blink.
+  if (!buttonSingleClicked() && !auto_select_) return;
+
+  auto_select_ = false;
+
+  // Are we a blink that belongs to the current player?
+  if ((blink::state::GetType() == BLINK_STATE_TYPE_PLAYER) &&
+      (blink::state::GetPlayer() == game::state::GetNextPlayer())) {
+    LOGFLN("clicked on a new origin");
+    auto_select_ = true;
+
+    // Change our state accordingly.
+    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
+
+    return;
+  }
+
+  // We are a valid target.
+  blink::state::SetTarget(true);
+
+  *specific_state = GAME_STATE_PLAY_TARGET_SELECTED;
+}
+
+static void target_selected(byte* state, byte* specific_state) {
+  // Double-click in any blink confirms the move.
+  if (buttonDoubleClicked()) {
+    *specific_state = GAME_STATE_PLAY_CONFIRM_MOVE;
+    return;
+  }
+
+  // If this blink is the current target, there is nothing for it to do at this
+  // stage.
+  if (blink::state::GetTarget()) return;
+
+  // If this blink is the current origin, there is nothing for it to do at this
+  // stage.
+  if (blink::state::GetOrigin()) return;
+
+  // If we are not a possible target or a blink that belongs to the current
+  // player, then there is also nothing to do.
+  if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE &&
+      (blink::state::GetType() != BLINK_STATE_TYPE_PLAYER ||
+       blink::state::GetPlayer() != game::state::GetNextPlayer())) {
+    return;
+  }
+
+  // We pass all checks, but we do nothing until we get a click.
+  if (!buttonSingleClicked()) return;
+
+  // Are we a blink that belongs to the current player?
+  if ((blink::state::GetType() == BLINK_STATE_TYPE_PLAYER) &&
+      (blink::state::GetPlayer() == game::state::GetNextPlayer())) {
+    // Yes. We are a new origin now.
+    auto_select_ = true;
+
+    // Change our state accordingly.
+    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
+    return;
+  }
+
+  // Are we a different target?
+  if (blink::state::GetTargetType() != BLINK_STATE_TARGET_TYPE_NONE) {
+    // Yes. Set ourselves as the target.
+    auto_select_ = true;
+
+    *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
+  }
+}
+
 void Handler(bool state_changed, byte* state, byte* specific_state) {
   if (state_changed) {
     *state = GAME_STATE_PLAY;
@@ -64,78 +210,16 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 
   switch (game::state::GetSpecific()) {
     case GAME_STATE_PLAY_SELECT_ORIGIN:
-      blink::state::SetOrigin(false);
-      blink::state::SetTarget(false);
-      blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
-
-      if (blink::state::GetType() != BLINK_STATE_TYPE_PLAYER) break;
-
-      if (blink::state::GetPlayer() != game::state::GetNextPlayer()) break;
-
-      if (!buttonSingleClicked()) break;
-
-      blink::state::SetOrigin(true);
-
-      *specific_state = GAME_STATE_PLAY_ORIGIN_SELECTED;
+      select_origin(state, specific_state);
       break;
-    case GAME_STATE_PLAY_ORIGIN_SELECTED: {
-      blink::state::SetTarget(false);
-      // blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
-
-      if (!blink::state::GetOrigin()) break;
-
-      broadcast::message::Message reply;
-      if (!game::message::SendGameStatePlayFindTargets(reply)) break;
-
-      if (broadcast::message::Payload(reply)[0] == 0) {
-        // No targets.
-        *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
-        break;
-      }
-
-      *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
+    case GAME_STATE_PLAY_ORIGIN_SELECTED:
+      origin_selected(state, specific_state);
       break;
-    }
     case GAME_STATE_PLAY_SELECT_TARGET:
-      blink::state::SetTarget(false);
-
-      if (blink::state::GetOrigin()) break;
-
-      if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE &&
-          blink::state::GetType() != BLINK_STATE_TYPE_PLAYER &&
-          blink::state::GetPlayer() != game::state::GetNextPlayer()) {
-        break;
-      }
-
-      if (!buttonSingleClicked()) break;
-
-      blink::state::SetTarget(true);
-
-      *specific_state = GAME_STATE_PLAY_TARGET_SELECTED;
+      select_target(state, specific_state);
       break;
     case GAME_STATE_PLAY_TARGET_SELECTED:
-      if (buttonDoubleClicked()) {
-        *specific_state = GAME_STATE_PLAY_CONFIRM_MOVE;
-
-        break;
-      }
-
-      if (!buttonSingleClicked()) break;
-
-      if (blink::state::GetOrigin()) {
-        // Unselect origin.
-        *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
-
-        break;
-      }
-
-      if (blink::state::GetTarget()) {
-        // Unselect origin.
-        *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
-
-        break;
-      }
-
+      target_selected(state, specific_state);
       break;
     case GAME_STATE_PLAY_CONFIRM_MOVE:
       break;
