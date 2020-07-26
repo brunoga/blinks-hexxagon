@@ -6,7 +6,11 @@
 #include "game_state_play.h"
 #include "game_state_setup.h"
 
-void setup() { game::message::Setup(); }
+void setup() {
+  game::message::Setup();
+  blink::state::Reset();
+  game::state::Reset();
+}
 
 static bool force_propagation_ = false;
 
