@@ -55,7 +55,6 @@ static void set_payload_for_face(byte* payload, byte f) {
 static bool auto_select_ = false;
 
 static void select_origin(byte* state, byte* specific_state) {
-  LOGFLN("select origin");
   // We are going to select an origin, so reset any blink that is currently one.
   blink::state::SetOrigin(false);
 
@@ -72,14 +71,8 @@ static void select_origin(byte* state, byte* specific_state) {
   // It belongs to a player, but not the current one. Nothing to do.
   if (blink::state::GetPlayer() != game::state::GetNextPlayer()) return;
 
-  LOGFLN("waiting for click");
-
   // We pass all checks, but we do nothing until we get a click.
   if (!buttonSingleClicked() && !auto_select_) return;
-
-  if (auto_select_) {
-    LOGFLN("auto selected");
-  }
 
   auto_select_ = false;
 
@@ -92,7 +85,6 @@ static void select_origin(byte* state, byte* specific_state) {
 }
 
 static void origin_selected(byte* state, byte* specific_state) {
-  LOGFLN("origin selected");
   // Only the origin blink has anything to do here.
   if (!blink::state::GetOrigin()) return;
 
@@ -113,7 +105,6 @@ static void origin_selected(byte* state, byte* specific_state) {
 }
 
 static void select_target(byte* state, byte* specific_state) {
-  LOGFLN("select target");
   // We are going to select a target, so reset any blink that is currently one.
   blink::state::SetTarget(false);
 
@@ -137,7 +128,6 @@ static void select_target(byte* state, byte* specific_state) {
   // Are we a blink that belongs to the current player?
   if ((blink::state::GetType() == BLINK_STATE_TYPE_PLAYER) &&
       (blink::state::GetPlayer() == game::state::GetNextPlayer())) {
-    LOGFLN("clicked on a new origin");
     auto_select_ = true;
 
     // Change our state accordingly.
@@ -198,6 +188,44 @@ static void target_selected(byte* state, byte* specific_state) {
   }
 }
 
+static bool neighboorTarget() {
+  FOREACH_FACE(f) {
+    if (isValueReceivedOnFaceExpired(f)) continue;
+
+    blink::state::FaceValue face_value;
+    face_value.value = getLastValueReceivedOnFace(f);
+
+    LOGLN(face_value.value);
+    LOGLN(face_value.target);
+
+    if (face_value.target) return true;
+  }
+
+  return false;
+}
+
+static void confirm_move(byte* state, byte* specific_state) {
+  if (blink::state::GetOrigin()) {
+    if (!neighboorTarget()) {
+      // We are the origin and the target is not an immediate neighboor. We are
+      // moving from here so reset ourselves.
+      blink::state::Reset();
+    }
+  } else if (blink::state::GetTarget()) {
+    // We are the target. Become a player blink.
+    blink::state::SetTarget(false);
+    blink::state::SetType(BLINK_STATE_TYPE_PLAYER);
+    blink::state::SetPlayer(game::state::GetNextPlayer());
+  }
+
+  // Clear target type for everybody.
+  blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
+
+  *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
+}
+
+static void move_confirmed(byte* state, byte* specific_state) {}
+
 void Handler(bool state_changed, byte* state, byte* specific_state) {
   if (state_changed) {
     *state = GAME_STATE_PLAY;
@@ -222,6 +250,10 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       target_selected(state, specific_state);
       break;
     case GAME_STATE_PLAY_CONFIRM_MOVE:
+      confirm_move(state, specific_state);
+      break;
+    case GAME_STATE_PLAY_MOVE_CONFIRMED:
+      move_confirmed(state, specific_state);
       break;
   }
 
