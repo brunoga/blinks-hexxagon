@@ -50,9 +50,9 @@ void SetSpecific(byte specific_state, bool from_network) {
 
 byte GetSpecific() { return specific_state_.current; }
 
-void SetNextPlayer(byte next_player) { state_.next_player = next_player - 1; }
+void SetPlayer(byte next_player) { state_.next_player = next_player - 1; }
 
-byte GetNextPlayer() { return state_.next_player + 1; }
+byte GetPlayer() { return state_.next_player + 1; }
 
 void Reset() {
   state_.current = GAME_STATE_IDLE;

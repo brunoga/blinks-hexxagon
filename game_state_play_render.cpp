@@ -32,7 +32,7 @@ void Render() {
         color = BLUE;
       }
 
-      if (game::state::GetNextPlayer() == blink::state::GetPlayer()) {
+      if (game::state::GetPlayer() == blink::state::GetPlayer()) {
         if (!blink::state::GetOrigin()) {
           color = dim(color, 127);
         }

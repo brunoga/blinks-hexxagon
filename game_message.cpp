@@ -23,7 +23,7 @@ static void rcv_message_handler(byte message_id, byte* payload) {
     case MESSAGE_GAME_STATE_CHANGE:
       game::state::Set(payload[0], true);
       game::state::SetSpecific(payload[1], true);
-      game::state::SetNextPlayer(payload[2]);
+      game::state::SetPlayer(payload[2]);
       break;
     case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
       game::state::play::HandleReceiveMessage(message_id, payload);
