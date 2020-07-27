@@ -204,20 +204,20 @@ static bool neighboor_target() {
 }
 
 static void confirm_move(byte* state, byte* specific_state) {
-  if (blink::state::GetOrigin()) {
-    if (!neighboor_target()) {
+  bool neighboor_is_target = neighboor_target();
+
+  if (neighboor_is_target) {
+    if (blink::state::GetPlayer() != game::state::GetPlayer()) {
+      // Target is our neighboor and it is a different player from ourselves. We
+      // now become that player too.
+      blink::state::SetPlayer(game::state::GetPlayer());
+    }
+  } else {
+    if (blink::state::GetOrigin()) {
       // We are the origin and the target is not an immediate neighboor. We are
       // moving from here so reset ourselves.
       blink::state::Reset();
     }
-  } else if (blink::state::GetTarget()) {
-    // We are the target. Become a player blink.
-    //
-    // TODO(bga): We do not remove the target flag here so it will still be
-    // present when we are reading the face value in a origin neighboor blink.
-    // There is most likelly a better way to do this.
-    blink::state::SetType(BLINK_STATE_TYPE_PLAYER);
-    blink::state::SetPlayer(game::state::GetPlayer());
   }
 
   // Clear target type for everybody.
@@ -230,7 +230,16 @@ static void confirm_move(byte* state, byte* specific_state) {
 
 static void move_confirmed(byte* state, byte* specific_state) {
   // Now it is ok to clear the target flag.
-  if (blink::state::GetTarget()) blink::state::SetTarget(false);
+  if (blink::state::GetTarget()) {
+    // We are the target. Become a player blink.
+    //
+    // TODO(bga): We do not remove the target flags in confirm_movwe above so it
+    // will still be present when we are reading the face value in a origin
+    // neighboor blink. There is most likelly a better way to do this.
+    blink::state::SetType(BLINK_STATE_TYPE_PLAYER);
+    blink::state::SetPlayer(game::state::GetPlayer());
+    blink::state::SetTarget(false);
+  }
 
   if (!blink::state::GetArbitrator()) return;
 
