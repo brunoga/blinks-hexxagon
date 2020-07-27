@@ -44,6 +44,9 @@ byte GetPlayer();
 void SetArbitrator(bool arbitrator);
 bool GetArbitrator();
 
+void SetColorOverride(bool color_override);
+bool GetColorOverride();
+
 void Reset();
 
 void Render(byte game_state);

@@ -22,6 +22,8 @@ struct BlinkState {
 };
 static BlinkState state_;
 
+static bool color_override_ = false;
+
 void SetType(byte type) { state_.type = type; }
 byte GetType() { return state_.type; }
 
@@ -41,6 +43,9 @@ byte GetPlayer() {
 
 void SetArbitrator(bool arbitrator) { state_.arbitrator = arbitrator; }
 bool GetArbitrator() { return state_.arbitrator; }
+
+void SetColorOverride(bool color_override) { color_override_ = color_override; }
+bool GetColorOverride() { return color_override_; }
 
 void Reset() {
   state_.type = BLINK_STATE_TYPE_EMPTY;
@@ -64,6 +69,12 @@ void Render(byte game_state) {
   face_value.reserved = 0;
 
   setValueSentOnAllFaces(face_value.value);
+
+  if (blink::state::GetColorOverride()) {
+    setColor(WHITE);
+
+    return;
+  }
 
   // Now render the state specific colors/animations.
   switch (game_state) {

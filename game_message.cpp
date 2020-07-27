@@ -19,6 +19,8 @@ namespace message {
 static byte message_state_ = MESSAGE_STATE_SEND_MESSAGE;
 
 static void rcv_message_handler(byte message_id, byte* payload) {
+  blink::state::SetColorOverride(true);
+
   switch (message_id) {
     case MESSAGE_GAME_STATE_CHANGE:
       game::state::Set(payload[0], true);
@@ -33,6 +35,8 @@ static void rcv_message_handler(byte message_id, byte* payload) {
 
 static void fwd_message_handler(byte message_id, byte src_face, byte dst_face,
                                 byte* payload) {
+  blink::state::SetColorOverride(true);
+
   switch (message_id) {
     case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
       game::state::play::HandleForwardMessage(message_id, src_face, dst_face,
@@ -46,6 +50,8 @@ static byte num_player_one_ = 0;
 static byte num_player_two_ = 0;
 
 static void rcv_reply_handler(byte message_id, const byte* payload) {
+  blink::state::SetColorOverride(false);
+
   switch (message_id) {
     case MESSAGE_CHECK_BOARD:
       num_blinks_ += payload[0];
@@ -59,6 +65,8 @@ static void rcv_reply_handler(byte message_id, const byte* payload) {
 }
 
 static void fwd_reply_handler(byte message_id, byte* payload) {
+  blink::state::SetColorOverride(false);
+
   switch (message_id) {
     case MESSAGE_CHECK_BOARD:
       if (blink::state::GetType() == BLINK_STATE_TYPE_PLAYER) {
