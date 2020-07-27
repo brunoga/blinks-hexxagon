@@ -55,6 +55,7 @@ static void set_payload_for_face(byte* payload, byte f) {
 static bool auto_select_ = false;
 
 static void select_origin(byte* state, byte* specific_state) {
+  LOGFLN("select origin");
   // We are going to select an origin, so reset any blink that is currently one.
   blink::state::SetOrigin(false);
 
@@ -85,6 +86,7 @@ static void select_origin(byte* state, byte* specific_state) {
 }
 
 static void origin_selected(byte* state, byte* specific_state) {
+  LOGFLN("origin selected");
   // Only the origin blink has anything to do here.
   if (!blink::state::GetOrigin()) return;
 
@@ -105,6 +107,7 @@ static void origin_selected(byte* state, byte* specific_state) {
 }
 
 static void select_target(byte* state, byte* specific_state) {
+  LOGFLN("select target");
   // We are going to select a target, so reset any blink that is currently one.
   blink::state::SetTarget(false);
 
@@ -143,8 +146,11 @@ static void select_target(byte* state, byte* specific_state) {
 }
 
 static void target_selected(byte* state, byte* specific_state) {
+  LOGFLN("target selected");
   // Double-click in any blink confirms the move.
   if (buttonDoubleClicked()) {
+    blink::state::SetArbitrator(true);
+
     *specific_state = GAME_STATE_PLAY_CONFIRM_MOVE;
     return;
   }
@@ -168,7 +174,7 @@ static void target_selected(byte* state, byte* specific_state) {
   // We pass all checks, but we do nothing until we get a click.
   if (!buttonSingleClicked()) return;
 
-  // Are we a blink that belongs to the current player?
+  // Are we a blink that belong to the current player?
   if ((blink::state::GetType() == BLINK_STATE_TYPE_PLAYER) &&
       (blink::state::GetPlayer() == game::state::GetPlayer())) {
     // Yes. We are a new origin now.
@@ -195,9 +201,6 @@ static bool neighboor_target() {
     blink::state::FaceValue face_value;
     face_value.value = getLastValueReceivedOnFace(f);
 
-    LOGLN(face_value.value);
-    LOGLN(face_value.target);
-
     if (face_value.target) return true;
   }
 
@@ -205,15 +208,23 @@ static bool neighboor_target() {
 }
 
 static void confirm_move(byte* state, byte* specific_state) {
+  LOGFLN("confirm move");
   if (blink::state::GetOrigin()) {
+    LOGFLN("origin");
     if (!neighboor_target()) {
+      LOGFLN("target not neighboor");
       // We are the origin and the target is not an immediate neighboor. We are
       // moving from here so reset ourselves.
       blink::state::Reset();
+    } else {
+      LOGFLN("target neighboor");
     }
   } else if (blink::state::GetTarget()) {
     // We are the target. Become a player blink.
-    blink::state::SetTarget(false);
+    //
+    // TODO(bga): We do not remove the target flag here so it will still be
+    // present when we are reading the face value in a origin neighboor blink.
+    // There is most likelly a better way to do this.
     blink::state::SetType(BLINK_STATE_TYPE_PLAYER);
     blink::state::SetPlayer(game::state::GetPlayer());
   }
@@ -221,10 +232,43 @@ static void confirm_move(byte* state, byte* specific_state) {
   // Clear target type for everybody.
   blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
 
+  if (!blink::state::GetArbitrator()) return;
+
   *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
 }
 
-static void move_confirmed(byte* state, byte* specific_state) {}
+static void move_confirmed(byte* state, byte* specific_state) {
+  LOGFLN("move confirmed");
+
+  // Now it is ok to clear the target flag.
+  if (blink::state::GetTarget()) blink::state::SetTarget(false);
+
+  if (!blink::state::GetArbitrator()) return;
+
+  broadcast::message::Message reply;
+  if (!game::message::SendCheckBoard(reply)) {
+    return;
+  }
+
+  const byte* payload = broadcast::message::Payload(reply);
+  byte empty_blinks = payload[0] - (payload[1] + payload[2]);
+  if (payload[1] == 0 || payload[2] == 0 || empty_blinks == 0) {
+    // One of the players has zero blinks or there is zero spaces left. Game
+    // over.
+    *state = GAME_STATE_END;
+    *specific_state = 0;
+
+    return;
+  }
+
+  byte next_player = game::state::GetPlayer() + 1;
+
+  game::state::SetPlayer(next_player > 2 ? 1 : next_player);
+
+  blink::state::SetArbitrator(false);
+
+  *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
+}
 
 void Handler(bool state_changed, byte* state, byte* specific_state) {
   if (state_changed) {

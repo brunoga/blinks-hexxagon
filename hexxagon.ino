@@ -2,6 +2,7 @@
 #include "debug.h"
 #include "game_message.h"
 #include "game_state.h"
+#include "game_state_end.h"
 #include "game_state_idle.h"
 #include "game_state_play.h"
 #include "game_state_setup.h"
@@ -47,6 +48,8 @@ void loop() {
       case GAME_STATE_PLAY:
         game::state::play::Handler(state_changed, &state, &specific_state);
         break;
+      case GAME_STATE_END:
+        game::state::end::Handler(state_changed, &state, &specific_state);
     }
 
     // Switch our state to the computed one. This will be propagated to other
@@ -56,4 +59,8 @@ void loop() {
   }
 
   blink::state::Render(game::state::Get());
+
+  buttonSingleClicked();
+  buttonDoubleClicked();
+  buttonLongPressed();
 }

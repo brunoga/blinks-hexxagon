@@ -6,6 +6,7 @@
 #define GAME_STATE_IDLE 0
 #define GAME_STATE_SETUP 1
 #define GAME_STATE_PLAY 2
+#define GAME_STATE_END 3
 
 namespace game {
 
