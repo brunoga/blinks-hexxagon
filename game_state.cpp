@@ -60,8 +60,8 @@ bool Changed(bool include_specific) {
              : state_.current != state_.previous;
 }
 
-bool Propagate(bool force) {
-  if ((!Changed() || state_.from_network) && !force) return true;
+bool Propagate() {
+  if (!Changed() || state_.from_network) return true;
 
   if (!game::message::SendGameStateChange(
           state_.current, specific_state_.current, state_.next_player + 1)) {
