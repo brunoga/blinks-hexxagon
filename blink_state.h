@@ -41,6 +41,9 @@ byte GetTargetType();
 void SetPlayer(byte player);
 byte GetPlayer();
 
+void SetArbitrator(bool arbitrator);
+bool GetArbitrator();
+
 void Reset();
 
 void Render(byte game_state);
