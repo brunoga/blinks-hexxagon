@@ -13,21 +13,16 @@ void setup() {
   game::state::Reset();
 }
 
-static bool force_propagation_ = false;
-
 void loop() {
   // Process any pending game messages.
   game::message::Process();
 
   // Check escape hatch. Reset to idle state if button is long pressed.
   if (buttonLongPressed()) {
-    game::state::Reset();
-    blink::state::Reset();
-
-    force_propagation_ = true;
+    game::state::Set(GAME_STATE_IDLE);
   }
 
-  if (game::state::Propagate(force_propagation_)) {
+  if (game::state::Propagate(/*force_propagation_*/)) {
     // Cache current state and if we changed state since the previous iteration.
     byte state = game::state::Get();
     byte specific_state = game::state::GetSpecific();
@@ -52,8 +47,6 @@ void loop() {
     // nodes in case there was a change.
     game::state::Set(state);
     game::state::SetSpecific(specific_state);
-  } else {
-    force_propagation_ = false;
   }
 
   blink::state::Render(game::state::Get());
