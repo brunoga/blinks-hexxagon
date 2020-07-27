@@ -24,14 +24,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 
     return;
   }
-
-  *state = GAME_STATE_IDLE;
-  *specific_state = 0;
-}
-
-void HandleReceiveMessage(byte message_id, byte* payload) {
-  (void)message_id;
-  (void)payload;
 }
 
 }  // namespace idle

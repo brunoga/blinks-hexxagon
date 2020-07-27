@@ -10,7 +10,6 @@ namespace state {
 namespace idle {
 
 void Handler(bool state_changed, byte* state, byte* specific_state);
-void HandleReceiveMessage(byte message_id, byte* payload);
 
 }  // namespace idle
 

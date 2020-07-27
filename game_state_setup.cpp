@@ -39,8 +39,7 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     }
 
     *state = GAME_STATE_PLAY;
-
-    return;
+    *specific_state = 0;
   }
 
   if (buttonSingleClicked()) {
@@ -60,14 +59,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       }
     }
   }
-
-  *state = GAME_STATE_SETUP;
-  *specific_state = 0;
-}
-
-void HandleReceiveMessage(byte message_id, byte* payload) {
-  (void)message_id;
-  (void)payload;
 }
 
 }  // namespace setup
