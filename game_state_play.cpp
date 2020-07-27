@@ -55,7 +55,6 @@ static void set_payload_for_face(byte* payload, byte f) {
 static bool auto_select_ = false;
 
 static void select_origin(byte* state, byte* specific_state) {
-  LOGFLN("select origin");
   // We are going to select an origin, so reset any blink that is currently one.
   blink::state::SetOrigin(false);
 
@@ -86,7 +85,6 @@ static void select_origin(byte* state, byte* specific_state) {
 }
 
 static void origin_selected(byte* state, byte* specific_state) {
-  LOGFLN("origin selected");
   // Only the origin blink has anything to do here.
   if (!blink::state::GetOrigin()) return;
 
@@ -107,7 +105,6 @@ static void origin_selected(byte* state, byte* specific_state) {
 }
 
 static void select_target(byte* state, byte* specific_state) {
-  LOGFLN("select target");
   // We are going to select a target, so reset any blink that is currently one.
   blink::state::SetTarget(false);
 
@@ -146,7 +143,6 @@ static void select_target(byte* state, byte* specific_state) {
 }
 
 static void target_selected(byte* state, byte* specific_state) {
-  LOGFLN("target selected");
   // Double-click in any blink confirms the move.
   if (buttonDoubleClicked()) {
     blink::state::SetArbitrator(true);
@@ -208,16 +204,11 @@ static bool neighboor_target() {
 }
 
 static void confirm_move(byte* state, byte* specific_state) {
-  LOGFLN("confirm move");
   if (blink::state::GetOrigin()) {
-    LOGFLN("origin");
     if (!neighboor_target()) {
-      LOGFLN("target not neighboor");
       // We are the origin and the target is not an immediate neighboor. We are
       // moving from here so reset ourselves.
       blink::state::Reset();
-    } else {
-      LOGFLN("target neighboor");
     }
   } else if (blink::state::GetTarget()) {
     // We are the target. Become a player blink.
@@ -238,8 +229,6 @@ static void confirm_move(byte* state, byte* specific_state) {
 }
 
 static void move_confirmed(byte* state, byte* specific_state) {
-  LOGFLN("move confirmed");
-
   // Now it is ok to clear the target flag.
   if (blink::state::GetTarget()) blink::state::SetTarget(false);
 

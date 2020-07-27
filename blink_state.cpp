@@ -63,9 +63,6 @@ void Render(byte game_state) {
   face_value.unused = 0;
   face_value.reserved = 0;
 
-  LOGLN(face_value.target);
-  LOGLN(face_value.value);
-
   setValueSentOnAllFaces(face_value.value);
 
   // Now render the state specific colors/animations.
