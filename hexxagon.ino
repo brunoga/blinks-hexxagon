@@ -24,14 +24,10 @@ void loop() {
     game::state::Reset();
     blink::state::Reset();
 
-    game::state::Set(GAME_STATE_IDLE);
-
     force_propagation_ = true;
   }
 
   if (game::state::Propagate(force_propagation_)) {
-    force_propagation_ = false;
-
     // Cache current state and if we changed state since the previous iteration.
     byte state = game::state::Get();
     byte specific_state = game::state::GetSpecific();
@@ -56,6 +52,8 @@ void loop() {
     // nodes in case there was a change.
     game::state::Set(state);
     game::state::SetSpecific(specific_state);
+  } else {
+    force_propagation_ = false;
   }
 
   blink::state::Render(game::state::Get());
