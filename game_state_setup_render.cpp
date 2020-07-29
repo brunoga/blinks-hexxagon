@@ -11,19 +11,17 @@ namespace setup {
 void Render() {
   Color color;
 
+  // TODO(bga): Extend to 4 players.
   switch (blink::state::GetPlayer()) {
     case 0:
       color = dim(ORANGE, 63);
       break;
-    default: {
-      if (blink::state::GetPlayer() == 1) {
-        color = dim(RED, 63);
-      } else {
-        color = dim(BLUE, 63);
-      }
-
+    case 1:
+      color = dim(RED, 63);
       break;
-    }
+    case 2:
+      color = dim(BLUE, 63);
+      break;
   }
 
   setColor(color);

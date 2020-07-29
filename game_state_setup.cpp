@@ -43,20 +43,9 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
   }
 
   if (buttonSingleClicked()) {
-    // TODO(bga): This is so ugly. Just do a for loop. :)
-    switch (blink::state::GetPlayer()) {
-      case 0:
-        blink::state::SetPlayer(1);
-        break;
-      default: {
-        if (blink::state::GetPlayer() == 1) {
-          blink::state::SetPlayer(2);
-        } else {
-          blink::state::SetPlayer(0);
-        }
-        break;
-      }
-    }
+    // TODO(bga): Expand to 4 players.
+    byte current_player = blink::state::GetPlayer();
+    blink::state::SetPlayer(current_player < 2 ? current_player + 1 : 0);
   }
 }
 

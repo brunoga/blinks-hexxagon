@@ -299,8 +299,6 @@ void HandleReceiveMessage(byte message_id, byte* payload) {
 
   if (blink::state::GetPlayer() != 0) return;
 
-  byte selected_target_type = BLINK_STATE_TARGET_TYPE_TARGET;
-
   if (abs(int8_t(payload[0])) <= 2 && abs(int8_t(payload[1])) <= 2 &&
       abs(int8_t(payload[2])) <= 2) {
     blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_TARGET);
