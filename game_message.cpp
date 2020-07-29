@@ -101,7 +101,7 @@ static bool sendOrWaitForReply(broadcast::message::Message message,
         message_state_ = MESSAGE_STATE_WAIT_FOR_RESULT;
       }
 
-      return false;
+      break;
     case MESSAGE_STATE_WAIT_FOR_RESULT:
       if (broadcast::manager::Receive(reply)) {
         message_state_ = MESSAGE_STATE_SEND_MESSAGE;
@@ -109,7 +109,7 @@ static bool sendOrWaitForReply(broadcast::message::Message message,
         return true;
       }
 
-      return false;
+      break;
   }
 
   return false;
@@ -128,7 +128,7 @@ void Setup() {
                             rcv_reply_handler, fwd_reply_handler);
 }
 
-void Process() { ::broadcast::manager::Process(); }
+void Process() { broadcast::manager::Process(); }
 
 bool SendGameStateChange(byte game_state, byte specific_state,
                          byte next_player) {
