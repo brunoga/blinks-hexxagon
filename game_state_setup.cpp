@@ -43,16 +43,15 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
   }
 
   if (buttonSingleClicked()) {
-    switch (blink::state::GetType()) {
-      case BLINK_STATE_TYPE_EMPTY:
-        blink::state::SetType(BLINK_STATE_TYPE_PLAYER);
+    // TODO(bga): This is so ugly. Just do a for loop. :)
+    switch (blink::state::GetPlayer()) {
+      case 0:
         blink::state::SetPlayer(1);
         break;
-      case BLINK_STATE_TYPE_PLAYER: {
+      default: {
         if (blink::state::GetPlayer() == 1) {
           blink::state::SetPlayer(2);
         } else {
-          blink::state::SetType(BLINK_STATE_TYPE_EMPTY);
           blink::state::SetPlayer(0);
         }
         break;

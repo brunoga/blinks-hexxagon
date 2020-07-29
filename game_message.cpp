@@ -69,12 +69,10 @@ static void fwd_reply_handler(byte message_id, byte* payload) {
 
   switch (message_id) {
     case MESSAGE_CHECK_BOARD:
-      if (blink::state::GetType() == BLINK_STATE_TYPE_PLAYER) {
-        if (blink::state::GetPlayer() == 1) {
-          num_player_one_++;
-        } else {
-          num_player_two_++;
-        }
+      if (blink::state::GetPlayer() == 1) {
+        num_player_one_++;
+      } else {
+        num_player_two_++;
       }
       num_blinks_++;
 

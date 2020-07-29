@@ -26,8 +26,8 @@ void renderSelected(const Color& base_color) {
 void Render() {
   Color color;
 
-  switch (blink::state::GetType()) {
-    case BLINK_STATE_TYPE_EMPTY:
+  switch (blink::state::GetPlayer()) {
+    case 0:
       if (blink::state::GetTarget()) {
         color = ORANGE;
         renderSelected(color);
@@ -40,7 +40,7 @@ void Render() {
         color = dim(ORANGE, 127);
       }
       break;
-    case BLINK_STATE_TYPE_PLAYER: {
+    default: {
       if (blink::state::GetPlayer() == 1) {
         color = RED;
       } else {

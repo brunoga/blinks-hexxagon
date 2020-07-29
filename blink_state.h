@@ -3,9 +3,6 @@
 
 #include <blinklib.h>
 
-#define BLINK_STATE_TYPE_EMPTY 0
-#define BLINK_STATE_TYPE_PLAYER 1
-
 #define BLINK_STATE_TARGET_TYPE_NONE 0
 #define BLINK_STATE_TARGET_TYPE_MOVE 1
 #define BLINK_STATE_TARGET_TYPE_COPY 2
@@ -25,9 +22,6 @@ union FaceValue {
 
   byte value;
 };
-
-void SetType(byte type);
-byte GetType();
 
 void SetOrigin(bool origin);
 bool GetOrigin();

@@ -65,10 +65,7 @@ static void select_origin(byte* state, byte* specific_state) {
   // Also reset any potential targets.
   blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
 
-  // This blink does not belong to a player. Nothing to do.
-  if (blink::state::GetType() != BLINK_STATE_TYPE_PLAYER) return;
-
-  // It belongs to a player, but not the current one. Nothing to do.
+  // This blink belongs to a player, but not the current one. Nothing to do.
   if (blink::state::GetPlayer() != game::state::GetPlayer()) return;
 
   // We pass all checks, but we do nothing until we get a click.
@@ -114,8 +111,7 @@ static void select_target(byte* state, byte* specific_state) {
   // If we are not a possible target or a blink that belongs to the current
   // player, then there is also nothing to do.
   if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE &&
-      (blink::state::GetType() != BLINK_STATE_TYPE_PLAYER ||
-       blink::state::GetPlayer() != game::state::GetPlayer())) {
+      blink::state::GetPlayer() != game::state::GetPlayer()) {
     return;
   }
 
@@ -126,8 +122,7 @@ static void select_target(byte* state, byte* specific_state) {
   auto_select_ = false;
 
   // Are we a blink that belongs to the current player?
-  if ((blink::state::GetType() == BLINK_STATE_TYPE_PLAYER) &&
-      (blink::state::GetPlayer() == game::state::GetPlayer())) {
+  if (blink::state::GetPlayer() == game::state::GetPlayer()) {
     auto_select_ = true;
 
     // Change our state accordingly.
@@ -162,8 +157,7 @@ static void target_selected(byte* state, byte* specific_state) {
   // If we are not a possible target or a blink that belongs to the current
   // player, then there is also nothing to do.
   if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE &&
-      (blink::state::GetType() != BLINK_STATE_TYPE_PLAYER ||
-       blink::state::GetPlayer() != game::state::GetPlayer())) {
+      blink::state::GetPlayer() != game::state::GetPlayer()) {
     return;
   }
 
@@ -171,8 +165,7 @@ static void target_selected(byte* state, byte* specific_state) {
   if (!buttonSingleClicked()) return;
 
   // Are we a blink that belong to the current player?
-  if ((blink::state::GetType() == BLINK_STATE_TYPE_PLAYER) &&
-      (blink::state::GetPlayer() == game::state::GetPlayer())) {
+  if (blink::state::GetPlayer() == game::state::GetPlayer()) {
     // Yes. We are a new origin now.
     auto_select_ = true;
 
@@ -236,7 +229,6 @@ static void move_confirmed(byte* state, byte* specific_state) {
     // TODO(bga): We do not remove the target flags in confirm_movwe above so it
     // will still be present when we are reading the face value in a origin
     // neighboor blink. There is most likelly a better way to do this.
-    blink::state::SetType(BLINK_STATE_TYPE_PLAYER);
     blink::state::SetPlayer(game::state::GetPlayer());
     blink::state::SetTarget(false);
   }
@@ -305,7 +297,7 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 void HandleReceiveMessage(byte message_id, byte* payload) {
   switch (message_id) {
     case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS: {
-      if (blink::state::GetType() == BLINK_STATE_TYPE_EMPTY) {
+      if (blink::state::GetPlayer() == 0) {
         byte selected_target_type = BLINK_STATE_TARGET_TYPE_NONE;
         for (byte i = 0; i < 3; ++i) {
           byte distance = abs(int8_t(payload[i]));

@@ -11,11 +11,11 @@ namespace setup {
 void Render() {
   Color color;
 
-  switch (blink::state::GetType()) {
-    case BLINK_STATE_TYPE_EMPTY:
+  switch (blink::state::GetPlayer()) {
+    case 0:
       color = dim(ORANGE, 63);
       break;
-    case BLINK_STATE_TYPE_PLAYER: {
+    default: {
       if (blink::state::GetPlayer() == 1) {
         color = dim(RED, 63);
       } else {

@@ -13,19 +13,15 @@ namespace blink {
 namespace state {
 
 struct BlinkState {
-  byte type : 1;
   bool origin : 1;
   bool target : 1;
-  byte player : 2;
+  byte player : 1;
   byte target_type : 2;
   bool arbitrator : 1;
 };
 static BlinkState state_;
 
 static bool color_override_ = false;
-
-void SetType(byte type) { state_.type = type; }
-byte GetType() { return state_.type; }
 
 void SetOrigin(bool origin) { state_.origin = origin; }
 bool GetOrigin() { return state_.origin; }
@@ -36,10 +32,8 @@ bool GetTarget() { return state_.target; }
 void SetTargetType(byte target_type) { state_.target_type = target_type; }
 byte GetTargetType() { return state_.target_type; }
 
-void SetPlayer(byte player) { state_.player = player - 1; }
-byte GetPlayer() {
-  return state_.type == BLINK_STATE_TYPE_PLAYER ? state_.player + 1 : 0;
-}
+void SetPlayer(byte player) { state_.player = player; }
+byte GetPlayer() { return state_.player; }
 
 void SetArbitrator(bool arbitrator) { state_.arbitrator = arbitrator; }
 bool GetArbitrator() { return state_.arbitrator; }
@@ -48,7 +42,6 @@ void SetColorOverride(bool color_override) { color_override_ = color_override; }
 bool GetColorOverride() { return color_override_; }
 
 void Reset() {
-  state_.type = BLINK_STATE_TYPE_EMPTY;
   state_.origin = false;
   state_.target = false;
   state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
