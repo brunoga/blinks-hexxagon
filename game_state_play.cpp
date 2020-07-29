@@ -295,76 +295,62 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 }
 
 void HandleReceiveMessage(byte message_id, byte* payload) {
-  switch (message_id) {
-    case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS: {
-      if (blink::state::GetPlayer() == 0) {
-        byte selected_target_type = BLINK_STATE_TARGET_TYPE_NONE;
-        for (byte i = 0; i < 3; ++i) {
-          byte distance = abs(int8_t(payload[i]));
-          if (distance > 2) {
-            selected_target_type = BLINK_STATE_TARGET_TYPE_NONE;
-            break;
-          }
+  if (message_id != MESSAGE_GAME_STATE_PLAY_FIND_TARGETS) return;
 
-          if (distance > selected_target_type) {
-            selected_target_type = distance;
-          }
-        }
+  if (blink::state::GetPlayer() != 0) return;
 
-        blink::state::SetTargetType(selected_target_type);
-      }
-      break;
-    }
+  byte selected_target_type = BLINK_STATE_TARGET_TYPE_TARGET;
+
+  if (abs(int8_t(payload[0])) <= 2 && abs(int8_t(payload[1])) <= 2 &&
+      abs(int8_t(payload[2])) <= 2) {
+    blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_TARGET);
   }
 }
 
 void HandleForwardMessage(byte message_id, byte src_face, byte dst_face,
                           byte* payload) {
-  switch (message_id) {
-    case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS: {
-      if (src_face == FACE_COUNT) {
-        // We are the source of the coordinate system. Set payload using the
-        // real face number.
-        set_payload_for_face(payload, dst_face);
+  if (message_id != MESSAGE_GAME_STATE_PLAY_FIND_TARGETS) return;
 
-        return;
-      }
+  if (src_face == FACE_COUNT) {
+    // We are the source of the coordinate system. Set payload using the
+    // real face number.
+    set_payload_for_face(payload, dst_face);
 
-      // The input face is the face opposite to the face the message was sent
-      // to.
-      byte input_face = ((payload[3] + 3) % 6);
-
-      // The output face is the normalized face in relation to the input face.
-      byte output_face = ((dst_face - src_face) + input_face + 6) % 6;
-
-      // Set payload using the normalized output face.
-      set_payload_for_face(payload, output_face);
-    }
+    return;
   }
+
+  // The input face is the face opposite to the face the message was sent
+  // to.
+  byte input_face = ((payload[3] + FACE_COUNT / 2) % FACE_COUNT);
+
+  // The output face is the normalized face in relation to the input face.
+  byte output_face =
+      ((dst_face - src_face) + input_face + FACE_COUNT) % FACE_COUNT;
+
+  // Set payload using the normalized output face.
+  set_payload_for_face(payload, output_face);
 }
 
 static byte upstream_target_ = false;
 
 void HandleReceiveReply(byte message_id, const byte* payload) {
-  switch (message_id) {
-    case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
-      if (payload[0] != 0) {
-        upstream_target_ = true;
-      }
+  if (message_id != MESSAGE_GAME_STATE_PLAY_FIND_TARGETS) return;
+
+  if (payload[0] != 0) {
+    upstream_target_ = true;
   }
 }
 
 void HandleForwardReply(byte message_id, byte* payload) {
-  switch (message_id) {
-    case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
-      if (blink::state::GetTargetType() != BLINK_STATE_TARGET_TYPE_NONE ||
-          upstream_target_) {
-        // Just indicate in the payload that we have a target.
-        payload[0] = 1;
-      }
+  if (message_id != MESSAGE_GAME_STATE_PLAY_FIND_TARGETS) return;
 
-      upstream_target_ = false;
+  if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_TARGET ||
+      upstream_target_) {
+    // Just indicate in the payload that we are or we know a target.
+    payload[0] = 1;
   }
+
+  upstream_target_ = false;
 }
 
 }  // namespace play
