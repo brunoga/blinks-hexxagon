@@ -118,7 +118,7 @@ static bool sendOrWaitForReply(broadcast::message::Message message,
 static bool sendOrWaitForReply(byte message_id, const byte* payload,
                                broadcast::message::Message reply) {
   broadcast::message::Message message;
-  broadcast::message::Set(message, message_id, payload, false);
+  broadcast::message::Set(message, message_id, 0, payload, false);
 
   return sendOrWaitForReply(message, reply);
 }
@@ -133,7 +133,8 @@ void Process() { ::broadcast::manager::Process(); }
 bool SendGameStateChange(byte game_state, byte specific_state,
                          byte next_player) {
   broadcast::message::Message message;
-  broadcast::message::Set(message, MESSAGE_GAME_STATE_CHANGE, nullptr, false);
+  broadcast::message::Set(message, MESSAGE_GAME_STATE_CHANGE, 0, nullptr,
+                          false);
 
   broadcast::message::MutablePayload(message)[0] = game_state;
   broadcast::message::MutablePayload(message)[1] = specific_state;
