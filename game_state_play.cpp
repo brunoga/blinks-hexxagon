@@ -138,48 +138,49 @@ static void select_target(byte* state, byte* specific_state) {
 }
 
 static void target_selected(byte* state, byte* specific_state) {
-  // Double-click in any blink confirms the move.
-  if (buttonDoubleClicked()) {
-    blink::state::SetArbitrator(true);
-
-    *specific_state = GAME_STATE_PLAY_CONFIRM_MOVE;
-    return;
-  }
-
-  // If this blink is the current target, there is nothing for it to do at this
-  // stage.
-  if (blink::state::GetTarget()) return;
-
-  // If this blink is the current origin, there is nothing for it to do at this
-  // stage.
-  if (blink::state::GetOrigin()) return;
-
-  // If we are not a possible target or a blink that belongs to the current
-  // player, then there is also nothing to do.
-  if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE &&
+  if (!blink::state::GetTarget() && !blink::state::GetOrigin() &&
+      blink::state::GetTargetType() != BLINK_STATE_TARGET_TYPE_TARGET &&
       blink::state::GetPlayer() != game::state::GetPlayer()) {
+    // We are not the currently selected target, the origin, an alternate
+    // target or an alternate origin. Nothing to do.
     return;
   }
 
   // We pass all checks, but we do nothing until we get a click.
   if (!buttonSingleClicked()) return;
 
-  // Are we a blink that belong to the current player?
-  if (blink::state::GetPlayer() == game::state::GetPlayer()) {
-    // Yes. We are a new origin now.
-    auto_select_ = true;
+  // Button was clicked and we are the selected target. Confirmn move.
+  if (blink::state::GetTarget()) {
+    blink::state::SetArbitrator(true);
 
-    // Change our state accordingly.
-    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
+    *specific_state = GAME_STATE_PLAY_CONFIRM_MOVE;
+
     return;
   }
 
-  // Are we a different target?
-  if (blink::state::GetTargetType() != BLINK_STATE_TARGET_TYPE_NONE) {
-    // Yes. Set ourselves as the target.
+  // Origin was clicked. Deselect current selected target.
+  if (blink::state::GetOrigin()) {
+    *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
+
+    return;
+  }
+
+  // Another target was clicked. Select it.
+  if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_TARGET) {
     auto_select_ = true;
 
     *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
+
+    return;
+  }
+
+  // Another origin was clicked. Select it.
+  if (blink::state::GetPlayer() == game::state::GetPlayer()) {
+    auto_select_ = true;
+
+    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
+
+    return;
   }
 }
 
@@ -200,7 +201,8 @@ static void confirm_move(byte* state, byte* specific_state) {
   bool neighboor_is_target = neighboor_target();
 
   if (neighboor_is_target) {
-    if (blink::state::GetPlayer() != game::state::GetPlayer()) {
+    if (blink::state::GetPlayer() != 0 &&
+        blink::state::GetPlayer() != game::state::GetPlayer()) {
       // Target is our neighboor and it is a different player from ourselves. We
       // now become that player too.
       blink::state::SetPlayer(game::state::GetPlayer());
@@ -226,7 +228,7 @@ static void move_confirmed(byte* state, byte* specific_state) {
   if (blink::state::GetTarget()) {
     // We are the target. Become a player blink.
     //
-    // TODO(bga): We do not remove the target flags in confirm_movwe above so it
+    // TODO(bga): We do not remove the target flags in confirm_move above so it
     // will still be present when we are reading the face value in a origin
     // neighboor blink. There is most likelly a better way to do this.
     blink::state::SetPlayer(game::state::GetPlayer());
