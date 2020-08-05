@@ -15,9 +15,10 @@ namespace state {
 struct BlinkState {
   bool origin : 1;
   bool target : 1;
-  byte player : 1;
-  byte target_type : 2;
+  byte player : 2;
+  byte target_type : 1;
   bool arbitrator : 1;
+  byte unused : 2;
 };
 static BlinkState state_;
 
@@ -47,6 +48,7 @@ void Reset() {
   state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
   state_.player = 0;
   state_.arbitrator = false;
+  state_.unused = 0;
 }
 
 void Render(byte game_state) {
