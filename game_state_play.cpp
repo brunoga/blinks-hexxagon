@@ -186,8 +186,6 @@ static void target_selected(byte* state, byte* specific_state) {
 
 static bool neighboor_target() {
   FOREACH_FACE(f) {
-    if (isValueReceivedOnFaceExpired(f)) continue;
-
     blink::state::FaceValue face_value;
     face_value.value = getLastValueReceivedOnFace(f);
 
