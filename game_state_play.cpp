@@ -238,9 +238,11 @@ static void move_confirmed(byte* state, byte* specific_state) {
   broadcast::Message reply;
   if (!game::message::SendCheckBoard(&reply)) return;
 
+  blink::state::SetArbitrator(false);
+
   byte empty_blinks = reply.payload[0] - (reply.payload[1] + reply.payload[2]);
   if (reply.payload[1] == 0 || reply.payload[2] == 0 || empty_blinks == 0) {
-    // One of the players has zero blinks or there is zero spaces left. Game
+    // One of the players has zero blinks or there are zero spaces left. Game
     // over.
     *state = GAME_STATE_END;
     *specific_state = 0;
@@ -251,8 +253,6 @@ static void move_confirmed(byte* state, byte* specific_state) {
   byte next_player = game::state::GetPlayer() + 1;
 
   game::state::SetPlayer(next_player > 2 ? 1 : next_player);
-
-  blink::state::SetArbitrator(false);
 
   *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
 }
@@ -267,7 +267,7 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     return;
   }
 
-  switch (game::state::GetSpecific()) {
+  switch (*specific_state) {
     case GAME_STATE_PLAY_SELECT_ORIGIN:
       select_origin(state, specific_state);
       break;
@@ -287,8 +287,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       move_confirmed(state, specific_state);
       break;
   }
-
-  *state = GAME_STATE_PLAY;
 }
 
 void HandleReceiveMessage(byte message_id, byte* payload) {
