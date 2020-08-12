@@ -22,7 +22,7 @@ void loop() {
     game::state::Set(GAME_STATE_IDLE);
   }
 
-  if (game::state::Propagate(/*force_propagation_*/)) {
+  if (game::state::Propagate()) {
     // Cache current state and if we changed state since the previous iteration.
     byte state = game::state::Get();
     byte specific_state = game::state::GetSpecific();
@@ -54,4 +54,5 @@ void loop() {
   buttonSingleClicked();
   buttonDoubleClicked();
   buttonLongPressed();
+  hasWoken();
 }
