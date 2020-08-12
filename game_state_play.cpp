@@ -69,7 +69,7 @@ static void select_origin(byte* state, byte* specific_state) {
   if (blink::state::GetPlayer() != game::state::GetPlayer()) return;
 
   // We pass all checks, but we do nothing until we get a click.
-  if (!buttonSingleClicked() && !auto_select_) return;
+  if (!buttonSingleClicked() && !auto_select_ && !hasWoken()) return;
 
   auto_select_ = false;
 
@@ -117,7 +117,7 @@ static void select_target(byte* state, byte* specific_state) {
 
   // We pass all checks, but we do nothing until we get a click or auto
   // selection is enabled for this blink.
-  if (!buttonSingleClicked() && !auto_select_) return;
+  if (!buttonSingleClicked() && !auto_select_ && !hasWoken()) return;
 
   auto_select_ = false;
 
@@ -147,7 +147,7 @@ static void target_selected(byte* state, byte* specific_state) {
   }
 
   // We pass all checks, but we do nothing until we get a click.
-  if (!buttonSingleClicked()) return;
+  if (!buttonSingleClicked() && !hasWoken()) return;
 
   // Button was clicked and we are the selected target. Confirmn move.
   if (blink::state::GetTarget()) {
