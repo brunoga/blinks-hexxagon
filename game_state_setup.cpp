@@ -21,16 +21,16 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
   if (buttonDoubleClicked() || checking_board_) {
     checking_board_ = true;
 
-    broadcast::message::Message reply;
-    if (!game::message::SendCheckBoard(reply)) {
+    broadcast::Message reply;
+    if (!game::message::SendCheckBoard(&reply)) {
       return;
     }
 
     checking_board_ = false;
 
-    const byte* payload = broadcast::message::Payload(reply);
-    byte empty_blinks = payload[0] - (payload[1] + payload[2]);
-    if (payload[1] == 0 || payload[2] == 0 || empty_blinks == 0) {
+    byte empty_blinks =
+        reply.payload[0] - (reply.payload[1] + reply.payload[2]);
+    if (reply.payload[1] == 0 || reply.payload[2] == 0 || empty_blinks == 0) {
       // We need at least one piece for player one and one piece for player two
       // and one empty piece.
 

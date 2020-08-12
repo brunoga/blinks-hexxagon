@@ -21,10 +21,10 @@ bool SendGameStateChange(byte game_state, byte specific_state,
                          byte next_player);
 
 // Indexes: 0 = node count, 1 = player one count, 2 = player 2 count.
-bool SendCheckBoard(broadcast::message::Message reply);
+bool SendCheckBoard(broadcast::Message* reply);
 
 // Indexes: 0 = target found.
-bool SendGameStatePlayFindTargets(broadcast::message::Message reply);
+bool SendGameStatePlayFindTargets(broadcast::Message* reply);
 
 }  // namespace message
 

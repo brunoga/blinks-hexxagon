@@ -86,11 +86,11 @@ static void origin_selected(byte* state, byte* specific_state) {
   if (!blink::state::GetOrigin()) return;
 
   // Look for possible targets. Only continue when all other blinks report in.
-  broadcast::message::Message reply;
-  if (!game::message::SendGameStatePlayFindTargets(reply)) return;
+  broadcast::Message reply;
+  if (!game::message::SendGameStatePlayFindTargets(&reply)) return;
 
   // Did we find any targets?
-  if (broadcast::message::Payload(reply)[0] == 0) {
+  if (reply.payload[0] == 0) {
     // Nope. Reset to selecting an origin (hoppefully a different one).
     *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
 
@@ -235,14 +235,11 @@ static void move_confirmed(byte* state, byte* specific_state) {
 
   if (!blink::state::GetArbitrator()) return;
 
-  broadcast::message::Message reply;
-  if (!game::message::SendCheckBoard(reply)) {
-    return;
-  }
+  broadcast::Message reply;
+  if (!game::message::SendCheckBoard(&reply)) return;
 
-  const byte* payload = broadcast::message::Payload(reply);
-  byte empty_blinks = payload[0] - (payload[1] + payload[2]);
-  if (payload[1] == 0 || payload[2] == 0 || empty_blinks == 0) {
+  byte empty_blinks = reply.payload[0] - (reply.payload[1] + reply.payload[2]);
+  if (reply.payload[1] == 0 || reply.payload[2] == 0 || empty_blinks == 0) {
     // One of the players has zero blinks or there is zero spaces left. Game
     // over.
     *state = GAME_STATE_END;

@@ -19,7 +19,7 @@ namespace message {
 static byte message_state_ = MESSAGE_STATE_SEND_MESSAGE;
 
 static void rcv_message_handler(byte message_id, byte* payload) {
-  // blink::state::SetColorOverride(true);
+  blink::state::SetColorOverride(true);
 
   switch (message_id) {
     case MESSAGE_GAME_STATE_CHANGE:
@@ -35,7 +35,7 @@ static void rcv_message_handler(byte message_id, byte* payload) {
 
 static void fwd_message_handler(byte message_id, byte src_face, byte dst_face,
                                 byte* payload) {
-  // blink::state::SetColorOverride(true);
+  blink::state::SetColorOverride(true);
 
   switch (message_id) {
     case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
@@ -50,7 +50,7 @@ static byte num_player_one_ = 0;
 static byte num_player_two_ = 0;
 
 static void rcv_reply_handler(byte message_id, const byte* payload) {
-  // blink::state::SetColorOverride(false);
+  blink::state::SetColorOverride(false);
 
   switch (message_id) {
     case MESSAGE_CHECK_BOARD:
@@ -65,7 +65,7 @@ static void rcv_reply_handler(byte message_id, const byte* payload) {
 }
 
 static void fwd_reply_handler(byte message_id, byte* payload) {
-  // blink::state::SetColorOverride(false);
+  blink::state::SetColorOverride(false);
 
   switch (message_id) {
     case MESSAGE_CHECK_BOARD:
@@ -91,8 +91,8 @@ static void fwd_reply_handler(byte message_id, byte* payload) {
   }
 }
 
-static bool sendOrWaitForReply(broadcast::message::Message message,
-                               broadcast::message::Message reply) {
+static bool sendOrWaitForReply(broadcast::Message* message,
+                               broadcast::Message* reply) {
   switch (message_state_) {
     case MESSAGE_STATE_SEND_MESSAGE:
       if (broadcast::manager::Send(message)) {
@@ -113,12 +113,11 @@ static bool sendOrWaitForReply(broadcast::message::Message message,
   return false;
 }
 
-static bool sendOrWaitForReply(byte message_id, const byte* payload,
-                               broadcast::message::Message reply) {
-  broadcast::message::Message message;
-  broadcast::message::Set(message, message_id, 0, payload, false);
+static bool sendOrWaitForReply(byte message_id, broadcast::Message* reply) {
+  broadcast::Message message;
+  broadcast::message::Initialize(&message, message_id, false);
 
-  return sendOrWaitForReply(message, reply);
+  return sendOrWaitForReply(&message, reply);
 }
 
 void Setup() {
@@ -130,24 +129,22 @@ void Process() { broadcast::manager::Process(); }
 
 bool SendGameStateChange(byte game_state, byte specific_state,
                          byte next_player) {
-  broadcast::message::Message message;
-  broadcast::message::Set(message, MESSAGE_GAME_STATE_CHANGE, 0, nullptr,
-                          false);
+  broadcast::Message message;
 
-  broadcast::message::MutablePayload(message)[0] = game_state;
-  broadcast::message::MutablePayload(message)[1] = specific_state;
-  broadcast::message::MutablePayload(message)[2] = next_player;
+  broadcast::message::Initialize(&message, MESSAGE_GAME_STATE_CHANGE, false);
+  message.payload[0] = game_state;
+  message.payload[1] = specific_state;
+  message.payload[2] = next_player;
 
-  return sendOrWaitForReply(message, nullptr);
+  return sendOrWaitForReply(&message, nullptr);
 }
 
-bool SendCheckBoard(broadcast::message::Message reply) {
-  return sendOrWaitForReply(MESSAGE_CHECK_BOARD, nullptr, reply);
+bool SendCheckBoard(broadcast::Message* reply) {
+  return sendOrWaitForReply(MESSAGE_CHECK_BOARD, reply);
 }
 
-bool SendGameStatePlayFindTargets(broadcast::message::Message reply) {
-  return sendOrWaitForReply(MESSAGE_GAME_STATE_PLAY_FIND_TARGETS, nullptr,
-                            reply);
+bool SendGameStatePlayFindTargets(broadcast::Message* reply) {
+  return sendOrWaitForReply(MESSAGE_GAME_STATE_PLAY_FIND_TARGETS, reply);
 }
 
 }  // namespace message
