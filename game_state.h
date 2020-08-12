@@ -21,6 +21,7 @@ byte Get();
 
 void SetSpecific(byte specific_state, bool from_network = false);
 byte GetSpecific();
+byte GetPreviousSpecific();
 
 void SetPlayer(byte next_player);
 byte GetPlayer();
