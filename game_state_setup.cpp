@@ -27,7 +27,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 
     checking_board_ = false;
 
-    LOGLN(reply.payload[0]);
     if (reply.payload[0] == 0) {
       // We need at least one empty Blink.
 
@@ -37,7 +36,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 
     byte players_count = 0;
     for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
-      LOGLN(reply.payload[i]);
       if (reply.payload[i] > 0) players_count++;
     }
 

@@ -96,8 +96,6 @@ static bool sendOrWaitForReply(broadcast::Message* message,
       if (broadcast::manager::Receive(reply)) {
         message_state_ = MESSAGE_STATE_SEND_MESSAGE;
 
-        LOGFLN("got reply");
-
         return true;
       }
 
