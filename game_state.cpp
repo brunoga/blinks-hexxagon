@@ -63,7 +63,7 @@ void NextPlayer() {
 
 void SetBlinkCount(BlinkCount blink_count) {
   for (byte i = 0; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
-    blink_count_[i] = blink_count[i];
+    blink_count_[i] = blink_count == nullptr ? 0 : blink_count[i];
   }
 }
 
@@ -76,6 +76,7 @@ void Reset() {
   state_.from_network = false;
   specific_state_.current = 0;
   specific_state_.previous = 0;
+  SetBlinkCount(nullptr);
 }
 
 bool Changed(bool include_specific) {
