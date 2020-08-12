@@ -45,19 +45,18 @@ static void fwd_message_handler(byte message_id, byte src_face, byte dst_face,
   }
 }
 
-static byte num_blinks_ = 0;
-static byte num_player_one_ = 0;
-static byte num_player_two_ = 0;
+static game::state::BlinkCount blink_count_;
 
 static void rcv_reply_handler(byte message_id, const byte* payload) {
   blink::state::SetColorOverride(false);
 
   switch (message_id) {
-    case MESSAGE_CHECK_BOARD:
-      num_blinks_ += payload[0];
-      num_player_one_ += payload[1];
-      num_player_two_ += payload[2];
+    case MESSAGE_CHECK_BOARD: {
+      for (byte i = 0; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
+        blink_count_[i] += payload[i];
+      }
       break;
+    }
     case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
       game::state::play::HandleReceiveReply(message_id, payload);
       break;
@@ -68,23 +67,16 @@ static void fwd_reply_handler(byte message_id, byte* payload) {
   blink::state::SetColorOverride(false);
 
   switch (message_id) {
-    case MESSAGE_CHECK_BOARD:
-      if (blink::state::GetPlayer() == 1) {
-        num_player_one_++;
-      } else if (blink::state::GetPlayer() == 2) {
-        num_player_two_++;
+    case MESSAGE_CHECK_BOARD: {
+      blink_count_[blink::state::GetPlayer()]++;
+
+      for (byte i = 0; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
+        payload[i] = blink_count_[i];
+        blink_count_[i] = 0;
       }
-      num_blinks_++;
-
-      payload[0] = num_blinks_;
-      payload[1] = num_player_one_;
-      payload[2] = num_player_two_;
-
-      num_blinks_ = 0;
-      num_player_one_ = 0;
-      num_player_two_ = 0;
 
       break;
+    }
     case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
       game::state::play::HandleForwardReply(message_id, payload);
       break;
@@ -103,6 +95,8 @@ static bool sendOrWaitForReply(broadcast::Message* message,
     case MESSAGE_STATE_WAIT_FOR_RESULT:
       if (broadcast::manager::Receive(reply)) {
         message_state_ = MESSAGE_STATE_SEND_MESSAGE;
+
+        LOGFLN("got reply");
 
         return true;
       }

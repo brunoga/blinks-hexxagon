@@ -3,6 +3,9 @@
 
 #include <blinklib.h>
 
-#define DATAGRAM_BYTES 5
+#include "payload_bytes.h"
+
+// Max number of datagram bytes in a message.
+#define DATAGRAM_BYTES MESSAGE_PAYLOAD_BYTES + 1
 
 #endif

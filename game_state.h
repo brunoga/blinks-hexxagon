@@ -3,6 +3,8 @@
 
 #include <blinklib.h>
 
+#include "game_player.h"
+
 #define GAME_STATE_IDLE 0
 #define GAME_STATE_SETUP 1
 #define GAME_STATE_PLAY 2
@@ -12,6 +14,8 @@ namespace game {
 
 namespace state {
 
+typedef byte BlinkCount[GAME_PLAYER_MAX_PLAYERS + 1];
+
 void Set(byte state, bool from_network = false);
 byte Get();
 
@@ -20,6 +24,10 @@ byte GetSpecific();
 
 void SetPlayer(byte next_player);
 byte GetPlayer();
+void NextPlayer();
+
+void SetBlinkCount(BlinkCount blink_count);
+byte GetBlinkCount(byte player);
 
 void Reset();
 

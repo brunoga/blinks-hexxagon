@@ -1,6 +1,7 @@
 #include "game_state_setup_render.h"
 
 #include "blink_state.h"
+#include "game_player.h"
 
 namespace game {
 
@@ -9,22 +10,10 @@ namespace state {
 namespace setup {
 
 void Render() {
-  Color color;
+  Color current_player_color =
+      game::player::GetColor(blink::state::GetPlayer());
 
-  // TODO(bga): Extend to 4 players.
-  switch (blink::state::GetPlayer()) {
-    case 0:
-      color = dim(ORANGE, 63);
-      break;
-    case 1:
-      color = dim(RED, 63);
-      break;
-    case 2:
-      color = dim(BLUE, 63);
-      break;
-  }
-
-  setColor(color);
+  setColor(dim(current_player_color, 63));
 }
 
 }  // namespace setup

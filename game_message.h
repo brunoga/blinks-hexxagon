@@ -20,7 +20,7 @@ void Process();
 bool SendGameStateChange(byte game_state, byte specific_state,
                          byte next_player);
 
-// Indexes: 0 = node count, 1 = player one count, 2 = player 2 count.
+// Indexes: 0 = empty count, 1 = player one count, 2 = player 2 count, etc.
 bool SendCheckBoard(broadcast::Message* reply);
 
 // Indexes: 0 = target found.

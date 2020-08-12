@@ -15,10 +15,10 @@ namespace state {
 struct BlinkState {
   bool origin : 1;
   bool target : 1;
-  byte player : 2;
+  byte player : 3;
   byte target_type : 1;
   bool arbitrator : 1;
-  byte unused : 2;
+  bool unused : 1;
 };
 static BlinkState state_;
 

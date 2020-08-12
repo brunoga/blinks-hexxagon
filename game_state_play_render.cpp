@@ -2,6 +2,7 @@
 
 #include "blink_state.h"
 #include "debug.h"
+#include "game_player.h"
 #include "game_state.h"
 
 namespace game {
@@ -24,44 +25,38 @@ void renderSelected(const Color& base_color) {
 }
 
 void Render() {
-  Color color;
+  byte current_player = blink::state::GetPlayer();
+  Color current_player_color = game::player::GetColor(current_player);
 
-  switch (blink::state::GetPlayer()) {
+  switch (current_player) {
     case 0:
       if (blink::state::GetTarget()) {
-        color = ORANGE;
-        renderSelected(color);
+        renderSelected(current_player_color);
         return;
       }
 
       if (blink::state::GetTargetType() != BLINK_STATE_TARGET_TYPE_NONE) {
-        color = dim(ORANGE, 191);
+        current_player_color = dim(current_player_color, 191);
       } else {
-        color = dim(ORANGE, 127);
+        current_player_color = dim(current_player_color, 127);
       }
       break;
     default: {
-      if (blink::state::GetPlayer() == 1) {
-        color = RED;
-      } else {
-        color = BLUE;
-      }
-
       if (game::state::GetPlayer() == blink::state::GetPlayer()) {
         if (!blink::state::GetOrigin()) {
-          color = dim(color, 191);
+          current_player_color = dim(current_player_color, 191);
         } else {
-          renderSelected(color);
+          renderSelected(current_player_color);
           return;
         }
       } else {
-        color = dim(color, 127);
+        current_player_color = dim(current_player_color, 127);
       }
       break;
     }
   }
 
-  setColor(color);
+  setColor(current_player_color);
 }
 
 }  // namespace play

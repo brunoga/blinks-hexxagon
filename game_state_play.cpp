@@ -238,21 +238,32 @@ static void move_confirmed(byte* state, byte* specific_state) {
   broadcast::Message reply;
   if (!game::message::SendCheckBoard(&reply)) return;
 
+  game::state::SetBlinkCount(reply.payload);
+
   blink::state::SetArbitrator(false);
 
-  byte empty_blinks = reply.payload[0] - (reply.payload[1] + reply.payload[2]);
-  if (reply.payload[1] == 0 || reply.payload[2] == 0 || empty_blinks == 0) {
-    // One of the players has zero blinks or there are zero spaces left. Game
-    // over.
+  if (reply.payload[0] == 0) {
+    // No more empty spaces.
     *state = GAME_STATE_END;
     *specific_state = 0;
 
     return;
   }
 
-  byte next_player = game::state::GetPlayer() + 1;
+  byte players_count = 0;
+  for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
+    if (reply.payload[i] > 0) players_count++;
+  }
 
-  game::state::SetPlayer(next_player > 2 ? 1 : next_player);
+  if (players_count < 2) {
+    // Only one player left.
+    *state = GAME_STATE_END;
+    *specific_state = 0;
+
+    return;
+  }
+
+  game::state::NextPlayer();
 
   *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
 }
@@ -266,27 +277,28 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 
     return;
   }
-
-  switch (*specific_state) {
-    case GAME_STATE_PLAY_SELECT_ORIGIN:
-      select_origin(state, specific_state);
-      break;
-    case GAME_STATE_PLAY_ORIGIN_SELECTED:
-      origin_selected(state, specific_state);
-      break;
-    case GAME_STATE_PLAY_SELECT_TARGET:
-      select_target(state, specific_state);
-      break;
-    case GAME_STATE_PLAY_TARGET_SELECTED:
-      target_selected(state, specific_state);
-      break;
-    case GAME_STATE_PLAY_CONFIRM_MOVE:
-      confirm_move(state, specific_state);
-      break;
-    case GAME_STATE_PLAY_MOVE_CONFIRMED:
-      move_confirmed(state, specific_state);
-      break;
-  }
+  /*
+    switch (*specific_state) {
+      case GAME_STATE_PLAY_SELECT_ORIGIN:
+        select_origin(state, specific_state);
+        break;
+      case GAME_STATE_PLAY_ORIGIN_SELECTED:
+        origin_selected(state, specific_state);
+        break;
+      case GAME_STATE_PLAY_SELECT_TARGET:
+        select_target(state, specific_state);
+        break;
+      case GAME_STATE_PLAY_TARGET_SELECTED:
+        target_selected(state, specific_state);
+        break;
+      case GAME_STATE_PLAY_CONFIRM_MOVE:
+        confirm_move(state, specific_state);
+        break;
+      case GAME_STATE_PLAY_MOVE_CONFIRMED:
+        move_confirmed(state, specific_state);
+        break;
+    }
+    */
 }
 
 void HandleReceiveMessage(byte message_id, byte* payload) {

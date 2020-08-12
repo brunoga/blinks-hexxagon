@@ -1,6 +1,6 @@
 #include "game_state_idle_render.h"
 
-#include "blink_state.h"
+#include "game_player.h"
 
 namespace game {
 
@@ -21,7 +21,7 @@ void Render() {
 
   byte brightness = reverse_ ? 255 - base_brightness : base_brightness + 127;
 
-  setColor(dim(ORANGE, brightness));
+  setColor(dim(game::player::GetColor(0), brightness));
 }
 
 }  // namespace idle
