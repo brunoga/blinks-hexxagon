@@ -277,28 +277,27 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 
     return;
   }
-  /*
-    switch (*specific_state) {
-      case GAME_STATE_PLAY_SELECT_ORIGIN:
-        select_origin(state, specific_state);
-        break;
-      case GAME_STATE_PLAY_ORIGIN_SELECTED:
-        origin_selected(state, specific_state);
-        break;
-      case GAME_STATE_PLAY_SELECT_TARGET:
-        select_target(state, specific_state);
-        break;
-      case GAME_STATE_PLAY_TARGET_SELECTED:
-        target_selected(state, specific_state);
-        break;
-      case GAME_STATE_PLAY_CONFIRM_MOVE:
-        confirm_move(state, specific_state);
-        break;
-      case GAME_STATE_PLAY_MOVE_CONFIRMED:
-        move_confirmed(state, specific_state);
-        break;
-    }
-    */
+
+  switch (*specific_state) {
+    case GAME_STATE_PLAY_SELECT_ORIGIN:
+      select_origin(state, specific_state);
+      break;
+    case GAME_STATE_PLAY_ORIGIN_SELECTED:
+      origin_selected(state, specific_state);
+      break;
+    case GAME_STATE_PLAY_SELECT_TARGET:
+      select_target(state, specific_state);
+      break;
+    case GAME_STATE_PLAY_TARGET_SELECTED:
+      target_selected(state, specific_state);
+      break;
+    case GAME_STATE_PLAY_CONFIRM_MOVE:
+      confirm_move(state, specific_state);
+      break;
+    case GAME_STATE_PLAY_MOVE_CONFIRMED:
+      move_confirmed(state, specific_state);
+      break;
+  }
 }
 
 void HandleReceiveMessage(byte message_id, byte* payload) {
