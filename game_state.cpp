@@ -72,7 +72,7 @@ byte GetBlinkCount(byte player) { return blink_count_[player]; }
 void Reset() {
   state_.current = GAME_STATE_IDLE;
   state_.previous = GAME_STATE_IDLE;
-  state_.player = 1;
+  state_.player = 0;
   state_.from_network = false;
   specific_state_.current = 0;
   specific_state_.previous = 0;
