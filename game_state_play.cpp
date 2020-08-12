@@ -278,6 +278,21 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     return;
   }
 
+  if (*specific_state == GAME_STATE_PLAY_PASS_TURN) {
+    byte previous_specific_state = game::state::GetPreviousSpecific();
+    game::state::SetSpecific(previous_specific_state, true);
+    *specific_state = previous_specific_state;
+  }
+
+  // Check for turn passing.
+  if (buttonDoubleClicked()) {
+    *specific_state = GAME_STATE_PLAY_PASS_TURN;
+
+    game::state::NextPlayer();
+
+    return;
+  }
+
   switch (*specific_state) {
     case GAME_STATE_PLAY_SELECT_ORIGIN:
       select_origin(state, specific_state);
