@@ -23,6 +23,8 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
         if (player_count > max_count) {
           max_count = player_count;
           num_players_max_count = 1;
+        } else {
+          num_players_max_count++;
         }
 
         players_max_count[num_players_max_count - 1] = i;
