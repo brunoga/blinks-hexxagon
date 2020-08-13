@@ -19,13 +19,16 @@ namespace message {
 static byte message_state_ = MESSAGE_STATE_SEND_MESSAGE;
 
 static void rcv_message_handler(byte message_id, byte* payload) {
-  // blink::state::SetColorOverride(true);
+  blink::state::SetColorOverride(true);
 
   switch (message_id) {
     case MESSAGE_GAME_STATE_CHANGE:
       game::state::Set(payload[0], true);
       game::state::SetSpecific(payload[1], true);
       game::state::SetPlayer(payload[2]);
+      break;
+    case MESSAGE_REPORT_BLINK_COUNT:
+      game::state::SetBlinkCount(payload);
       break;
     case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
       game::state::play::HandleReceiveMessage(message_id, payload);
@@ -88,6 +91,8 @@ static bool sendOrWaitForReply(broadcast::Message* message,
   switch (message_state_) {
     case MESSAGE_STATE_SEND_MESSAGE:
       if (broadcast::manager::Send(message)) {
+        if (message->header.is_fire_and_forget) return true;
+
         message_state_ = MESSAGE_STATE_WAIT_FOR_RESULT;
       }
 
@@ -133,6 +138,15 @@ bool SendGameStateChange(byte game_state, byte specific_state,
 
 bool SendCheckBoard(broadcast::Message* reply) {
   return sendOrWaitForReply(MESSAGE_CHECK_BOARD, reply);
+}
+
+bool ReportBlinkCount(game::state::BlinkCount blink_count) {
+  broadcast::Message message;
+
+  broadcast::message::Initialize(&message, MESSAGE_REPORT_BLINK_COUNT, true);
+  memcpy(message.payload, &blink_count, GAME_PLAYER_MAX_PLAYERS + 1);
+
+  return sendOrWaitForReply(&message, nullptr);
 }
 
 bool SendGameStatePlayFindTargets(broadcast::Message* reply) {

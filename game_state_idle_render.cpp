@@ -2,11 +2,17 @@
 
 #include "game_player.h"
 
+// Disabled for now to save storage space. Reenable if we can get savings
+// somewhere else.
+//#define GAME_STATE_IDLE_FANCY_ANIMATION
+
 namespace game {
 
 namespace state {
 
 namespace idle {
+
+#ifdef GAME_STATE_IDLE_FANCY_ANIMATION
 
 static Timer pulse_timer_;
 static bool reverse_ = true;
@@ -23,6 +29,9 @@ void Render() {
 
   setColor(dim(game::player::GetColor(0), brightness));
 }
+#else
+void Render() { setColor(dim(game::player::GetColor(0), 127)); }
+#endif
 
 }  // namespace idle
 

@@ -3,11 +3,13 @@
 
 #include <blinklib.h>
 
+#include "game_state.h"
 #include "message.h"
 
 #define MESSAGE_GAME_STATE_CHANGE 0
 #define MESSAGE_CHECK_BOARD 1
 #define MESSAGE_GAME_STATE_PLAY_FIND_TARGETS 2
+#define MESSAGE_REPORT_BLINK_COUNT 3
 
 namespace game {
 
@@ -22,6 +24,8 @@ bool SendGameStateChange(byte game_state, byte specific_state,
 
 // Indexes: 0 = empty count, 1 = player one count, 2 = player 2 count, etc.
 bool SendCheckBoard(broadcast::Message* reply);
+
+bool ReportBlinkCount(game::state::BlinkCount blink_count);
 
 // Indexes: 0 = target found.
 bool SendGameStatePlayFindTargets(broadcast::Message* reply);
