@@ -4,6 +4,7 @@
 
 #include "debug.h"
 #include "game_state.h"
+#include "game_state_end_render.h"
 #include "game_state_idle_render.h"
 #include "game_state_play_render.h"
 #include "game_state_setup_render.h"
@@ -82,8 +83,8 @@ void Render(byte game_state) {
     case GAME_STATE_PLAY:
       game::state::play::Render();
       break;
-    default:
-      setColor(RED);
+    case GAME_STATE_END:
+      game::state::end::Render();
       break;
   }
 }
