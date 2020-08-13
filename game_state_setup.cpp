@@ -22,34 +22,25 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
   if (buttonDoubleClicked() || checking_board_) {
     checking_board_ = true;
 
-    broadcast::Message reply;
-    if (!game::message::SendCheckBoard(&reply)) return;
+    byte result = game::state::UpdateBoardState();
+
+    if (result == GAME_STATE_UPDATE_BOARD_STATE_UPDATING) {
+      return;
+    }
 
     checking_board_ = false;
 
-    if (reply.payload[0] == 0) {
-      // We need at least one empty Blink.
-
+    if (result == GAME_STATE_UPDATE_BOARD_STATE_ERROR) {
+      // Board is in an invalid state.
+      //
       // TODO(bga): Add some visual feedback to indicate something is wrong.
       return;
     }
-
-    byte players_count = 0;
-    for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
-      if (reply.payload[i] > 0) players_count++;
-    }
-
-    if (players_count < 2) {
-      // We need at least two players.
-
-      // TODO(bga): Add some visual feedback to indicate something is wrong.
-      return;
-    }
-
-    game::state::SetBlinkCount(reply.payload);
 
     *state = GAME_STATE_PLAY;
     *specific_state = 0;
+
+    return;
   }
 
   if (buttonSingleClicked() && !hasWoken()) {

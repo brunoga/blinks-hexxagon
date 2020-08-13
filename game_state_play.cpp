@@ -243,34 +243,21 @@ static void move_confirmed(byte* state, byte* specific_state) {
 
   if (!blink::state::GetArbitrator()) return;
 
-  broadcast::Message reply;
-  if (!game::message::SendCheckBoard(&reply)) return;
+  byte result = game::state::UpdateBoardState();
 
-  game::state::SetBlinkCount(reply.payload);
+  if (result == GAME_STATE_UPDATE_BOARD_STATE_UPDATING) return;
 
   blink::state::SetArbitrator(false);
 
-  if (reply.payload[0] == 0) {
-    // No more empty spaces.
+  if (result == GAME_STATE_UPDATE_BOARD_STATE_ERROR) {
+    // Board is in a state where the game can not continue. The end.
     *state = GAME_STATE_END;
     *specific_state = 0;
 
     return;
   }
 
-  byte players_count = 0;
-  for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
-    if (reply.payload[i] > 0) players_count++;
-  }
-
-  if (players_count < 2) {
-    // Only one player left.
-    *state = GAME_STATE_END;
-    *specific_state = 0;
-
-    return;
-  }
-
+  // Movbe to next turn.
   game::state::NextPlayer();
 
   *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;

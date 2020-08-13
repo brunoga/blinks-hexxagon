@@ -59,6 +59,35 @@ void NextPlayer() {
   SetPlayer(next_player);
 }
 
+byte UpdateBoardState() {
+  broadcast::Message reply;
+  if (!game::message::SendCheckBoard(&reply)) {
+    return GAME_STATE_UPDATE_BOARD_STATE_UPDATING;
+  }
+
+  SetBlinkCount(reply.payload);
+
+  if (reply.payload[0] == 0) {
+    // We need at least one empty Blink.
+    return GAME_STATE_UPDATE_BOARD_STATE_ERROR;
+  }
+
+  byte players_count = 0;
+  for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
+    if (reply.payload[i] > 0) players_count++;
+  }
+
+  if (players_count < 2) {
+    // We need at least two players.
+    return GAME_STATE_UPDATE_BOARD_STATE_ERROR;
+  }
+
+  // TODO(bga): We need to tell the other Blinks about the current game state.
+  // Currently this only breaks the end state s lets do it another time.
+
+  return GAME_STATE_UPDATE_BOARD_STATE_OK;
+}
+
 void SetBlinkCount(BlinkCount blink_count) {
   for (byte i = 0; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
     blink_count_[i] = blink_count == nullptr ? 0 : blink_count[i];
