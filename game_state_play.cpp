@@ -79,6 +79,8 @@ static void select_origin(byte* state, byte* specific_state) {
   // Indicate that an origin was selected. This will be automatically propagated
   // to all blinks.
   *specific_state = GAME_STATE_PLAY_ORIGIN_SELECTED;
+
+  (void)state;
 }
 
 static void origin_selected(byte* state, byte* specific_state) {
@@ -99,6 +101,8 @@ static void origin_selected(byte* state, byte* specific_state) {
 
   // We have at least one possible target.
   *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
+
+  (void)state;
 }
 
 static void select_target(byte* state, byte* specific_state) {
@@ -135,6 +139,8 @@ static void select_target(byte* state, byte* specific_state) {
   blink::state::SetTarget(true);
 
   *specific_state = GAME_STATE_PLAY_TARGET_SELECTED;
+
+  (void)state;
 }
 
 static void target_selected(byte* state, byte* specific_state) {
@@ -179,9 +185,9 @@ static void target_selected(byte* state, byte* specific_state) {
     auto_select_ = true;
 
     *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
-
-    return;
   }
+
+  (void)state;
 }
 
 static bool neighboor_target() {
@@ -219,6 +225,8 @@ static void confirm_move(byte* state, byte* specific_state) {
   if (!blink::state::GetArbitrator()) return;
 
   *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
+
+  (void)state;
 }
 
 static void move_confirmed(byte* state, byte* specific_state) {
@@ -279,9 +287,8 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
   }
 
   if (*specific_state == GAME_STATE_PLAY_PASS_TURN) {
-    byte previous_specific_state = game::state::GetPreviousSpecific();
-    game::state::SetSpecific(previous_specific_state, true);
-    *specific_state = previous_specific_state;
+    game::state::SetSpecific(GAME_STATE_PLAY_SELECT_ORIGIN, true);
+    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
   }
 
   // Check for turn passing.

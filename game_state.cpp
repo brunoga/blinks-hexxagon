@@ -43,8 +43,6 @@ void SetSpecific(byte specific_state, bool from_network) {
 
 byte GetSpecific() { return specific_state_.current; }
 
-byte GetPreviousSpecific() { return specific_state_.previous; }
-
 void SetPlayer(byte player) { state_.player = player; }
 
 byte GetPlayer() { return state_.player; }
