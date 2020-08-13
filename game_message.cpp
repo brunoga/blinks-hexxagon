@@ -91,8 +91,6 @@ static bool sendOrWaitForReply(broadcast::Message* message,
   switch (message_state_) {
     case MESSAGE_STATE_SEND_MESSAGE:
       if (broadcast::manager::Send(message)) {
-        if (message->header.is_fire_and_forget) return true;
-
         message_state_ = MESSAGE_STATE_WAIT_FOR_RESULT;
       }
 
@@ -143,7 +141,7 @@ bool SendCheckBoard(broadcast::Message* reply) {
 bool ReportBlinkCount(game::state::BlinkCount blink_count) {
   broadcast::Message message;
 
-  broadcast::message::Initialize(&message, MESSAGE_REPORT_BLINK_COUNT, true);
+  broadcast::message::Initialize(&message, MESSAGE_REPORT_BLINK_COUNT, false);
   memcpy(message.payload, &blink_count, GAME_PLAYER_MAX_PLAYERS + 1);
 
   return sendOrWaitForReply(&message, nullptr);
