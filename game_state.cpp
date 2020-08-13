@@ -51,8 +51,8 @@ void NextPlayer() {
   byte current_player = GetPlayer();
 
   byte next_player = game::player::GetNext(current_player);
-  while (blink_count_[next_player] == 0 && current_player != next_player &&
-         next_player != 0) {
+  while ((blink_count_[next_player] == 0 || next_player == 0) &&
+         next_player != current_player) {
     next_player = game::player::GetNext(next_player);
   }
 
