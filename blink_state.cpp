@@ -66,11 +66,11 @@ void Render(byte game_state) {
 
   setValueSentOnAllFaces(face_value.value);
 
-  if (blink::state::GetColorOverride()) {
-    setColor(WHITE);
+  // if (blink::state::GetColorOverride()) {
+  //  setColor(WHITE);
 
-    return;
-  }
+  //  return;
+  // }
 
   // Now render the state specific colors/animations.
   switch (game_state) {
