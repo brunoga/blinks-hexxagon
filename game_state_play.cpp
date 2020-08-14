@@ -320,16 +320,18 @@ void HandleReceiveMessage(byte message_id, byte* payload) {
   }
 }
 
-void HandleForwardMessage(byte message_id, byte src_face, byte dst_face,
+byte HandleForwardMessage(byte message_id, byte src_face, byte dst_face,
                           byte* payload) {
-  if (message_id != MESSAGE_GAME_STATE_PLAY_FIND_TARGETS) return;
+  if (message_id != MESSAGE_GAME_STATE_PLAY_FIND_TARGETS) {
+    return MESSAGE_PAYLOAD_BYTES;
+  }
 
   if (src_face == FACE_COUNT) {
     // We are the source of the coordinate system. Set payload using the
     // real face number.
     set_payload_for_face(payload, dst_face);
 
-    return;
+    return 4;
   }
 
   // The input face is the face opposite to the face the message was sent
@@ -342,6 +344,8 @@ void HandleForwardMessage(byte message_id, byte src_face, byte dst_face,
 
   // Set payload using the normalized output face.
   set_payload_for_face(payload, output_face);
+
+  return 4;
 }
 
 static byte upstream_target_ = false;
@@ -354,8 +358,10 @@ void HandleReceiveReply(byte message_id, const byte* payload) {
   }
 }
 
-void HandleForwardReply(byte message_id, byte* payload) {
-  if (message_id != MESSAGE_GAME_STATE_PLAY_FIND_TARGETS) return;
+byte HandleForwardReply(byte message_id, byte* payload) {
+  if (message_id != MESSAGE_GAME_STATE_PLAY_FIND_TARGETS) {
+    return MESSAGE_PAYLOAD_BYTES;
+  }
 
   if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_TARGET ||
       upstream_target_) {
@@ -364,6 +370,8 @@ void HandleForwardReply(byte message_id, byte* payload) {
   }
 
   upstream_target_ = false;
+
+  return 1;
 }
 
 }  // namespace play

@@ -36,16 +36,23 @@ static void rcv_message_handler(byte message_id, byte* payload) {
   }
 }
 
-static void fwd_message_handler(byte message_id, byte src_face, byte dst_face,
+static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
                                 byte* payload) {
   blink::state::SetColorOverride(true);
 
   switch (message_id) {
     case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
-      game::state::play::HandleForwardMessage(message_id, src_face, dst_face,
-                                              payload);
-      break;
+      return game::state::play::HandleForwardMessage(message_id, src_face,
+                                                     dst_face, payload);
+    case MESSAGE_GAME_STATE_CHANGE:
+      return 3;
+    case MESSAGE_CHECK_BOARD:
+      return 0;
+    case MESSAGE_REPORT_WINNER:
+      return 1;
   }
+
+  return MESSAGE_PAYLOAD_BYTES;
 }
 
 static game::state::BlinkCount blink_count_;
@@ -66,7 +73,7 @@ static void rcv_reply_handler(byte message_id, const byte* payload) {
   }
 }
 
-static void fwd_reply_handler(byte message_id, byte* payload) {
+static byte fwd_reply_handler(byte message_id, byte* payload) {
   blink::state::SetColorOverride(false);
 
   switch (message_id) {
@@ -78,12 +85,16 @@ static void fwd_reply_handler(byte message_id, byte* payload) {
         blink_count_[i] = 0;
       }
 
-      break;
+      return GAME_PLAYER_MAX_PLAYERS + 1;
     }
     case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
-      game::state::play::HandleForwardReply(message_id, payload);
-      break;
+      return game::state::play::HandleForwardReply(message_id, payload);
+    case MESSAGE_GAME_STATE_CHANGE:
+    case MESSAGE_REPORT_WINNER:
+      return 0;
   }
+
+  return MESSAGE_PAYLOAD_BYTES;
 }
 
 static bool sendOrWaitForReply(broadcast::Message* message,

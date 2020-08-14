@@ -22,10 +22,10 @@ namespace play {
 void Handler(bool state_changed, byte* state, byte* specific_state);
 
 void HandleReceiveMessage(byte message_id, byte* payload);
-void HandleForwardMessage(byte message_id, byte src_face, byte dst_face,
+byte HandleForwardMessage(byte message_id, byte src_face, byte dst_face,
                           byte* payload);
 void HandleReceiveReply(byte message_id, const byte* payload);
-void HandleForwardReply(byte message_id, byte* payload);
+byte HandleForwardReply(byte message_id, byte* payload);
 
 }  // namespace play
 
