@@ -63,9 +63,12 @@ static void rcv_message_handler(byte message_id, byte* payload) {
 
   switch (message_id) {
     case MESSAGE_GAME_STATE_CHANGE:
-      game::state::Set(payload[0], true);
-      game::state::SetSpecific(payload[1], true);
-      game::state::SetPlayer(payload[2]);
+      GameStateChangeData data;
+      data.value = payload[0];
+
+      game::state::Set(data.state, true);
+      game::state::SetSpecific(data.specific_state, true);
+      game::state::SetPlayer(data.next_player + 1);
       break;
     case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
       if (blink::state::GetPlayer() != 0) break;
@@ -109,7 +112,7 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
       len = 4;
       break;
     case MESSAGE_GAME_STATE_CHANGE:
-      len = 3;
+      len = 1;
       break;
     case MESSAGE_CHECK_BOARD:
       len = 0;
@@ -215,14 +218,12 @@ void Setup() {
 
 void Process() { broadcast::manager::Process(); }
 
-bool SendGameStateChange(byte game_state, byte specific_state,
-                         byte next_player) {
+bool SendGameStateChange(byte payload) {
   broadcast::Message message;
 
   broadcast::message::Initialize(&message, MESSAGE_GAME_STATE_CHANGE, false);
-  message.payload[0] = game_state;
-  message.payload[1] = specific_state;
-  message.payload[2] = next_player;
+
+  message.payload[0] = payload;
 
   return sendOrWaitForReply(&message, nullptr);
 }

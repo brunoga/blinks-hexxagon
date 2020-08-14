@@ -113,8 +113,13 @@ bool Changed(bool include_specific) {
 bool Propagate() {
   if (!Changed() || state_.from_network) return true;
 
-  if (!game::message::SendGameStateChange(
-          state_.current, specific_state_.current, state_.player)) {
+  game::message::GameStateChangeData data;
+
+  data.state = state_.current;
+  data.specific_state = specific_state_.current;
+  data.next_player = state_.player - 1;
+
+  if (!game::message::SendGameStateChange(data.value)) {
     return false;
   }
 

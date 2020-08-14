@@ -15,12 +15,21 @@ namespace game {
 
 namespace message {
 
+union GameStateChangeData {
+  struct {
+    byte state : 2;
+    byte specific_state : 4;
+    byte next_player : 2;  // Add 1 for actual player number.
+  };
+
+  byte value;
+};
+
 void Setup();
 
 void Process();
 
-bool SendGameStateChange(byte game_state, byte specific_state,
-                         byte next_player);
+bool SendGameStateChange(byte payload);
 
 // Indices reply: 0 = empty count, 1 = player one count, 2 = player 2 count,
 // etc.
