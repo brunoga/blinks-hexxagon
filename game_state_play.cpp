@@ -247,8 +247,6 @@ static void move_confirmed(byte* state, byte* specific_state) {
 
   if (result == GAME_STATE_UPDATE_BOARD_STATE_UPDATING) return;
 
-  blink::state::SetArbitrator(false);
-
   if (result == GAME_STATE_UPDATE_BOARD_STATE_ERROR) {
     // Board is in a state where the game can not continue. The end.
     *state = GAME_STATE_END;
@@ -257,7 +255,9 @@ static void move_confirmed(byte* state, byte* specific_state) {
     return;
   }
 
-  // Movbe to next turn.
+  blink::state::SetArbitrator(false);
+
+  // Move to next turn.
   game::state::NextPlayer();
 
   *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;

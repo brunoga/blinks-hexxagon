@@ -27,11 +27,11 @@ static void rcv_message_handler(byte message_id, byte* payload) {
       game::state::SetSpecific(payload[1], true);
       game::state::SetPlayer(payload[2]);
       break;
-    case MESSAGE_REPORT_BLINK_COUNT:
-      game::state::SetBlinkCount(payload);
-      break;
     case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
       game::state::play::HandleReceiveMessage(message_id, payload);
+      break;
+    case MESSAGE_REPORT_WINNER:
+      blink::state::SetPlayer(payload[0]);
       break;
   }
 }
@@ -138,17 +138,17 @@ bool SendCheckBoard(broadcast::Message* reply) {
   return sendOrWaitForReply(MESSAGE_CHECK_BOARD, reply);
 }
 
-bool ReportBlinkCount(game::state::BlinkCount blink_count) {
-  broadcast::Message message;
-
-  broadcast::message::Initialize(&message, MESSAGE_REPORT_BLINK_COUNT, false);
-  memcpy(message.payload, &blink_count, GAME_PLAYER_MAX_PLAYERS + 1);
-
-  return sendOrWaitForReply(&message, nullptr);
-}
-
 bool SendGameStatePlayFindTargets(broadcast::Message* reply) {
   return sendOrWaitForReply(MESSAGE_GAME_STATE_PLAY_FIND_TARGETS, reply);
+}
+
+bool SendReportWinner(byte winner_player) {
+  broadcast::Message message;
+
+  broadcast::message::Initialize(&message, MESSAGE_REPORT_WINNER, false);
+  message.payload[0] = winner_player;
+
+  return sendOrWaitForReply(&message, nullptr);
 }
 
 }  // namespace message

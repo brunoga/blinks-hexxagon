@@ -23,7 +23,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     checking_board_ = true;
 
     byte result = game::state::UpdateBoardState();
-
     if (result == GAME_STATE_UPDATE_BOARD_STATE_UPDATING) {
       return;
     }

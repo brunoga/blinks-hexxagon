@@ -33,7 +33,7 @@ void NextPlayer();
 byte UpdateBoardState();
 
 void SetBlinkCount(BlinkCount blink_count);
-byte* GetBlinkCount();
+byte GetBlinkCount(byte player);
 
 void Reset();
 
