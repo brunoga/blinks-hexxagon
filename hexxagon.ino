@@ -7,10 +7,7 @@
 #include "game_state_play.h"
 #include "game_state_setup.h"
 
-void setup() {
-  game::message::Setup();
-  randomize();
-}
+void setup() { game::message::Setup(); }
 
 void loop() {
   // Process any pending game messages.
