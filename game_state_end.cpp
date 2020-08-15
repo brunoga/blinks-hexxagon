@@ -38,18 +38,9 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     }
   }
 
-  if (buttonDoubleClicked()) {
-    *state = GAME_STATE_IDLE;
-    *specific_state = 0;
-
-    return;
-  }
-
   if (!blink::state::GetArbitrator()) return;
 
   if (!game::message::SendReportWinner(winner_player_)) return;
-
-  winner_player_ = 0;
 
   blink::state::SetArbitrator(false);
 }
