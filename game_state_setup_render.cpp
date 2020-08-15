@@ -10,10 +10,9 @@ namespace state {
 namespace setup {
 
 void Render() {
-  Color current_player_color =
-      game::player::GetColor(blink::state::GetPlayer());
+  Color player_color = game::player::GetColor(blink::state::GetPlayer());
 
-  setColor(dim(current_player_color, 63));
+  setColor(dim(player_color, 63));
 }
 
 }  // namespace setup
