@@ -25,38 +25,34 @@ void renderSelected(const Color& base_color) {
 }
 
 void Render() {
-  byte current_player = blink::state::GetPlayer();
-  Color current_player_color = game::player::GetColor(current_player);
+  byte player = blink::state::GetPlayer();
+  Color player_color = game::player::GetColor(player);
 
-  switch (current_player) {
+  switch (player) {
     case 0:
       if (blink::state::GetTarget()) {
-        renderSelected(current_player_color);
+        renderSelected(player_color);
         return;
       }
 
-      if (blink::state::GetTargetType() != BLINK_STATE_TARGET_TYPE_NONE) {
-        current_player_color = dim(current_player_color, 191);
-      } else {
-        current_player_color = dim(current_player_color, 127);
+      if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE) {
+        player_color = dim(player_color, 94);
       }
       break;
     default: {
       if (game::state::GetPlayer() == blink::state::GetPlayer()) {
-        if (!blink::state::GetOrigin()) {
-          current_player_color = dim(current_player_color, 191);
-        } else {
-          renderSelected(current_player_color);
+        if (blink::state::GetOrigin()) {
+          renderSelected(player_color);
           return;
         }
       } else {
-        current_player_color = dim(current_player_color, 127);
+        player_color = dim(player_color, 94);
       }
       break;
     }
   }
 
-  setColor(current_player_color);
+  setColor(player_color);
 }
 
 }  // namespace play
