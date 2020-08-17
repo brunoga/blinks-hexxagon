@@ -45,7 +45,7 @@ void loop() {
     }
 
     // Switch our state to the computed one. This will be propagated to other
-    // nodes in case there was a change.
+    // Blinks in case there was a change.
     game::state::Set(state);
     game::state::SetSpecific(specific_state);
   }
