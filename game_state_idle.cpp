@@ -17,7 +17,7 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     blink::state::Reset();
   }
 
-  if (!buttonSingleClicked() || hasWoken()) return;
+  if (!buttonSingleClicked()) return;
 
   // Switch to setup state.
   *state = GAME_STATE_SETUP;

@@ -13,6 +13,11 @@ void loop() {
   // Process any pending game messages.
   game::message::Process();
 
+  if (hasWoken()) {
+    // We just woke up. Consume button click event so it will not
+    buttonSingleClicked();
+  }
+
   // Check escape hatch. Reset to idle state if button is long pressed.
   if (buttonLongPressed()) {
     game::state::Set(GAME_STATE_IDLE);
@@ -46,10 +51,4 @@ void loop() {
   }
 
   blink::state::Render(game::state::Get());
-
-  buttonSingleClicked();
-  buttonDoubleClicked();
-  buttonLongPressed();
-
-  hasWoken();
 }
