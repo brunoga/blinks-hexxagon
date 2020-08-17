@@ -14,7 +14,7 @@ namespace play {
 
 static bool auto_select_ = false;
 
-static void select_origin(byte* state, byte* specific_state) {
+static void select_origin(byte* specific_state) {
   // We are going to select an origin, so reset any blink that is currently one.
   blink::state::SetOrigin(false);
 
@@ -39,11 +39,9 @@ static void select_origin(byte* state, byte* specific_state) {
   // Indicate that an origin was selected. This will be automatically propagated
   // to all blinks.
   *specific_state = GAME_STATE_PLAY_ORIGIN_SELECTED;
-
-  (void)state;
 }
 
-static void origin_selected(byte* state, byte* specific_state) {
+static void origin_selected(byte* specific_state) {
   // Only the origin blink has anything to do here.
   if (!blink::state::GetOrigin()) return;
 
@@ -61,11 +59,9 @@ static void origin_selected(byte* state, byte* specific_state) {
 
   // We have at least one possible target.
   *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
-
-  (void)state;
 }
 
-static void select_target(byte* state, byte* specific_state) {
+static void select_target(byte* specific_state) {
   // We are going to select a target, so reset any blink that is currently one.
   blink::state::SetTarget(false);
 
@@ -99,11 +95,9 @@ static void select_target(byte* state, byte* specific_state) {
   blink::state::SetTarget(true);
 
   *specific_state = GAME_STATE_PLAY_TARGET_SELECTED;
-
-  (void)state;
 }
 
-static void target_selected(byte* state, byte* specific_state) {
+static void target_selected(byte* specific_state) {
   if (!blink::state::GetTarget() && !blink::state::GetOrigin() &&
       blink::state::GetTargetType() != BLINK_STATE_TARGET_TYPE_TARGET &&
       blink::state::GetPlayer() != game::state::GetPlayer()) {
@@ -146,8 +140,6 @@ static void target_selected(byte* state, byte* specific_state) {
 
     *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
   }
-
-  (void)state;
 }
 
 static bool neighboor_target() {
@@ -161,7 +153,7 @@ static bool neighboor_target() {
   return false;
 }
 
-static void confirm_move(byte* state, byte* specific_state) {
+static void confirm_move(byte* specific_state) {
   bool neighboor_is_target = neighboor_target();
 
   if (neighboor_is_target) {
@@ -185,8 +177,6 @@ static void confirm_move(byte* state, byte* specific_state) {
   if (!blink::state::GetArbitrator()) return;
 
   *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
-
-  (void)state;
 }
 
 static void move_confirmed(byte* state, byte* specific_state) {
@@ -249,19 +239,19 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 
   switch (*specific_state) {
     case GAME_STATE_PLAY_SELECT_ORIGIN:
-      select_origin(state, specific_state);
+      select_origin(specific_state);
       break;
     case GAME_STATE_PLAY_ORIGIN_SELECTED:
-      origin_selected(state, specific_state);
+      origin_selected(specific_state);
       break;
     case GAME_STATE_PLAY_SELECT_TARGET:
-      select_target(state, specific_state);
+      select_target(specific_state);
       break;
     case GAME_STATE_PLAY_TARGET_SELECTED:
-      target_selected(state, specific_state);
+      target_selected(specific_state);
       break;
     case GAME_STATE_PLAY_CONFIRM_MOVE:
-      confirm_move(state, specific_state);
+      confirm_move(specific_state);
       break;
     case GAME_STATE_PLAY_MOVE_CONFIRMED:
       move_confirmed(state, specific_state);
