@@ -17,13 +17,11 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     blink::state::Reset();
   }
 
-  if (buttonSingleClicked() && !hasWoken()) {
-    // Switch to setup state.
-    *state = GAME_STATE_SETUP;
-    *specific_state = 0;
+  if (!buttonSingleClicked() || hasWoken()) return;
 
-    return;
-  }
+  // Switch to setup state.
+  *state = GAME_STATE_SETUP;
+  *specific_state = 0;
 }
 
 }  // namespace idle

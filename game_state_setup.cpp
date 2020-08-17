@@ -42,9 +42,9 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     return;
   }
 
-  if (buttonSingleClicked() && !hasWoken()) {
-    blink::state::SetPlayer(game::player::GetNext(blink::state::GetPlayer()));
-  }
+  if (!buttonSingleClicked() || hasWoken()) return;
+
+  blink::state::SetPlayer(game::player::GetNext(blink::state::GetPlayer()));
 }
 
 }  // namespace setup
