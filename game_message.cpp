@@ -112,13 +112,11 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
       len = 4;
       break;
     case MESSAGE_GAME_STATE_CHANGE:
+    case MESSAGE_REPORT_WINNER:
       len = 1;
       break;
     case MESSAGE_CHECK_BOARD:
       len = 0;
-      break;
-    case MESSAGE_REPORT_WINNER:
-      len = 1;
       break;
   }
 
@@ -197,8 +195,6 @@ static bool sendOrWaitForReply(broadcast::Message* message,
 
         return true;
       }
-
-      break;
   }
 
   return false;
