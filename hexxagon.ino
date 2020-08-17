@@ -50,5 +50,6 @@ void loop() {
   buttonSingleClicked();
   buttonDoubleClicked();
   buttonLongPressed();
+
   hasWoken();
 }

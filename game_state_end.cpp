@@ -19,19 +19,12 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
   if (state_changed) {
     byte max_count = 0;
     for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
-      if (game::state::GetBlinkCount(i) > max_count) {
-        max_count = game::state::GetBlinkCount(i);
-      }
-    }
-
-    for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
-      if (game::state::GetBlinkCount(i) == max_count) {
-        if (winner_player_ != 0) {
-          winner_player_ = 0;
-          break;
-        }
-
+      byte player_count = GetBlinkCount(i);
+      if (player_count > max_count) {
+        max_count = player_count;
         winner_player_ = i;
+      } else if (player_count == max_count) {
+        winner_player_ = 0;
       }
     }
 
