@@ -6,6 +6,7 @@
 #include "game_state_idle.h"
 #include "game_state_play.h"
 #include "game_state_setup.h"
+#include "manager.h"
 
 void setup() { game::message::Setup(); }
 
@@ -23,7 +24,7 @@ void loop() {
     game::state::Set(GAME_STATE_IDLE);
   }
 
-  if (game::state::Propagate()) {
+  if (game::state::Propagate() && !broadcast::manager::Processing()) {
     // Cache current state and if we changed state since the previous iteration.
     byte state = game::state::Get();
     byte specific_state = game::state::GetSpecific();
@@ -51,4 +52,7 @@ void loop() {
   }
 
   blink::state::Render(game::state::Get());
+
+  buttonSingleClicked();
+  buttonDoubleClicked();
 }
