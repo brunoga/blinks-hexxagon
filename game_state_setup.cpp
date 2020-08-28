@@ -42,7 +42,7 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     return;
   }
 
-  if (!buttonSingleClicked()) return;
+  if (!buttonSingleClicked() || hasWoken()) return;
 
   blink::state::SetPlayer(game::player::GetNext(blink::state::GetPlayer()));
 }
