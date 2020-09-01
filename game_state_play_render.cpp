@@ -33,7 +33,7 @@ void Render() {
           render::animation::WhiteSpinner(player_color);
           return;
         } else {
-          render::animation::Pulse(player_color);
+          render::animation::Pulse(player_color, 128, 5);
           return;
         }
       } else {
