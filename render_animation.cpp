@@ -7,7 +7,7 @@ namespace animation {
 static Timer timer_;
 static bool reverse_ = true;
 
-void Pulsate(const Color& base_color) {
+void Pulse(const Color& base_color) {
   if (timer_.isExpired()) {
     reverse_ = !reverse_;
     timer_.set(128 * 10);
