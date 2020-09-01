@@ -61,7 +61,11 @@ static void set_payload_for_face(byte* payload, byte f) {
 static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
                                 bool loop) {
   (void)src_face;
-  (void)loop;
+
+  if (loop) {
+    // Ignore loops.
+    return;
+  }
 
   blink::state::SetColorOverride(true);
 
