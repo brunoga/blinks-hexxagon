@@ -14,6 +14,9 @@ namespace end {
 static byte winner_player_;
 
 void Handler(bool state_changed, byte* state, byte* specific_state) {
+  (void)specific_state;
+  (void)state;
+
   if (!blink::state::GetArbitrator()) return;
 
   if (state_changed) {
