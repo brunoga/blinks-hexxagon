@@ -58,8 +58,12 @@ static void set_payload_for_face(byte* payload, byte f) {
   payload[PAYLOAD_FACE] = f;
 }
 
-static void rcv_message_handler(byte message_id, byte* payload) {
-  // blink::state::SetColorOverride(true);
+static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
+                                bool loop) {
+  (void)src_face;
+  (void)loop;
+
+  blink::state::SetColorOverride(true);
 
   switch (message_id) {
     case MESSAGE_GAME_STATE_CHANGE:
@@ -86,7 +90,7 @@ static void rcv_message_handler(byte message_id, byte* payload) {
 
 static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
                                 byte* payload) {
-  // blink::state::SetColorOverride(true);
+  (void)src_face;
 
   byte len = MESSAGE_PAYLOAD_BYTES;
 
@@ -126,8 +130,9 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
 static game::state::BlinkCount blink_count_;
 static byte upstream_target_;
 
-static void rcv_reply_handler(byte message_id, const byte* payload) {
-  // blink::state::SetColorOverride(false);
+static void rcv_reply_handler(byte message_id, byte src_face,
+                              const byte* payload) {
+  (void)src_face;
 
   switch (message_id) {
     case MESSAGE_CHECK_BOARD:
@@ -144,8 +149,10 @@ static void rcv_reply_handler(byte message_id, const byte* payload) {
   }
 }
 
-static byte fwd_reply_handler(byte message_id, byte* payload) {
-  // blink::state::SetColorOverride(false);
+static byte fwd_reply_handler(byte message_id, byte dst_face, byte* payload) {
+  (void)dst_face;
+
+  blink::state::SetColorOverride(false);
 
   byte len = MESSAGE_PAYLOAD_BYTES;
 
