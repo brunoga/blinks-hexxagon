@@ -67,8 +67,6 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
     return;
   }
 
-  blink::state::SetColorOverride(true);
-
   switch (message_id) {
     case MESSAGE_GAME_STATE_CHANGE:
       GameStateChangeData data;
@@ -88,6 +86,9 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
       break;
     case MESSAGE_REPORT_WINNER:
       blink::state::SetPlayer(payload[0]);
+      break;
+    case MESSAGE_FLASH:
+      blink::state::StartColorOverride();
       break;
   }
 }
@@ -124,6 +125,7 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
       len = 1;
       break;
     case MESSAGE_CHECK_BOARD:
+    case MESSAGE_FLASH:
       len = 0;
       break;
   }
@@ -155,8 +157,6 @@ static void rcv_reply_handler(byte message_id, byte src_face,
 
 static byte fwd_reply_handler(byte message_id, byte dst_face, byte* payload) {
   (void)dst_face;
-
-  blink::state::SetColorOverride(false);
 
   byte len = MESSAGE_PAYLOAD_BYTES;
 
@@ -196,6 +196,10 @@ static bool sendOrWaitForReply(broadcast::Message* message,
   switch (message_state_) {
     case MESSAGE_STATE_SEND_MESSAGE:
       if (broadcast::manager::Send(message)) {
+        if (message->header.is_fire_and_forget) {
+          return true;
+        }
+
         message_state_ = MESSAGE_STATE_WAIT_FOR_RESULT;
       }
 
@@ -243,13 +247,23 @@ bool SendGameStatePlayFindTargets(broadcast::Message* reply) {
   return sendOrWaitForReply(MESSAGE_GAME_STATE_PLAY_FIND_TARGETS, reply);
 }
 
-bool SendReportWinner(byte winner_player) {
+void SendReportWinner(byte winner_player) {
   broadcast::Message message;
 
-  broadcast::message::Initialize(&message, MESSAGE_REPORT_WINNER, false);
+  broadcast::message::Initialize(&message, MESSAGE_REPORT_WINNER, true);
   message.payload[0] = winner_player;
 
-  return sendOrWaitForReply(&message, nullptr);
+  sendOrWaitForReply(&message, nullptr);
+}
+
+void SendFlash() {
+  broadcast::Message message;
+
+  broadcast::message::Initialize(&message, MESSAGE_FLASH, true);
+
+  if (sendOrWaitForReply(&message, nullptr)) {
+    blink::state::StartColorOverride();
+  }
 }
 
 }  // namespace message

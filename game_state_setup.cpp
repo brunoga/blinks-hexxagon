@@ -30,9 +30,9 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     checking_board_ = false;
 
     if (result == GAME_STATE_UPDATE_BOARD_STATE_ERROR) {
-      // Board is in an invalid state.
-      //
-      // TODO(bga): Add some visual feedback to indicate something is wrong.
+      // Tell all Blinks to flash.
+      game::message::SendFlash();
+
       return;
     }
 

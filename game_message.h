@@ -10,6 +10,7 @@
 #define MESSAGE_CHECK_BOARD 1
 #define MESSAGE_GAME_STATE_PLAY_FIND_TARGETS 2
 #define MESSAGE_REPORT_WINNER 3
+#define MESSAGE_FLASH 4
 
 namespace game {
 
@@ -39,7 +40,9 @@ bool SendCheckBoard(broadcast::Message* reply);
 bool SendGameStatePlayFindTargets(broadcast::Message* reply);
 
 // Indices message: 0 = winner player (0 if tie).
-bool SendReportWinner(byte winner_player);
+void SendReportWinner(byte winner_player);
+
+void SendFlash();
 
 }  // namespace message
 

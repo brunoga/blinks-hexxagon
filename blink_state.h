@@ -34,7 +34,7 @@ byte GetTargetType();
 void SetPlayer(byte player);
 byte GetPlayer();
 
-void SetColorOverride(bool color_override);
+void StartColorOverride();
 bool GetColorOverride();
 
 void Reset();

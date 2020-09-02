@@ -18,10 +18,11 @@ struct BlinkState {
   bool target : 1;
   byte player : 3;
   byte target_type : 1;
-  bool color_override : 1;
-  byte unused : 1;
+  byte unused : 2;
 };
 static BlinkState state_;
+
+static Timer color_override_timer_;
 
 void SetOrigin(bool origin) { state_.origin = origin; }
 bool GetOrigin() { return state_.origin; }
@@ -35,17 +36,15 @@ byte GetTargetType() { return state_.target_type; }
 void SetPlayer(byte player) { state_.player = player; }
 byte GetPlayer() { return state_.player; }
 
-void SetColorOverride(bool color_override) {
-  state_.color_override = color_override;
-}
-bool GetColorOverride() { return state_.color_override; }
+void StartColorOverride() { color_override_timer_.set(200); }
+
+bool GetColorOverride() { return !color_override_timer_.isExpired(); }
 
 void Reset() {
   state_.origin = false;
   state_.target = false;
   state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
   state_.player = 0;
-  state_.color_override = false;
 }
 
 void Render(byte game_state) {

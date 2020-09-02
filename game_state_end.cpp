@@ -34,8 +34,9 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     blink::state::SetPlayer(winner_player_);
   }
 
-  if (!game::message::SendReportWinner(winner_player_)) return;
+  game::message::SendReportWinner(winner_player_);
 
+  // Make sure we will not just continue sending messages.
   blink::state::SetTarget(false);
 }
 
