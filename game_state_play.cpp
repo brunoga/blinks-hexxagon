@@ -36,8 +36,7 @@ static void select_origin(byte* specific_state) {
   // Ok, we are now the origin.
   blink::state::SetOrigin(true);
 
-  // Indicate that an origin was selected. This will be automatically propagated
-  // to all blinks.
+  // Indicate that an origin was selected.
   *specific_state = GAME_STATE_PLAY_ORIGIN_SELECTED;
 }
 
@@ -68,7 +67,7 @@ static void select_target(byte* specific_state) {
   // If this blink is the origin, there is nothing for it to do at this stage.
   if (blink::state::GetOrigin()) return;
 
-  // If we are not a possible target or a blink that belongs to the current
+  // If we are not a possible target or a Blink that belongs to the current
   // player, then there is also nothing to do.
   if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE &&
       blink::state::GetPlayer() != game::state::GetPlayer()) {
@@ -76,7 +75,7 @@ static void select_target(byte* specific_state) {
   }
 
   // We pass all checks, but we do nothing until we get a click or auto
-  // selection is enabled for this blink.
+  // selection is enabled.
   if ((!buttonSingleClicked() || hasWoken()) && !auto_select_) return;
 
   auto_select_ = false;
@@ -116,7 +115,7 @@ static void target_selected(byte* specific_state) {
     return;
   }
 
-  // Origin was clicked. Deselect current selected target.
+  // Origin was clicked. Deselect currently selected target.
   if (blink::state::GetOrigin()) {
     *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
 
@@ -152,9 +151,7 @@ static bool neighboor_target() {
 }
 
 static void confirm_move(byte* specific_state) {
-  bool neighboor_is_target = neighboor_target();
-
-  if (neighboor_is_target) {
+  if (neighboor_target()) {
     if (blink::state::GetPlayer() != 0 &&
         blink::state::GetPlayer() != game::state::GetPlayer()) {
       // Target is our neighboor and it is a different player from ourselves. We
@@ -178,16 +175,6 @@ static void confirm_move(byte* specific_state) {
 }
 
 static void move_confirmed(byte* state, byte* specific_state) {
-  // Now it is ok to clear the target flag.
-  if (blink::state::GetTarget()) {
-    // We are the target. Become a player blink.
-    //
-    // TODO(bga): We do not remove the target flags in confirm_move above so it
-    // will still be present when we are reading the face value in a origin
-    // neighboor blink. There is most likelly a better way to do this.
-    blink::state::SetPlayer(game::state::GetPlayer());
-  }
-
   if (!blink::state::GetTarget()) return;
 
   byte result = game::state::UpdateBoardState();
