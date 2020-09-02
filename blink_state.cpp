@@ -18,7 +18,8 @@ struct BlinkState {
   bool target : 1;
   byte player : 3;
   byte target_type : 1;
-  byte unused : 2;
+  bool takeover : 1;
+  byte unused : 1;
 };
 static BlinkState state_;
 
@@ -36,6 +37,9 @@ byte GetTargetType() { return state_.target_type; }
 void SetPlayer(byte player) { state_.player = player; }
 byte GetPlayer() { return state_.player; }
 
+void SetTakeover(bool takeover) { state_.takeover = takeover; }
+bool GetTakeover() { return state_.takeover; }
+
 void __attribute__((noinline)) StartColorOverride() {
   color_override_timer_.set(200);
 }
@@ -46,6 +50,7 @@ void Reset() {
   state_.origin = false;
   state_.target = false;
   state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
+  state_.takeover = false;
   state_.player = 0;
 }
 
