@@ -20,8 +20,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
   if (!blink::state::GetTarget()) return;
 
   if (state_changed) {
-    blink::state::StartColorOverride();
-
     // Tell all Blinks to flash. Should be ok to ignore the return value here.
     // TODO(bga): Make sure it is or fix this.
     game::message::SendFlash();

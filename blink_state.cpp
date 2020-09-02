@@ -36,7 +36,9 @@ byte GetTargetType() { return state_.target_type; }
 void SetPlayer(byte player) { state_.player = player; }
 byte GetPlayer() { return state_.player; }
 
-void StartColorOverride() { color_override_timer_.set(200); }
+void __attribute__((noinline)) StartColorOverride() {
+  color_override_timer_.set(200);
+}
 
 bool GetColorOverride() { return !color_override_timer_.isExpired(); }
 
