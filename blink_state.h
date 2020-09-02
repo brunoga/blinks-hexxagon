@@ -34,9 +34,6 @@ byte GetTargetType();
 void SetPlayer(byte player);
 byte GetPlayer();
 
-void SetArbitrator(bool arbitrator);
-bool GetArbitrator();
-
 void SetColorOverride(bool color_override);
 bool GetColorOverride();
 

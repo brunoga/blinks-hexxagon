@@ -18,8 +18,7 @@ struct BlinkState {
   bool target : 1;
   byte player : 3;
   byte target_type : 1;
-  bool arbitrator : 1;
-  bool unused : 1;
+  byte unused : 2;
 };
 static BlinkState state_;
 
@@ -37,9 +36,6 @@ byte GetTargetType() { return state_.target_type; }
 void SetPlayer(byte player) { state_.player = player; }
 byte GetPlayer() { return state_.player; }
 
-void SetArbitrator(bool arbitrator) { state_.arbitrator = arbitrator; }
-bool GetArbitrator() { return state_.arbitrator; }
-
 void SetColorOverride(bool color_override) { color_override_ = color_override; }
 bool GetColorOverride() { return color_override_; }
 
@@ -48,8 +44,6 @@ void Reset() {
   state_.target = false;
   state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
   state_.player = 0;
-  state_.arbitrator = false;
-  state_.unused = 0;
 }
 
 void Render(byte game_state) {

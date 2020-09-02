@@ -111,8 +111,6 @@ static void target_selected(byte* specific_state) {
 
   // Button was clicked and we are the selected target. Confirmn move.
   if (blink::state::GetTarget()) {
-    blink::state::SetArbitrator(true);
-
     *specific_state = GAME_STATE_PLAY_CONFIRM_MOVE;
 
     return;
@@ -174,7 +172,7 @@ static void confirm_move(byte* specific_state) {
   // Clear target type for everybody.
   blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
 
-  if (!blink::state::GetArbitrator()) return;
+  if (!blink::state::GetTarget()) return;
 
   *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
 }
@@ -188,10 +186,9 @@ static void move_confirmed(byte* state, byte* specific_state) {
     // will still be present when we are reading the face value in a origin
     // neighboor blink. There is most likelly a better way to do this.
     blink::state::SetPlayer(game::state::GetPlayer());
-    blink::state::SetTarget(false);
   }
 
-  if (!blink::state::GetArbitrator()) return;
+  if (!blink::state::GetTarget()) return;
 
   byte result = game::state::UpdateBoardState();
 
@@ -205,7 +202,7 @@ static void move_confirmed(byte* state, byte* specific_state) {
     return;
   }
 
-  blink::state::SetArbitrator(false);
+  blink::state::SetTarget(false);
 
   // Move to next turn.
   game::state::NextPlayer();

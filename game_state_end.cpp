@@ -17,7 +17,7 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
   (void)specific_state;
   (void)state;
 
-  if (!blink::state::GetArbitrator()) return;
+  if (!blink::state::GetTarget()) return;
 
   if (state_changed) {
     byte max_count = 0;
@@ -36,7 +36,7 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 
   if (!game::message::SendReportWinner(winner_player_)) return;
 
-  blink::state::SetArbitrator(false);
+  blink::state::SetTarget(false);
 }
 
 }  // namespace end
