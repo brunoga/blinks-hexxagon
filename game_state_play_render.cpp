@@ -36,6 +36,13 @@ void Render() {
           render::animation::Pulse(player_color, 128, 5);
           return;
         }
+      } else if (blink::state::GetTakeover()) {
+        if (render::animation::Takeover(
+                player_color,
+                game::player::GetColor(game::state::GetPlayer()))) {
+          blink::state::SetTakeover(false);
+        }
+        return;
       } else {
         player_color = dim(player_color, 94);
       }
