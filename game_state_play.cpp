@@ -171,6 +171,9 @@ static void confirm_move(byte* specific_state) {
 
   if (!blink::state::GetTarget()) return;
 
+  // We are the target, so we are now owned by the current player.
+  blink::state::SetPlayer(game::state::GetPlayer());
+
   *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
 }
 
@@ -188,8 +191,6 @@ static void move_confirmed(byte* state, byte* specific_state) {
 
     return;
   }
-
-  blink::state::SetTarget(false);
 
   // Move to next turn.
   game::state::NextPlayer();
