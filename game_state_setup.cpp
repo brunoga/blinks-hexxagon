@@ -30,7 +30,8 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     checking_board_ = false;
 
     if (result == GAME_STATE_UPDATE_BOARD_STATE_ERROR) {
-      // Tell all Blinks to flash.
+      // Tell all Blinks to flash. Should be ok to ignore the return value here.
+      // TODO(bga): Make sure it is or fix this.
       game::message::SendFlash();
 
       return;

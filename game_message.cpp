@@ -232,7 +232,7 @@ void Process() { broadcast::manager::Process(); }
 bool SendGameStateChange(byte payload) {
   broadcast::Message message;
 
-  broadcast::message::Initialize(&message, MESSAGE_GAME_STATE_CHANGE, false);
+  broadcast::message::Initialize(&message, MESSAGE_GAME_STATE_CHANGE, true);
 
   message.payload[0] = payload;
 
@@ -247,23 +247,27 @@ bool SendGameStatePlayFindTargets(broadcast::Message* reply) {
   return sendOrWaitForReply(MESSAGE_GAME_STATE_PLAY_FIND_TARGETS, reply);
 }
 
-void SendReportWinner(byte winner_player) {
+bool SendReportWinner(byte winner_player) {
   broadcast::Message message;
 
   broadcast::message::Initialize(&message, MESSAGE_REPORT_WINNER, true);
   message.payload[0] = winner_player;
 
-  sendOrWaitForReply(&message, nullptr);
+  return sendOrWaitForReply(&message, nullptr);
 }
 
-void SendFlash() {
+bool SendFlash() {
   broadcast::Message message;
 
   broadcast::message::Initialize(&message, MESSAGE_FLASH, true);
 
   if (sendOrWaitForReply(&message, nullptr)) {
     blink::state::StartColorOverride();
+
+    return true;
   }
+
+  return false;
 }
 
 }  // namespace message

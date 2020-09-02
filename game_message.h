@@ -40,9 +40,9 @@ bool SendCheckBoard(broadcast::Message* reply);
 bool SendGameStatePlayFindTargets(broadcast::Message* reply);
 
 // Indices message: 0 = winner player (0 if tie).
-void SendReportWinner(byte winner_player);
+bool SendReportWinner(byte winner_player);
 
-void SendFlash();
+bool SendFlash();
 
 }  // namespace message
 
