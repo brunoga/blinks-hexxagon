@@ -139,19 +139,29 @@ static void target_selected(byte* specific_state) {
   }
 }
 
-static bool neighboor_target() {
+#define NEIGHBOOR_TYPE_TARGET 0
+#define NEIGHBOOR_TYPE_ENEMY 1
+
+static bool neighboor_type(byte neighboor_type) {
   FOREACH_FACE(f) {
     blink::state::FaceValue face_value;
     face_value.value = getLastValueReceivedOnFace(f);
 
-    if (face_value.target) return true;
+    if ((neighboor_type == NEIGHBOOR_TYPE_TARGET) && face_value.target) {
+      return true;
+    }
+
+    if ((neighboor_type == NEIGHBOOR_TYPE_ENEMY) && face_value.target &&
+        (face_value.player != blink::state::GetPlayer())) {
+      return true;
+    }
   }
 
   return false;
 }
 
 static void confirm_move(byte* specific_state) {
-  if (neighboor_target()) {
+  if (neighboor_type(NEIGHBOOR_TYPE_TARGET)) {
     if (blink::state::GetPlayer() != 0 &&
         blink::state::GetPlayer() != game::state::GetPlayer()) {
       // Target is our neighboor and it is a different player from ourselves. We
