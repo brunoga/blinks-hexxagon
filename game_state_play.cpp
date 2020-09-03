@@ -183,6 +183,9 @@ static void confirm_move(byte* specific_state) {
     }
   }
 
+  // Reset origin so the spinning animation stops.
+  blink::state::SetOrigin(false);
+
   // Clear target type for everybody.
   blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
 
