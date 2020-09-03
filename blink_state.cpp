@@ -34,7 +34,9 @@ bool GetTarget() { return state_.target; }
 void SetTargetType(byte target_type) { state_.target_type = target_type; }
 byte GetTargetType() { return state_.target_type; }
 
-void SetPlayer(byte player) { state_.player = player; }
+void __attribute__((noinline)) SetPlayer(byte player) {
+  state_.player = player;
+}
 byte GetPlayer() { return state_.player; }
 
 void SetTakeover(bool takeover) { state_.takeover = takeover; }
