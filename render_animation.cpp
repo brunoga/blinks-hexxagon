@@ -34,12 +34,14 @@ void WhiteSpinner(const Color& base_color) {
 
 static bool takeover_animation_started_ = false;
 
-#define RENDER_ANIMATION_TAKEOVER_MS 1000
+#define RENDER_ANIMATION_TAKEOVER_MS 500
 
-static byte compute_color_component(byte start,
-                                    const millis_t& remaining_time_ms) {
-  return start + (((255 - start) / RENDER_ANIMATION_TAKEOVER_MS) *
-                  (RENDER_ANIMATION_TAKEOVER_MS - remaining_time_ms));
+static byte __attribute__((noinline)) compute_color_component(byte start) {
+  return start + (((255 - start) *
+                   (((RENDER_ANIMATION_TAKEOVER_MS - timer_.getRemaining()) *
+                     RENDER_ANIMATION_TAKEOVER_MS) /
+                    RENDER_ANIMATION_TAKEOVER_MS)) /
+                  RENDER_ANIMATION_TAKEOVER_MS);
 }
 
 bool Takeover(const Color& start, const Color& end) {
@@ -55,11 +57,9 @@ bool Takeover(const Color& start, const Color& end) {
     timer_.set(RENDER_ANIMATION_TAKEOVER_MS);
   }
 
-  millis_t remaining = timer_.getRemaining();
-
-  byte r = compute_color_component(start.r, remaining);
-  byte g = compute_color_component(start.g, remaining);
-  byte b = compute_color_component(start.b, remaining);
+  byte r = compute_color_component(start.r);
+  byte g = compute_color_component(start.g);
+  byte b = compute_color_component(start.b);
 
   setColor(makeColorRGB(r, g, b));
 
