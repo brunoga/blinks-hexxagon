@@ -45,7 +45,7 @@ byte GetSpecific() { return specific_state_.current; }
 
 void SetPlayer(byte player) { state_.player = player; }
 
-byte GetPlayer() { return state_.player; }
+byte __attribute__((noinline)) GetPlayer() { return state_.player; }
 
 void NextPlayer() {
   byte current_player = GetPlayer();
