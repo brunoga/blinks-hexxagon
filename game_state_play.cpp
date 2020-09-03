@@ -50,7 +50,14 @@ static void origin_selected(byte* specific_state) {
 
   // Did we find any targets?
   if (reply.payload[0] == 0) {
-    // Nope. Reset to selecting an origin (hoppefully a different one).
+    // Nope. Notify the player and reset to selecting an origin (hoppefully a
+    // different one).
+    //
+    // Should be ok to not check the return value here as we know we just
+    // received the reply for the find targets message so there can not be any
+    // message pending to be delivered and send will succeed.
+    game::message::SendFlash();
+
     *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
 
     return;
