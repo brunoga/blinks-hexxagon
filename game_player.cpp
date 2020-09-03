@@ -12,7 +12,9 @@ byte GetNext(byte current_player) {
   return next_player > GAME_PLAYER_MAX_PLAYERS ? 0 : next_player;
 }
 
-Color GetColor(byte player) { return colors_[player]; }
+Color __attribute__((noinline)) GetColor(byte player) {
+  return colors_[player];
+}
 
 }  // namespace player
 
