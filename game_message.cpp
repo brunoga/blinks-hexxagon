@@ -232,7 +232,10 @@ void Process() { broadcast::manager::Process(); }
 bool SendGameStateChange(byte payload) {
   broadcast::Message message;
 
-  broadcast::message::Initialize(&message, MESSAGE_GAME_STATE_CHANGE, true);
+  bool fire_and_forget = game::state::Get() == GAME_STATE_IDLE;
+
+  broadcast::message::Initialize(&message, MESSAGE_GAME_STATE_CHANGE,
+                                 fire_and_forget);
 
   message.payload[0] = payload;
 
