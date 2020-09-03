@@ -40,6 +40,7 @@ void Render() {
         if (render::animation::Takeover(
                 player_color,
                 game::player::GetColor(game::state::GetPlayer()))) {
+          blink::state::SetPlayer(game::state::GetPlayer());
           blink::state::SetTakeover(false);
         }
         return;

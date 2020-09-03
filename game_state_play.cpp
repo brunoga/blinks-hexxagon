@@ -158,7 +158,8 @@ static bool neighboor_type(byte neighboor_type) {
       return true;
     }
 
-    if ((neighboor_type == NEIGHBOOR_TYPE_ENEMY) && face_value.target &&
+    if ((neighboor_type == NEIGHBOOR_TYPE_ENEMY) && (face_value.player != 0) &&
+        (blink::state::GetPlayer() != 0) &&
         (face_value.player != blink::state::GetPlayer())) {
       return true;
     }
@@ -173,7 +174,8 @@ static void confirm_move(byte* specific_state) {
         blink::state::GetPlayer() != game::state::GetPlayer()) {
       // Target is our neighboor and it is a different player from ourselves. We
       // now become that player too.
-      blink::state::SetPlayer(game::state::GetPlayer());
+      // blink::state::SetPlayer(game::state::GetPlayer());
+      blink::state::SetTakeover(true);
     }
   } else {
     if (blink::state::GetOrigin()) {
@@ -193,6 +195,8 @@ static void confirm_move(byte* specific_state) {
 
   // We are the target, so we are now owned by the current player.
   blink::state::SetPlayer(game::state::GetPlayer());
+
+  if (neighboor_type(NEIGHBOOR_TYPE_ENEMY)) return;
 
   *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
 }

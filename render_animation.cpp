@@ -34,6 +34,14 @@ void WhiteSpinner(const Color& base_color) {
 
 static bool takeover_animation_started_ = false;
 
+#define RENDER_ANIMATION_TAKEOVER_MS 1000
+
+static byte compute_color_component(byte start,
+                                    const millis_t& remaining_time_ms) {
+  return start + (((255 - start) / RENDER_ANIMATION_TAKEOVER_MS) *
+                  (RENDER_ANIMATION_TAKEOVER_MS - remaining_time_ms));
+}
+
 bool Takeover(const Color& start, const Color& end) {
   if (timer_.isExpired()) {
     if (takeover_animation_started_) {
@@ -44,19 +52,16 @@ bool Takeover(const Color& start, const Color& end) {
       takeover_animation_started_ = true;
     }
 
-    timer_.set(1000);
+    timer_.set(RENDER_ANIMATION_TAKEOVER_MS);
   }
 
-  // TODO(bga): Actually animate this. It should look like an explosion going
-  // from the start color to the end one passing through white. The current
-  // implementation is just for testing.
-  if (timer_.getRemaining() < 450) {
-    setColor(start);
-  } else if (timer_.getRemaining() < 550) {
-    setColor(WHITE);
-  } else {
-    setColor(end);
-  }
+  millis_t remaining = timer_.getRemaining();
+
+  byte r = compute_color_component(start.r, remaining);
+  byte g = compute_color_component(start.g, remaining);
+  byte b = compute_color_component(start.b, remaining);
+
+  setColor(makeColorRGB(r, g, b));
 
   return false;
 }
