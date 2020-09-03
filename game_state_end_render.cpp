@@ -2,6 +2,7 @@
 
 #include "blink_state.h"
 #include "game_player.h"
+#include "render_animation.h"
 
 namespace game {
 
@@ -10,9 +11,8 @@ namespace state {
 namespace end {
 
 void Render() {
-  Color player_color = game::player::GetColor(blink::state::GetPlayer());
-
-  setColor(player_color);
+  render::animation::Pulse(game::player::GetColor(blink::state::GetPlayer()),
+                           128, 5);
 }
 
 }  // namespace end
