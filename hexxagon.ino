@@ -25,11 +25,6 @@ void loop() {
     byte specific_state = game::state::GetSpecific();
     bool state_changed = game::state::Changed(false);
 
-    if (state_changed) {
-      buttonSingleClicked();
-      buttonDoubleClicked();
-    }
-
     // Run our state machine.
     switch (state) {
       case GAME_STATE_IDLE:
@@ -49,6 +44,11 @@ void loop() {
     // Blinks in case there was a change.
     game::state::Set(state);
     game::state::SetSpecific(specific_state);
+
+    if (game::state::Changed()) {
+      buttonSingleClicked();
+      buttonDoubleClicked();
+    }
   }
 
   blink::state::Render(game::state::Get());
