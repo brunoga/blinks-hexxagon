@@ -25,6 +25,11 @@ void loop() {
     byte specific_state = game::state::GetSpecific();
     bool state_changed = game::state::Changed(false);
 
+    if (state_changed) {
+      buttonSingleClicked();
+      buttonDoubleClicked();
+    }
+
     // Run our state machine.
     switch (state) {
       case GAME_STATE_IDLE:
