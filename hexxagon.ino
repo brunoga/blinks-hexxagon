@@ -14,6 +14,10 @@ void setup() { game::message::Setup(); }
 void loop() {
   if (isAlone()) {
     render::animation::Pulse(WHITE, 255, 2);
+
+    buttonSingleClicked();
+    buttonDoubleClicked();
+
     return;
   }
 
