@@ -103,7 +103,7 @@ void Reset() {
   SetBlinkCount(nullptr);
 }
 
-bool Changed(bool include_specific) {
+bool __attribute__((noinline)) Changed(bool include_specific) {
   return include_specific
              ? state_.current != state_.previous ||
                    specific_state_.current != specific_state_.previous
