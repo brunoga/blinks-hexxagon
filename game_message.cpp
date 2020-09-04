@@ -24,6 +24,8 @@ namespace game {
 
 namespace message {
 
+static const byte opposite_face_[] = {3, 4, 5, 0, 1, 2};
+
 static byte message_state_ = MESSAGE_STATE_SEND_MESSAGE;
 
 static byte abs(int8_t i) { return i < 0 ? -i : i; }
@@ -108,7 +110,7 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
       } else {
         // The input face is the face opposite to the face the message was sent
         // to.
-        byte input_face = ((payload[3] + FACE_COUNT / 2) % FACE_COUNT);
+        byte input_face = opposite_face_[payload[3]];
 
         // The output face is the normalized face in relation to the input face.
         byte output_face =
