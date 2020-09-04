@@ -7,10 +7,16 @@
 #include "game_state_play.h"
 #include "game_state_setup.h"
 #include "manager.h"
+#include "render_animation.h"
 
 void setup() { game::message::Setup(); }
 
 void loop() {
+  if (isAlone()) {
+    render::animation::Pulse(WHITE, 255, 2);
+    return;
+  }
+
   // Process any pending game messages.
   game::message::Process();
 
