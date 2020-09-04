@@ -37,9 +37,7 @@ void Render() {
           return;
         }
       } else if (blink::state::GetTakeover()) {
-        if (render::animation::Takeover(
-                player_color,
-                game::player::GetColor(game::state::GetPlayer()))) {
+        if (render::animation::Takeover(player_color)) {
           blink::state::SetPlayer(game::state::GetPlayer());
           blink::state::SetTakeover(false);
         }

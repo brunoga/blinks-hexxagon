@@ -44,7 +44,7 @@ static byte __attribute__((noinline)) compute_color_component(byte start) {
                   RENDER_ANIMATION_TAKEOVER_MS);
 }
 
-bool Takeover(const Color& start, const Color& end) {
+bool Takeover(const Color& base_color) {
   if (timer_.isExpired()) {
     if (takeover_animation_started_) {
       takeover_animation_started_ = false;
@@ -57,9 +57,9 @@ bool Takeover(const Color& start, const Color& end) {
     timer_.set(RENDER_ANIMATION_TAKEOVER_MS);
   }
 
-  byte r = compute_color_component(start.r);
-  byte g = compute_color_component(start.g);
-  byte b = compute_color_component(start.b);
+  byte r = compute_color_component(base_color.r);
+  byte g = compute_color_component(base_color.g);
+  byte b = compute_color_component(base_color.b);
 
   setColor(makeColorRGB(r, g, b));
 
