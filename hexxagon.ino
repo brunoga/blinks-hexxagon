@@ -47,6 +47,4 @@ void loop() {
   }
 
   blink::state::Render(game::state::Get());
-
-  buttonSingleClicked();
 }
