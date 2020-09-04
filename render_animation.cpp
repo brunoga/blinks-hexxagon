@@ -34,7 +34,7 @@ void WhiteSpinner(const Color& base_color) {
 
 static bool takeover_animation_started_ = false;
 
-#define RENDER_ANIMATION_TAKEOVER_MS 500
+#define RENDER_ANIMATION_TAKEOVER_MS 800
 
 static byte __attribute__((noinline)) compute_color_component(byte start) {
   return start + (((255 - start) *
