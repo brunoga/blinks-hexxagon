@@ -39,11 +39,16 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 
   sent_flash_ = true;
 
+  // We need to do this because there might be a draw and, in this case, the
+  // "winner player" is the empty Blink. If we do not switch, we would still
+  // display the color of the last player to move.
+  blink::state::SetPlayer(winner_player_);
+
   if (!game::message::SendReportWinner(winner_player_)) return;
 
   // Make sure we will not just continue sending messages.
   blink::state::SetTarget(false);
-}  // namespace end
+}
 
 }  // namespace end
 
