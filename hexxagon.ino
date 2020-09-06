@@ -21,7 +21,7 @@ void loop() {
       game::state::Set(GAME_STATE_IDLE);
     }
 
-    if (game::state::Propagate() && !broadcast::manager::Processing()) {
+    if (game::state::Propagate()) {
       // Cache current state and if we changed state since the previous
       // iteration.
       byte state = game::state::Get();
