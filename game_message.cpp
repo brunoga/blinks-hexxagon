@@ -184,10 +184,6 @@ static byte fwd_reply_handler(byte message_id, byte dst_face, byte* payload) {
 
       len = 1;
       break;
-    case MESSAGE_GAME_STATE_CHANGE:
-    case MESSAGE_REPORT_WINNER:
-      len = 0;
-      break;
   }
 
   return len;
