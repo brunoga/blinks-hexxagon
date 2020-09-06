@@ -227,7 +227,7 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     *state = GAME_STATE_PLAY;
     *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
 
-    game::state::SetPlayer(1);
+    game::state::NextPlayer();
 
     return;
   }
