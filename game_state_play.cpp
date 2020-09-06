@@ -224,12 +224,8 @@ static void move_confirmed(byte* state, byte* specific_state) {
 
 void Handler(bool state_changed, byte* state, byte* specific_state) {
   if (state_changed) {
-    *state = GAME_STATE_PLAY;
+    // Make sure we are at our initial specific state.
     *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
-
-    game::state::NextPlayer();
-
-    return;
   }
 
   if (*specific_state == GAME_STATE_PLAY_PASS_TURN) {

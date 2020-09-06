@@ -37,6 +37,9 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       return;
     }
 
+    // Swithc to first available player.
+    game::state::NextPlayer();
+
     *state = GAME_STATE_PLAY;
     *specific_state = 0;
 
