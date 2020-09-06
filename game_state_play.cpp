@@ -172,10 +172,8 @@ static void confirm_move(byte* specific_state) {
   if (search_neighbor_type(NEIGHBOR_TYPE_TARGET)) {
     if (blink::state::GetPlayer() != 0 &&
         blink::state::GetPlayer() != game::state::GetPlayer()) {
-      // Target is our neighboor and it is a different player from ourselves. We
-      // now become that player too.
-      // blink::state::SetPlayer(game::state::GetPlayer());
-      blink::state::SetTakeover(true);
+      // We are being conquered, trigger explosion animation.
+      blink::state::SetExploding(true);
     }
   } else {
     if (blink::state::GetOrigin()) {

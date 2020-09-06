@@ -36,10 +36,11 @@ void Render() {
           render::animation::Pulse(player_color, 128, 5);
           return;
         }
-      } else if (blink::state::GetTakeover()) {
-        if (render::animation::Takeover(player_color)) {
+      } else if (blink::state::GetExploding()) {
+        if (render::animation::Explosion(player_color)) {
+          // TODO(bga): We should call SetPlayer() outside of the render code.
           blink::state::SetPlayer(game::state::GetPlayer());
-          blink::state::SetTakeover(false);
+          blink::state::SetExploding(false);
         }
         return;
       } else {

@@ -34,8 +34,8 @@ byte GetTargetType();
 void SetPlayer(byte player);
 byte GetPlayer();
 
-void SetTakeover(bool takeovert);
-bool GetTakeover();
+void SetExploding(bool takeovert);
+bool GetExploding();
 
 void StartColorOverride();
 bool GetColorOverride();
