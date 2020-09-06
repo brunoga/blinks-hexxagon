@@ -6,6 +6,9 @@
 #include "game_state.h"
 #include "message.h"
 
+#define NEIGHBOR_TYPE_TARGET 0
+#define NEIGHBOR_TYPE_ENEMY 1
+
 namespace game {
 
 namespace state {
@@ -13,6 +16,25 @@ namespace state {
 namespace play {
 
 static bool auto_select_ = false;
+
+static bool search_neighbor_type(byte neighbor_type) {
+  FOREACH_FACE(f) {
+    blink::state::FaceValue face_value;
+    face_value.value = getLastValueReceivedOnFace(f);
+
+    if ((neighbor_type == NEIGHBOR_TYPE_TARGET) && face_value.target) {
+      return true;
+    }
+
+    if ((neighbor_type == NEIGHBOR_TYPE_ENEMY) && (face_value.player != 0) &&
+        (blink::state::GetPlayer() != 0) &&
+        (face_value.player != blink::state::GetPlayer())) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 static void select_origin(byte* specific_state) {
   // We are going to select an origin, so reset any blink that is currently one.
@@ -146,30 +168,8 @@ static void target_selected(byte* specific_state) {
   }
 }
 
-#define NEIGHBOOR_TYPE_TARGET 0
-#define NEIGHBOOR_TYPE_ENEMY 1
-
-static bool neighboor_type(byte neighboor_type) {
-  FOREACH_FACE(f) {
-    blink::state::FaceValue face_value;
-    face_value.value = getLastValueReceivedOnFace(f);
-
-    if ((neighboor_type == NEIGHBOOR_TYPE_TARGET) && face_value.target) {
-      return true;
-    }
-
-    if ((neighboor_type == NEIGHBOOR_TYPE_ENEMY) && (face_value.player != 0) &&
-        (blink::state::GetPlayer() != 0) &&
-        (face_value.player != blink::state::GetPlayer())) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 static void confirm_move(byte* specific_state) {
-  if (neighboor_type(NEIGHBOOR_TYPE_TARGET)) {
+  if (search_neighbor_type(NEIGHBOR_TYPE_TARGET)) {
     if (blink::state::GetPlayer() != 0 &&
         blink::state::GetPlayer() != game::state::GetPlayer()) {
       // Target is our neighboor and it is a different player from ourselves. We
@@ -196,7 +196,7 @@ static void confirm_move(byte* specific_state) {
   // We are the target, so we are now owned by the current player.
   blink::state::SetPlayer(game::state::GetPlayer());
 
-  if (neighboor_type(NEIGHBOOR_TYPE_ENEMY)) return;
+  if (search_neighbor_type(NEIGHBOR_TYPE_ENEMY)) return;
 
   *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
 }
