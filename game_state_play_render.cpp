@@ -16,6 +16,13 @@ void Render() {
   byte player = blink::state::GetPlayer();
   Color player_color = game::player::GetColor(player);
 
+  if (blink::state::GetExploding()) {
+    if (render::animation::Explosion(player_color)) {
+      blink::state::SetExploding(false);
+    }
+    return;
+  }
+
   switch (player) {
     case 0:
       if (blink::state::GetTarget()) {
@@ -36,13 +43,6 @@ void Render() {
           render::animation::Pulse(player_color, 128, 5);
           return;
         }
-      } else if (blink::state::GetExploding()) {
-        if (render::animation::Explosion(player_color)) {
-          // TODO(bga): We should call SetPlayer() outside of the render code.
-          blink::state::SetPlayer(game::state::GetPlayer());
-          blink::state::SetExploding(false);
-        }
-        return;
       } else {
         player_color = dim(player_color, 94);
       }
