@@ -34,7 +34,7 @@ void loop() {
           game::state::idle::Handler(state_changed, &state, &specific_state);
           break;
         case GAME_STATE_SETUP:
-          game::state::setup::Handler(state_changed, &state, &specific_state);
+          game::state::setup::Handler(&state, &specific_state);
           break;
         case GAME_STATE_PLAY:
           game::state::play::Handler(state_changed, &state, &specific_state);
