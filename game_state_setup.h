@@ -9,7 +9,7 @@ namespace state {
 
 namespace setup {
 
-void Handler(bool state_changed, byte* state, byte* specific_state);
+void Handler(byte* state, byte* specific_state);
 
 }  // namespace setup
 

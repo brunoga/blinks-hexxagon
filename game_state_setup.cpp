@@ -14,11 +14,7 @@ namespace setup {
 
 bool checking_board_ = false;
 
-void Handler(bool state_changed, byte* state, byte* specific_state) {
-  if (state_changed) {
-    blink::state::Reset();
-  }
-
+void Handler(byte* state, byte* specific_state) {
   if (buttonDoubleClicked() || checking_board_) {
     checking_board_ = true;
 
