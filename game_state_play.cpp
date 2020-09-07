@@ -17,6 +17,8 @@ namespace play {
 
 static bool auto_select_ = false;
 
+static bool explosion_started_ = false;
+
 static bool search_neighbor_type(byte neighbor_type) {
   FOREACH_FACE(f) {
     blink::state::FaceValue face_value;
@@ -29,6 +31,21 @@ static bool search_neighbor_type(byte neighbor_type) {
     if ((neighbor_type == NEIGHBOR_TYPE_ENEMY) && (face_value.player != 0) &&
         (blink::state::GetPlayer() != 0) &&
         (face_value.player != blink::state::GetPlayer())) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+static bool do_explosion(byte explode_to_player) {
+  if (!blink::state::GetExploding()) {
+    if (!explosion_started_) {
+      blink::state::SetExploding(true);
+      explosion_started_ = true;
+    } else {
+      blink::state::SetPlayer(explode_to_player);
+      explosion_started_ = false;
       return true;
     }
   }
@@ -173,7 +190,7 @@ static void confirm_move(byte* specific_state) {
     if (blink::state::GetPlayer() != 0 &&
         blink::state::GetPlayer() != game::state::GetPlayer()) {
       // We are being conquered, trigger explosion animation.
-      blink::state::SetExploding(true);
+      do_explosion(game::state::GetPlayer());
     }
   } else {
     if (blink::state::GetOrigin()) {
