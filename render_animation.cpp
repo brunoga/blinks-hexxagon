@@ -35,7 +35,7 @@ void WhiteSpinner(const Color& base_color) {
   setColorOnFace(WHITE, f);
 }
 
-static byte __attribute__((noinline)) compute_color_component(byte start) {
+static byte compute_color_component(byte start) {
   return start + (((255 - start) *
                    (((RENDER_ANIMATION_EXPLOSION_MS - timer_.getRemaining()) *
                      RENDER_ANIMATION_EXPLOSION_MS) /
