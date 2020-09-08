@@ -14,9 +14,15 @@ namespace end {
 static bool sent_flash_;
 static byte winner_player_;
 
-void Handler(bool state_changed, byte* state, byte* specific_state) {
-  (void)state;
-  (void)specific_state;
+void Handler(bool state_changed, byte* state) {
+  if (buttonSingleClicked()) {
+    // Ok to ignore result.
+    game::message::SendFlash();
+
+    *state = GAME_STATE_IDLE;
+
+    return;
+  }
 
   if (!blink::state::GetTarget()) return;
 

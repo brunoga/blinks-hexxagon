@@ -18,6 +18,9 @@ void loop() {
 
     // Check escape hatch. Reset to idle state if button is long pressed.
     if (buttonLongPressed()) {
+      // Ok to ignore result.
+      game::message::SendFlash();
+
       game::state::Set(GAME_STATE_IDLE);
     }
 
@@ -40,7 +43,7 @@ void loop() {
           game::state::play::Handler(state_changed, &state, &specific_state);
           break;
         case GAME_STATE_END:
-          game::state::end::Handler(state_changed, &state, &specific_state);
+          game::state::end::Handler(state_changed, &state);
       }
 
       // Switch our state to the computed one. This will be propagated to other
