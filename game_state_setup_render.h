@@ -7,6 +7,7 @@ namespace state {
 
 namespace setup {
 
+// Setup state renderer. Renders dimmed player colors.
 void Render();
 
 }  // namespace setup
