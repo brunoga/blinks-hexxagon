@@ -20,7 +20,7 @@ static bool auto_select_ = false;
 
 static bool explosion_started_ = false;
 
-static bool search_neighbor_type(byte neighbor_type) {
+static bool __attribute__((noinline)) search_neighbor_type(byte neighbor_type) {
   FOREACH_FACE(f) {
     blink::state::FaceValue face_value;
     face_value.value = getLastValueReceivedOnFace(f);
@@ -92,9 +92,9 @@ static void origin_selected(byte* specific_state) {
     // Nope. Notify the player and reset to selecting an origin (hoppefully a
     // different one).
     //
-    // Should be ok to not check the return value here as we know we just
-    // received the reply for the find targets message so there can not be any
-    // message pending to be delivered and send will succeed.
+    // It is ok to not check the return value here as we know we just received
+    // the reply for the find targets message so there can not be any message
+    // pending to be delivered and send will succeed.
     game::message::SendFlash();
 
     *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
@@ -109,12 +109,6 @@ static void origin_selected(byte* specific_state) {
 static void select_target(byte* specific_state) {
   // We are going to select a target, so reset any blink that is currently one.
   blink::state::SetTarget(false);
-
-  // If this blink is the origin, we deselect it.
-  if (blink::state::GetOrigin()) {
-    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
-    return;
-  }
 
   // If we are not a possible target or a Blink that belongs to the current
   // player, then there is also nothing to do.
@@ -131,10 +125,14 @@ static void select_target(byte* specific_state) {
 
   // Are we a blink that belongs to the current player?
   if (blink::state::GetPlayer() == game::state::GetPlayer()) {
-    auto_select_ = true;
-
     // Change our state accordingly.
     *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
+
+    if (!blink::state::GetOrigin()) {
+      // If we are not the origin we automatically switch to the new origin. If
+      // we are the current origin, then we just deselect ourselves.
+      auto_select_ = true;
+    }
 
     return;
   }
@@ -146,11 +144,11 @@ static void select_target(byte* specific_state) {
 }
 
 static void target_selected(byte* specific_state) {
-  if (!blink::state::GetTarget() && !blink::state::GetOrigin() &&
+  if (!blink::state::GetTarget() &&
       blink::state::GetTargetType() != BLINK_STATE_TARGET_TYPE_TARGET &&
       blink::state::GetPlayer() != game::state::GetPlayer()) {
-    // We are not the currently selected target, the origin, an alternate
-    // target or an alternate origin. Nothing to do.
+    // We are not the currently selected target, an alternate
+    // target or a Blink that belongs to the current player.
     return;
   }
 
@@ -164,9 +162,9 @@ static void target_selected(byte* specific_state) {
     return;
   }
 
-  // Origin was clicked. Deselect currently selected target.
+  // Origin was clicked. Deselect it.
   if (blink::state::GetOrigin()) {
-    *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
+    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
 
     return;
   }

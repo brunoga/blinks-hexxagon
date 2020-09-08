@@ -33,7 +33,12 @@ void Render() {
     return;
   }
 
-  setColor(dim(player_color, 94));
+  if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE) {
+    setColor(dim(player_color, 94));
+    return;
+  }
+
+  setColor(player_color);
 }
 
 }  // namespace play
