@@ -9,7 +9,8 @@ namespace state {
 
 namespace setup {
 
-void Handler(byte* state, byte* specific_state);
+// Setup state handler. Handles initial game configuration.
+void Handler(byte state_changed, byte* state, byte* specific_state);
 
 }  // namespace setup
 

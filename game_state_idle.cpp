@@ -12,7 +12,9 @@ namespace state {
 
 namespace idle {
 
-void Handler(bool state_changed, byte* state) {
+void Handler(bool state_changed, byte* state, byte* specific_state) {
+  (void)specific_state;
+
   if (state_changed) {
     // We just changed to this state. Reset global (game) and local (Blink)
     // states.

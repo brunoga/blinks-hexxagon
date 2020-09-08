@@ -9,7 +9,7 @@ namespace state {
 
 namespace end {
 
-void Handler(bool state_changed, byte* state);
+void Handler(bool state_changed, byte* state, byte* specific_state);
 
 }  // namespace end
 

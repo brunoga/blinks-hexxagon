@@ -34,16 +34,16 @@ void loop() {
       // Run our state machine.
       switch (state) {
         case GAME_STATE_IDLE:
-          game::state::idle::Handler(state_changed, &state);
+          game::state::idle::Handler(state_changed, &state, &specific_state);
           break;
         case GAME_STATE_SETUP:
-          game::state::setup::Handler(&state, &specific_state);
+          game::state::setup::Handler(state_changed, &state, &specific_state);
           break;
         case GAME_STATE_PLAY:
           game::state::play::Handler(state_changed, &state, &specific_state);
           break;
         case GAME_STATE_END:
-          game::state::end::Handler(state_changed, &state);
+          game::state::end::Handler(state_changed, &state, &specific_state);
       }
 
       // Switch our state to the computed one. This will be propagated to other

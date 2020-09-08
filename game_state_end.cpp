@@ -15,7 +15,9 @@ namespace end {
 static bool sent_flash_;
 static byte winner_player_;
 
-void Handler(bool state_changed, byte* state) {
+void Handler(bool state_changed, byte* state, byte* specific_state) {
+  (void)specific_state;
+
   if (util::NoSleepButtonSingleClicked()) {
     // Ok to ignore result.
     game::message::SendFlash();

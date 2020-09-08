@@ -15,7 +15,9 @@ namespace setup {
 
 static bool checking_board_ = false;
 
-void Handler(byte* state, byte* specific_state) {
+void Handler(byte state_changed, byte* state, byte* specific_state) {
+  (void)state_changed;
+
   if (buttonDoubleClicked()) {
     // We seem to be done with setting up the game. We now need to validate if
     // the board state is actually valid.
@@ -51,7 +53,8 @@ void Handler(byte* state, byte* specific_state) {
       // actually *INCREASE* the binary size. Simply removing the parameter
       // (thus also not doing this here) also increases it.
       //
-      // TODO(bga): Understand why and how can we use it in our benefit.
+      // TODO(bga): Understand why and how can we use it in our benefit. Note
+      // that this same trick does not work in other state handlers.
       *specific_state = 0;
     }
   } else if (util::NoSleepButtonSingleClicked()) {
