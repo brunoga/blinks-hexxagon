@@ -23,34 +23,17 @@ void Render() {
     return;
   }
 
-  switch (player) {
-    case 0:
-      if (blink::state::GetTarget()) {
-        render::animation::WhiteSpinner(player_color);
-        return;
-      }
-
-      if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE) {
-        player_color = dim(player_color, 94);
-      }
-      break;
-    default: {
-      if (game::state::GetPlayer() == blink::state::GetPlayer()) {
-        if (blink::state::GetOrigin()) {
-          render::animation::WhiteSpinner(player_color);
-          return;
-        } else {
-          render::animation::Pulse(player_color, 128, 5);
-          return;
-        }
-      } else {
-        player_color = dim(player_color, 94);
-      }
-      break;
-    }
+  if (blink::state::GetTarget() || blink::state::GetOrigin()) {
+    render::animation::WhiteSpinner(player_color);
+    return;
   }
 
-  setColor(player_color);
+  if (game::state::GetPlayer() == player) {
+    render::animation::Pulse(player_color, 128, 5);
+    return;
+  }
+
+  setColor(dim(player_color, 94));
 }
 
 }  // namespace play
