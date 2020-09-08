@@ -13,7 +13,7 @@ namespace state {
 
 namespace setup {
 
-bool checking_board_ = false;
+static bool checking_board_ = false;
 
 void Handler(byte* state, byte* specific_state) {
   if (buttonDoubleClicked()) {
