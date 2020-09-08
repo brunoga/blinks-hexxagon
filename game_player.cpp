@@ -4,7 +4,7 @@ namespace game {
 
 namespace player {
 
-static Color colors_[] = {ORANGE, RED, BLUE, GREEN, MAGENTA};
+static const Color colors_[] = {ORANGE, RED, BLUE, GREEN, MAGENTA};
 
 byte __attribute__((noinline)) GetNext(byte current_player) {
   byte next_player = current_player + 1;
