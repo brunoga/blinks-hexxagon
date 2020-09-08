@@ -138,8 +138,8 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
 static game::state::BlinkCount blink_count_;
 static byte upstream_target_;
 
-static void rcv_reply_handler(byte message_id, byte src_face,
-                              const byte* payload) {
+static void __attribute__((noinline))
+rcv_reply_handler(byte message_id, byte src_face, const byte* payload) {
   (void)src_face;
 
   switch (message_id) {
