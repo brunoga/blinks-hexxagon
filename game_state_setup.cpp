@@ -15,7 +15,7 @@ namespace setup {
 
 static bool checking_board_ = false;
 
-void Handler(byte state_changed, byte* state, byte* specific_state) {
+void Handler(bool state_changed, byte* state, byte* specific_state) {
   (void)state_changed;
 
   if (buttonDoubleClicked()) {
