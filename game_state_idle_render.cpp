@@ -9,7 +9,10 @@ namespace state {
 
 namespace idle {
 
-void Render() { render::animation::Pulse(game::player::GetColor(0), 128, 10); }
+void Render() {
+  render::animation::Pulse(game::player::GetColor(0), /*start=*/128,
+                           /*speed=*/10);
+}
 
 }  // namespace idle
 

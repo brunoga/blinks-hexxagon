@@ -7,6 +7,7 @@ namespace state {
 
 namespace idle {
 
+// Idle state renderer. Draws a pulsing orange light.
 void Render();
 
 }  // namespace idle
