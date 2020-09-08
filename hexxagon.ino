@@ -34,7 +34,7 @@ void loop() {
       // Run our state machine.
       switch (state) {
         case GAME_STATE_IDLE:
-          game::state::idle::Handler(state_changed, &state, &specific_state);
+          game::state::idle::Handler(state_changed, &state);
           break;
         case GAME_STATE_SETUP:
           game::state::setup::Handler(&state, &specific_state);
