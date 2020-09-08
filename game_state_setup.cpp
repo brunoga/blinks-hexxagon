@@ -5,6 +5,7 @@
 #include "game_message.h"
 #include "game_player.h"
 #include "game_state.h"
+#include "util.h"
 
 namespace game {
 
@@ -42,7 +43,7 @@ void Handler(byte* state, byte* specific_state) {
     return;
   }
 
-  if (!buttonSingleClicked() || hasWoken()) return;
+  if (util::NoSleepButtonSingleClicked()) return;
 
   blink::state::SetPlayer(game::player::GetNext(blink::state::GetPlayer()));
 }

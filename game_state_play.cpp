@@ -5,6 +5,7 @@
 #include "game_message.h"
 #include "game_state.h"
 #include "message.h"
+#include "util.h"
 
 #define NEIGHBOR_TYPE_TARGET 0
 #define NEIGHBOR_TYPE_ENEMY 1
@@ -68,7 +69,7 @@ static void select_origin(byte* specific_state) {
   if (blink::state::GetPlayer() != game::state::GetPlayer()) return;
 
   // We pass all checks, but we do nothing until we get a click.
-  if ((!buttonSingleClicked() || hasWoken()) && !auto_select_) return;
+  if (!util::NoSleepButtonSingleClicked() && !auto_select_) return;
 
   auto_select_ = false;
 
@@ -122,7 +123,7 @@ static void select_target(byte* specific_state) {
 
   // We pass all checks, but we do nothing until we get a click or auto
   // selection is enabled.
-  if ((!buttonSingleClicked() || hasWoken()) && !auto_select_) return;
+  if (!util::NoSleepButtonSingleClicked() && !auto_select_) return;
 
   auto_select_ = false;
 
@@ -152,7 +153,7 @@ static void target_selected(byte* specific_state) {
   }
 
   // We pass all checks, but we do nothing until we get a click.
-  if (!buttonSingleClicked() || hasWoken()) return;
+  if (!util::NoSleepButtonSingleClicked()) return;
 
   // Button was clicked and we are the selected target. Confirmn move.
   if (blink::state::GetTarget()) {

@@ -4,6 +4,7 @@
 #include "game_message.h"
 #include "game_state.h"
 #include "manager.h"
+#include "util.h"
 
 namespace game {
 
@@ -20,7 +21,7 @@ void Handler(bool state_changed, byte* state) {
     blink::state::Reset();
   }
 
-  if (!buttonSingleClicked() || hasWoken()) return;
+  if (!util::NoSleepButtonSingleClicked()) return;
 
   // Switch to setup state.
   *state = GAME_STATE_SETUP;

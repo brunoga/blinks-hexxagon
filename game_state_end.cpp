@@ -4,6 +4,7 @@
 #include "game_message.h"
 #include "game_player.h"
 #include "game_state.h"
+#include "util.h"
 
 namespace game {
 
@@ -15,7 +16,7 @@ static bool sent_flash_;
 static byte winner_player_;
 
 void Handler(bool state_changed, byte* state) {
-  if (buttonSingleClicked()) {
+  if (util::NoSleepButtonSingleClicked()) {
     // Ok to ignore result.
     game::message::SendFlash();
 
