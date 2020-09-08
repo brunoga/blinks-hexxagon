@@ -30,7 +30,6 @@ static bool search_neighbor_type(byte neighbor_type) {
     }
 
     if ((neighbor_type == NEIGHBOR_TYPE_ENEMY) && (face_value.player != 0) &&
-        (blink::state::GetPlayer() != 0) &&
         (face_value.player != blink::state::GetPlayer())) {
       return true;
     }
@@ -111,8 +110,11 @@ static void select_target(byte* specific_state) {
   // We are going to select a target, so reset any blink that is currently one.
   blink::state::SetTarget(false);
 
-  // If this blink is the origin, there is nothing for it to do at this stage.
-  if (blink::state::GetOrigin()) return;
+  // If this blink is the origin, we deselect it.
+  if (blink::state::GetOrigin()) {
+    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
+    return;
+  }
 
   // If we are not a possible target or a Blink that belongs to the current
   // player, then there is also nothing to do.
