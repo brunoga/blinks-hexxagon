@@ -34,7 +34,7 @@ void Handler(byte* state, byte* specific_state) {
       return;
     }
 
-    // Swithc to first available player.
+    // Switch to first available player.
     game::state::NextPlayer();
 
     *state = GAME_STATE_PLAY;
@@ -43,7 +43,7 @@ void Handler(byte* state, byte* specific_state) {
     return;
   }
 
-  if (util::NoSleepButtonSingleClicked()) return;
+  if (!util::NoSleepButtonSingleClicked()) return;
 
   blink::state::SetPlayer(game::player::GetNext(blink::state::GetPlayer()));
 }
