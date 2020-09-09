@@ -39,11 +39,13 @@ void SetSpecific(byte specific_state, bool from_network) {
 
 byte GetSpecific() { return state_.current_specific; }
 
-void SetPlayer(byte player) { state_.player = player; }
+void __attribute__((noinline)) SetPlayer(byte player) {
+  state_.player = player;
+}
 
 byte __attribute__((noinline)) GetPlayer() { return state_.player; }
 
-void __attribute__((noinline)) NextPlayer() {
+void NextPlayer() {
   byte current_player = GetPlayer();
 
   byte next_player = game::player::GetNext(current_player);
@@ -100,7 +102,7 @@ void Reset() {
   SetBlinkCount(nullptr);
 }
 
-bool __attribute__((noinline)) Changed(bool include_specific) {
+bool Changed(bool include_specific) {
   return include_specific
              ? state_.current != state_.previous ||
                    state_.current_specific != state_.previous_specific

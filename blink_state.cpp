@@ -25,7 +25,7 @@ static BlinkState state_;
 static Timer color_override_timer_;
 
 void SetOrigin(bool origin) { state_.origin = origin; }
-bool GetOrigin() { return state_.origin; }
+bool __attribute__((noinline)) GetOrigin() { return state_.origin; }
 
 void SetTarget(bool target) { state_.target = target; }
 bool GetTarget() { return state_.target; }
@@ -47,7 +47,7 @@ void __attribute__((noinline)) StartColorOverride() {
 
 bool GetColorOverride() { return !color_override_timer_.isExpired(); }
 
-void Reset() {
+void __attribute__((noinline)) Reset() {
   state_.origin = false;
   state_.target = false;
   state_.exploding = false;
@@ -55,7 +55,7 @@ void Reset() {
   state_.player = 0;
 }
 
-void Render(byte game_state) {
+void __attribute__((noinline)) Render(byte game_state) {
   // "Render" our face value.
   FaceValue face_value;
 
