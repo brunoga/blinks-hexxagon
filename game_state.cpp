@@ -10,18 +10,14 @@ namespace game {
 namespace state {
 
 struct State {
-  byte current : 2;
-  byte previous : 2;
-  byte player : 3;
-  bool from_network : 1;
+  byte current;
+  byte previous;
+  byte current_specific;
+  byte previous_specific;
+  byte player;
+  bool from_network;
 };
 static State state_;
-
-struct SpecificState {
-  byte current : 4;
-  byte previous : 4;
-};
-static SpecificState specific_state_;
 
 static BlinkCount blink_count_;
 
@@ -35,13 +31,13 @@ void Set(byte state, bool from_network) {
 byte Get() { return state_.current; }
 
 void SetSpecific(byte specific_state, bool from_network) {
-  specific_state_.previous = specific_state_.current;
-  specific_state_.current = specific_state;
+  state_.previous_specific = state_.current_specific;
+  state_.current_specific = specific_state;
 
   state_.from_network = from_network;
 }
 
-byte GetSpecific() { return specific_state_.current; }
+byte GetSpecific() { return state_.current_specific; }
 
 void SetPlayer(byte player) { state_.player = player; }
 
@@ -96,17 +92,18 @@ byte GetBlinkCount(byte player) { return blink_count_[player]; }
 void Reset() {
   state_.current = GAME_STATE_IDLE;
   state_.previous = GAME_STATE_IDLE;
+  state_.current_specific = 0;
+  state_.previous_specific = 0;
   state_.player = 0;
   state_.from_network = false;
-  specific_state_.current = 0;
-  specific_state_.previous = 0;
+
   SetBlinkCount(nullptr);
 }
 
 bool __attribute__((noinline)) Changed(bool include_specific) {
   return include_specific
              ? state_.current != state_.previous ||
-                   specific_state_.current != specific_state_.previous
+                   state_.current_specific != state_.previous_specific
              : state_.current != state_.previous;
 }
 
@@ -116,7 +113,7 @@ bool Propagate() {
   game::message::GameStateChangeData data;
 
   data.state = state_.current;
-  data.specific_state = specific_state_.current;
+  data.specific_state = state_.current_specific;
   data.next_player = state_.player - 1;
 
   if (!game::message::SendGameStateChange(data.value)) {
