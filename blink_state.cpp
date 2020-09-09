@@ -63,11 +63,7 @@ void __attribute__((noinline)) Render(byte game_state) {
   face_value.target = GetTarget();
   face_value.player = GetPlayer();
 
-  // Make sure everything else is zeroed out.
-  face_value.unused = 0;
-  face_value.reserved = 0;
-
-  setValueSentOnAllFaces(face_value.value);
+  setValueSentOnAllFaces(face_value.as_byte);
 
   if (blink::state::GetColorOverride()) {
     setColor(WHITE);

@@ -12,14 +12,13 @@ namespace state {
 
 union FaceValue {
   struct {
-    byte unused : 1;  // Unused for now.
+    byte unused : 3;  // Unused for now.
     bool origin : 1;  // Is it the current origin?
     bool target : 1;  // Is it the current target?
     byte player : 3;  // 0 means empty.
-    byte reserved : 2;
   };
 
-  byte value;
+  byte as_byte;
 };
 
 void SetOrigin(bool origin);
@@ -34,7 +33,7 @@ byte GetTargetType();
 void SetPlayer(byte player);
 byte GetPlayer();
 
-void SetExploding(bool takeovert);
+void SetExploding(bool exploding);
 bool GetExploding();
 
 void StartColorOverride();

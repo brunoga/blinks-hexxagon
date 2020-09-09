@@ -23,7 +23,7 @@ static bool explosion_started_ = false;
 static bool __attribute__((noinline)) search_neighbor_type(byte neighbor_type) {
   FOREACH_FACE(f) {
     blink::state::FaceValue face_value;
-    face_value.value = getLastValueReceivedOnFace(f);
+    face_value.as_byte = getLastValueReceivedOnFace(f);
 
     if ((neighbor_type == NEIGHBOR_TYPE_TARGET) && face_value.target) {
       return true;
@@ -54,7 +54,7 @@ static bool do_explosion(byte explode_to_player) {
 }
 
 static void select_origin(byte* specific_state) {
-  // We are going to select an origin, so reset any blink that is currently one.
+  // We are going to select an origin, so reset any Blink that is currently one.
   blink::state::SetOrigin(false);
 
   // Also, if there is a target selected. It must be reset (as we have no
