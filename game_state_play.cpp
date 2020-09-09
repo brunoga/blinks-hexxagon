@@ -241,13 +241,21 @@ static void move_confirmed(byte* state, byte* specific_state) {
 void Handler(bool state_changed, byte* state, byte* specific_state) {
   (void)state_changed;
 
-  // Check for turn passing.
   if (buttonDoubleClicked()) {
+    // Turn is being passed. Switch to next player.
     game::state::NextPlayer();
 
+    // Manually force a state that is not the select origin one so that even if
+    // we are currently in it, the state will be propagate to the other Blinks
+    // (the next player information is propagated with state changes). This is
+    // cheaper than keeping track of the previous player in the game state and
+    // using that for automatically deciding if the state should be propagated
+    // or not.
     game::state::SetSpecific(GAME_STATE_PLAY_MOVE_CONFIRMED);
 
+    // Next player will select origin.
     *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
+
     return;
   }
 
