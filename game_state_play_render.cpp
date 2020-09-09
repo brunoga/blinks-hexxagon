@@ -23,7 +23,8 @@ void Render() {
     return;
   }
 
-  if (blink::state::GetTarget() || blink::state::GetOrigin()) {
+  if ((blink::state::GetTarget() && blink::state::GetPlayer() == 0) ||
+      blink::state::GetOrigin()) {
     render::animation::WhiteSpinner(player_color);
     return;
   }
