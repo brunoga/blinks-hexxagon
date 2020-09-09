@@ -14,12 +14,11 @@ namespace blink {
 namespace state {
 
 struct BlinkState {
-  bool origin : 1;
-  bool target : 1;
-  byte player : 3;
-  byte target_type : 1;
-  bool exploding : 1;
-  byte unused : 1;
+  bool origin;
+  bool target;
+  bool exploding;
+  byte player;
+  byte target_type;
 };
 static BlinkState state_;
 
@@ -51,8 +50,8 @@ bool GetColorOverride() { return !color_override_timer_.isExpired(); }
 void Reset() {
   state_.origin = false;
   state_.target = false;
-  state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
   state_.exploding = false;
+  state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
   state_.player = 0;
 }
 
