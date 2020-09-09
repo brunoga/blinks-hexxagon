@@ -125,14 +125,14 @@ static void select_target(byte* specific_state) {
 
   // Are we a blink that belongs to the current player?
   if (blink::state::GetPlayer() == game::state::GetPlayer()) {
-    // Change our state accordingly.
-    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
-
     if (!blink::state::GetOrigin()) {
       // If we are not the origin we automatically switch to the new origin. If
       // we are the current origin, then we just deselect ourselves.
       auto_select_ = true;
     }
+
+    // Change our state accordingly.
+    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
 
     return;
   }
@@ -239,15 +239,7 @@ static void move_confirmed(byte* state, byte* specific_state) {
 }
 
 void Handler(bool state_changed, byte* state, byte* specific_state) {
-  if (state_changed) {
-    // Make sure we are at our initial specific state.
-    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
-  }
-
-  if (*specific_state == GAME_STATE_PLAY_PASS_TURN) {
-    game::state::SetSpecific(GAME_STATE_PLAY_SELECT_ORIGIN, true);
-    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
-  }
+  (void)state_changed;
 
   // Check for turn passing.
   if (buttonDoubleClicked()) {
@@ -277,6 +269,9 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     case GAME_STATE_PLAY_MOVE_CONFIRMED:
       move_confirmed(state, specific_state);
       break;
+    case GAME_STATE_PLAY_PASS_TURN:
+      game::state::SetSpecific(GAME_STATE_PLAY_SELECT_ORIGIN, true);
+      *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
   }
 }
 
