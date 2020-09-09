@@ -47,7 +47,7 @@ void SetPlayer(byte player) { state_.player = player; }
 
 byte __attribute__((noinline)) GetPlayer() { return state_.player; }
 
-void NextPlayer() {
+void __attribute__((noinline)) NextPlayer() {
   byte current_player = GetPlayer();
 
   byte next_player = game::player::GetNext(current_player);

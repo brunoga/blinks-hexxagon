@@ -11,8 +11,6 @@
 #define GAME_STATE_PLAY_CONFIRM_MOVE 4
 #define GAME_STATE_PLAY_MOVE_CONFIRMED 5
 
-#define GAME_STATE_PLAY_PASS_TURN 6
-
 namespace game {
 
 namespace state {

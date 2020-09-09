@@ -243,10 +243,11 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 
   // Check for turn passing.
   if (buttonDoubleClicked()) {
-    *specific_state = GAME_STATE_PLAY_PASS_TURN;
-
     game::state::NextPlayer();
 
+    game::state::SetSpecific(GAME_STATE_PLAY_MOVE_CONFIRMED);
+
+    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
     return;
   }
 
@@ -269,9 +270,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     case GAME_STATE_PLAY_MOVE_CONFIRMED:
       move_confirmed(state, specific_state);
       break;
-    case GAME_STATE_PLAY_PASS_TURN:
-      game::state::SetSpecific(GAME_STATE_PLAY_SELECT_ORIGIN, true);
-      *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
   }
 }
 
