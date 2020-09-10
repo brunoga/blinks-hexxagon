@@ -63,7 +63,4 @@ void loop() {
     // We are alone. Make it evident.
     render::animation::Pulse(WHITE, 255, 2);
   }
-
-  buttonSingleClicked();
-  buttonDoubleClicked();
 }

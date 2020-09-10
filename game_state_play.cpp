@@ -65,7 +65,10 @@ static void select_origin(byte* specific_state) {
   blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
 
   // This blink belongs to a player, but not the current one. Nothing to do.
-  if (blink::state::GetPlayer() != game::state::GetPlayer()) return;
+  if (blink::state::GetPlayer() != game::state::GetPlayer()) {
+    buttonSingleClicked();
+    return;
+  }
 
   // We pass all checks, but we do nothing until we get a click.
   if (!util::NoSleepButtonSingleClicked() && !auto_select_) return;
@@ -114,6 +117,7 @@ static void select_target(byte* specific_state) {
   // player, then there is also nothing to do.
   if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE &&
       blink::state::GetPlayer() != game::state::GetPlayer()) {
+    buttonSingleClicked();
     return;
   }
 
@@ -149,6 +153,7 @@ static void target_selected(byte* specific_state) {
       blink::state::GetPlayer() != game::state::GetPlayer()) {
     // We are not the currently selected target, an alternate
     // target or a Blink that belongs to the current player.
+    buttonSingleClicked();
     return;
   }
 
