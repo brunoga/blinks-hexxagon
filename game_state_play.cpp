@@ -53,7 +53,9 @@ static bool do_explosion(byte explode_to_player) {
   return false;
 }
 
-static void select_origin(byte* specific_state) {
+static void select_origin(byte* state, byte* specific_state) {
+  (void)state;
+
   bool button_clicked = util::NoSleepButtonSingleClicked();
 
   // We are going to select an origin, so reset any Blink that is currently
@@ -82,7 +84,9 @@ static void select_origin(byte* specific_state) {
   *specific_state = GAME_STATE_PLAY_ORIGIN_SELECTED;
 }
 
-static void origin_selected(byte* specific_state) {
+static void origin_selected(byte* state, byte* specific_state) {
+  (void)state;
+
   // Only the origin blink has anything to do here.
   if (!blink::state::GetOrigin()) return;
 
@@ -109,7 +113,9 @@ static void origin_selected(byte* specific_state) {
   *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
 }
 
-static void select_target(byte* specific_state) {
+static void select_target(byte* state, byte* specific_state) {
+  (void)state;
+
   bool button_clicked = util::NoSleepButtonSingleClicked();
 
   // We are going to select a target, so reset any blink that is currently one.
@@ -148,7 +154,9 @@ static void select_target(byte* specific_state) {
   *specific_state = GAME_STATE_PLAY_TARGET_SELECTED;
 }
 
-static void target_selected(byte* specific_state) {
+static void target_selected(byte* state, byte* specific_state) {
+  (void)state;
+
   bool button_clicked = util::NoSleepButtonSingleClicked();
 
   if (!blink::state::GetTarget() &&
@@ -193,7 +201,9 @@ static void target_selected(byte* specific_state) {
   }
 }
 
-static void confirm_move(byte* specific_state) {
+static void confirm_move(byte* state, byte* specific_state) {
+  (void)state;
+
   if (search_neighbor_type(NEIGHBOR_TYPE_TARGET)) {
     if (blink::state::GetPlayer() != 0 &&
         blink::state::GetPlayer() != game::state::GetPlayer()) {
@@ -268,19 +278,19 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 
   switch (*specific_state) {
     case GAME_STATE_PLAY_SELECT_ORIGIN:
-      select_origin(specific_state);
+      select_origin(state, specific_state);
       break;
     case GAME_STATE_PLAY_ORIGIN_SELECTED:
-      origin_selected(specific_state);
+      origin_selected(state, specific_state);
       break;
     case GAME_STATE_PLAY_SELECT_TARGET:
-      select_target(specific_state);
+      select_target(state, specific_state);
       break;
     case GAME_STATE_PLAY_TARGET_SELECTED:
-      target_selected(specific_state);
+      target_selected(state, specific_state);
       break;
     case GAME_STATE_PLAY_CONFIRM_MOVE:
-      confirm_move(specific_state);
+      confirm_move(state, specific_state);
       break;
     case GAME_STATE_PLAY_MOVE_CONFIRMED:
       move_confirmed(state, specific_state);
