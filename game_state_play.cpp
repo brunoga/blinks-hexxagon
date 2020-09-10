@@ -54,7 +54,10 @@ static bool do_explosion(byte explode_to_player) {
 }
 
 static void select_origin(byte* specific_state) {
-  // We are going to select an origin, so reset any Blink that is currently one.
+  bool button_clicked = util::NoSleepButtonSingleClicked();
+
+  // We are going to select an origin, so reset any Blink that is currently
+  // one.
   blink::state::SetOrigin(false);
 
   // Also, if there is a target selected. It must be reset (as we have no
@@ -65,13 +68,10 @@ static void select_origin(byte* specific_state) {
   blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
 
   // This blink belongs to a player, but not the current one. Nothing to do.
-  if (blink::state::GetPlayer() != game::state::GetPlayer()) {
-    buttonSingleClicked();
-    return;
-  }
+  if (blink::state::GetPlayer() != game::state::GetPlayer()) return;
 
   // We pass all checks, but we do nothing until we get a click.
-  if (!util::NoSleepButtonSingleClicked() && !auto_select_) return;
+  if (!button_clicked && !auto_select_) return;
 
   auto_select_ = false;
 
@@ -110,6 +110,8 @@ static void origin_selected(byte* specific_state) {
 }
 
 static void select_target(byte* specific_state) {
+  bool button_clicked = util::NoSleepButtonSingleClicked();
+
   // We are going to select a target, so reset any blink that is currently one.
   blink::state::SetTarget(false);
 
@@ -117,13 +119,12 @@ static void select_target(byte* specific_state) {
   // player, then there is also nothing to do.
   if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE &&
       blink::state::GetPlayer() != game::state::GetPlayer()) {
-    buttonSingleClicked();
     return;
   }
 
   // We pass all checks, but we do nothing until we get a click or auto
   // selection is enabled.
-  if (!util::NoSleepButtonSingleClicked() && !auto_select_) return;
+  if (!button_clicked && !auto_select_) return;
 
   auto_select_ = false;
 
@@ -148,17 +149,18 @@ static void select_target(byte* specific_state) {
 }
 
 static void target_selected(byte* specific_state) {
+  bool button_clicked = util::NoSleepButtonSingleClicked();
+
   if (!blink::state::GetTarget() &&
       blink::state::GetTargetType() != BLINK_STATE_TARGET_TYPE_TARGET &&
       blink::state::GetPlayer() != game::state::GetPlayer()) {
     // We are not the currently selected target, an alternate
     // target or a Blink that belongs to the current player.
-    buttonSingleClicked();
     return;
   }
 
   // We pass all checks, but we do nothing until we get a click.
-  if (!util::NoSleepButtonSingleClicked()) return;
+  if (!button_clicked) return;
 
   // Button was clicked and we are the selected target. Confirmn move.
   if (blink::state::GetTarget()) {
