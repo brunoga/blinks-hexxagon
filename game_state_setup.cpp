@@ -58,8 +58,8 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       *specific_state = 0;
     }
   } else if (util::NoSleepButtonSingleClicked()) {
-    // Blink was clicked. Switcht it to next player. Note that we will never
-    // reach this point if we are validating the game state until we dinish
+    // Blink was clicked. Switch it to next player. Note that we will never
+    // reach this point if we are validating the game state until we finish
     // doing it. This is intentional and prevents the local state changing while
     // we are validating the board. Clicking other Blinks could potentially mess
     // things up, but there is only so much we can do with the resources
