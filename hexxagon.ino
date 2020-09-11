@@ -69,4 +69,10 @@ void loop() {
   }
 
   blink::state::Render(game::state::Get());
+
+  // Consume any pending woken state. The rationale is that we already went
+  // through our loop and if the state is still set here we want to consume as
+  // it most likelly means another Blink woke us up. This will prevent us
+  // "swallowing" the first click on this Blink after wakeup.
+  hasWoken();
 }
