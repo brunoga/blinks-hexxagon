@@ -108,11 +108,12 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
         // real face number.
         set_payload_for_face(payload, dst_face);
       } else {
-        // The input face is the face opposite to the face the message was sent
-        // to.
+        // The input face is the face opposite to the face the message was
+        // sent to.
         byte input_face = opposite_face_[payload[3]];
 
-        // The output face is the normalized face in relation to the input face.
+        // The output face is the normalized face in relation to the input
+        // face.
         byte output_face =
             ((dst_face - src_face) + input_face + FACE_COUNT) % FACE_COUNT;
 
