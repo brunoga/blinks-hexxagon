@@ -59,7 +59,6 @@ void __attribute__((noinline)) Render(byte game_state) {
   // "Render" our face value.
   FaceValue face_value;
 
-  face_value.origin = GetOrigin();
   face_value.target = GetTarget();
   face_value.player = GetPlayer();
 

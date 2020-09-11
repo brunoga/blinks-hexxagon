@@ -12,8 +12,7 @@ namespace state {
 
 union FaceValue {
   struct {
-    byte unused : 3;  // Unused for now.
-    bool origin : 1;  // Is it the current origin?
+    byte unused : 4;  // Unused for now.
     bool target : 1;  // Is it the current target?
     byte player : 3;  // 0 means empty.
   };
