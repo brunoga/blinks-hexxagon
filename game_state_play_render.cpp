@@ -30,7 +30,7 @@ void Render() {
   }
 
   if (game::state::GetPlayer() == player) {
-    render::animation::Pulse(player_color, 128, 5);
+    render::animation::Pulse(player_color, 64, 3);
     return;
   }
 

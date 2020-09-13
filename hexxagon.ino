@@ -24,7 +24,7 @@ void loop() {
     // TODO(bga): Removing this saves 58 bytes of storage. We do not need it now
     // but if storage pressure mounts again, we can just eliminate this entire
     // block. It is a nice to have but has no gameplay effect whatsoever.
-    render::animation::Pulse(WHITE, 255, 2);
+    render::animation::Pulse(WHITE, 63, 2);
 
     return;
   }
