@@ -1,6 +1,7 @@
 #include "render_animation.h"
 
-#define RENDER_ANIMATION_EXPLOSION_MS 800
+// (255 * 3) + 200
+#define RENDER_ANIMATION_EXPLOSION_MS 965
 
 namespace render {
 
@@ -34,14 +35,6 @@ void WhiteSpinner(const Color& base_color) {
   setColorOnFace(WHITE, f);
 }
 
-static byte compute_color_component(byte start) {
-  return start + (((255 - start) *
-                   (((RENDER_ANIMATION_EXPLOSION_MS - timer_.getRemaining()) *
-                     RENDER_ANIMATION_EXPLOSION_MS) /
-                    RENDER_ANIMATION_EXPLOSION_MS)) /
-                  RENDER_ANIMATION_EXPLOSION_MS);
-}
-
 bool Explosion(const Color& base_color) {
   if (timer_.isExpired()) {
     if (explosion_animation_started_) {
@@ -55,12 +48,13 @@ bool Explosion(const Color& base_color) {
     timer_.set(RENDER_ANIMATION_EXPLOSION_MS);
   }
 
-  byte r = compute_color_component(base_color.r);
-  byte g = compute_color_component(base_color.g);
-  byte b = compute_color_component(base_color.b);
-
-  setColor(makeColorRGB(r, g, b));
-
+  if (timer_.getRemaining() > 200) {
+    setColor(lighten(base_color, 255 - ((timer_.getRemaining() - 200) / 3)));
+  } else if (timer_.getRemaining() > 100) {
+    setColor(WHITE);
+  } else {
+    setColor(OFF);
+  }
   return false;
 }
 
