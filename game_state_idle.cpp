@@ -20,6 +20,8 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     // states.
     game::state::Reset();
     blink::state::Reset();
+
+    *specific_state = 0;
   }
 
   if (!util::NoSleepButtonSingleClicked()) return;
