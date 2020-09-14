@@ -24,7 +24,7 @@ void Pulse(const Color& base_color, byte start, byte speed) {
   setColor(dim(base_color, brightness));
 }
 
-void WhiteSpinner(const Color& base_color) {
+void Spinner(const Color& base_color, const Color& spinner_color) {
   if (timer_.isExpired()) {
     timer_.set((5 * 100) + 99);
   }
@@ -32,7 +32,7 @@ void WhiteSpinner(const Color& base_color) {
   byte f = timer_.getRemaining() / 100;
 
   setColor(base_color);
-  setColorOnFace(WHITE, f);
+  setColorOnFace(spinner_color, f);
 }
 
 bool Explosion(const Color& base_color) {

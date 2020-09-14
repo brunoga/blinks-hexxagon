@@ -8,7 +8,7 @@ namespace render {
 namespace animation {
 
 void Pulse(const Color& base_color, byte start, byte speed);
-void WhiteSpinner(const Color& base_color);
+void Spinner(const Color& base_color, const Color& spinner_color);
 
 bool Explosion(const Color& base_color);
 
