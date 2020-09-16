@@ -1,10 +1,8 @@
 #include "game_state_play.h"
 
 #include "blink_state.h"
-#include "debug.h"
 #include "game_message.h"
 #include "game_state.h"
-#include "message.h"
 #include "util.h"
 
 #define NEIGHBOR_TYPE_TARGET 0

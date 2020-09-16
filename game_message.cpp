@@ -3,11 +3,10 @@
 #include <string.h>
 
 #include "blink_state.h"
-#include "debug.h"
 #include "game_state.h"
 #include "game_state_play.h"
-#include "manager.h"
-#include "message.h"
+#include "src/blinks-broadcast/manager.h"
+#include "src/blinks-broadcast/message.h"
 
 #define MESSAGE_STATE_SEND_MESSAGE 0
 #define MESSAGE_STATE_WAIT_FOR_RESULT 1

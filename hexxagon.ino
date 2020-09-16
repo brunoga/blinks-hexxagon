@@ -1,14 +1,12 @@
 #include <blinklib.h>
 
 #include "blink_state.h"
-#include "debug.h"
 #include "game_message.h"
 #include "game_state.h"
 #include "game_state_end.h"
 #include "game_state_idle.h"
 #include "game_state_play.h"
 #include "game_state_setup.h"
-#include "manager.h"
 #include "render_animation.h"
 
 #ifndef BGA_CUSTOM_BLINKLIB

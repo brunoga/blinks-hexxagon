@@ -4,7 +4,7 @@
 #include <blinklib.h>
 
 #include "game_state.h"
-#include "message.h"
+#include "src/blinks-broadcast/message.h"
 
 #define MESSAGE_GAME_STATE_CHANGE 0
 #define MESSAGE_CHECK_BOARD 1

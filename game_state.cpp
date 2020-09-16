@@ -1,7 +1,6 @@
 
 #include "game_state.h"
 
-#include "debug.h"
 #include "game_message.h"
 #include "game_player.h"
 

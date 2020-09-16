@@ -3,7 +3,6 @@
 #include "blink_state.h"
 #include "game_message.h"
 #include "game_state.h"
-#include "manager.h"
 #include "util.h"
 
 namespace game {

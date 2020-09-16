@@ -2,7 +2,6 @@
 
 #include <blinklib.h>
 
-#include "debug.h"
 #include "game_state.h"
 #include "game_state_end_render.h"
 #include "game_state_idle_render.h"
