@@ -36,6 +36,8 @@ void loop() {
     game::message::SendFlash();
 
     game::state::Set(GAME_STATE_IDLE);
+
+    return;
   }
 
   if (game::state::Propagate()) {
