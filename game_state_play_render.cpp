@@ -24,7 +24,7 @@ void Render() {
 
   if ((blink::state::GetTarget() && blink::state::GetPlayer() == 0) ||
       blink::state::GetOrigin()) {
-    render::animation::Spinner(player_color, WHITE);
+    render::animation::Spinner(player_color, WHITE, 1, 100);
     return;
   }
 

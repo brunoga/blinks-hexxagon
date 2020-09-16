@@ -11,28 +11,34 @@ static Timer timer_;
 static bool reverse_ = true;
 static bool explosion_animation_started_ = false;
 
-void Pulse(const Color& base_color, byte start, byte speed) {
+void Pulse(const Color& base_color, byte start, byte slowdown) {
   if (timer_.isExpired()) {
     reverse_ = !reverse_;
-    timer_.set((255 - start) * speed);
+    timer_.set((255 - start) * slowdown);
   }
 
-  byte base_brightness = timer_.getRemaining() / speed;
+  byte base_brightness = timer_.getRemaining() / slowdown;
 
   byte brightness = reverse_ ? 255 - base_brightness : start + base_brightness;
 
   setColor(dim(base_color, brightness));
 }
 
-void Spinner(const Color& base_color, const Color& spinner_color) {
+void Spinner(const Color& base_color, const Color& spinner_color,
+             byte num_faces, byte slowdown) {
   if (timer_.isExpired()) {
-    timer_.set((5 * 100) + 99);
+    timer_.set((FACE_COUNT * slowdown) - 1);
   }
 
-  byte f = timer_.getRemaining() / 100;
+  byte f = (FACE_COUNT - 1) - timer_.getRemaining() / slowdown;
 
   setColor(base_color);
-  setColorOnFace(spinner_color, f);
+
+  byte step = FACE_COUNT / num_faces;
+
+  for (byte face = 0; face < FACE_COUNT; face += step) {
+    setColorOnFace(spinner_color, (f + face) % FACE_COUNT);
+  }
 }
 
 bool Explosion(const Color& base_color) {
