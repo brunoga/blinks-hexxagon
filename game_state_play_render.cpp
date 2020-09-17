@@ -16,7 +16,7 @@ void Render() {
   Color player_color = game::player::GetColor(player);
 
   if (blink::state::GetAnimating()) {
-    if (render::animation::Explosion(player_color)) {
+    if (blink::state::RunAnimatingFunction()) {
       blink::state::SetAnimating(false);
     }
     return;

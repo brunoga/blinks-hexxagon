@@ -34,6 +34,9 @@ byte GetPlayer();
 
 void SetAnimating(bool animating);
 bool GetAnimating();
+void SetAnimatingParam(void* animating_param);
+void SetAnimatingFunction(bool (*animating_function)(void* param));
+bool RunAnimatingFunction();
 
 void StartColorOverride();
 bool GetColorOverride();

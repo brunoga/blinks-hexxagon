@@ -3,6 +3,7 @@
 #include "blink_state.h"
 #include "game_message.h"
 #include "game_state.h"
+#include "render_animation.h"
 #include "util.h"
 
 #define NEIGHBOR_TYPE_TARGET 0
@@ -17,18 +18,22 @@ namespace play {
 static bool auto_select_ = false;
 
 static bool explosion_started_ = false;
+static bool lightning_done_ = false;
 
-static bool __attribute__((noinline)) search_neighbor_type(byte neighbor_type) {
+static bool __attribute__((noinline))
+search_neighbor_type(byte neighbor_type, byte* source_face) {
   FOREACH_FACE(f) {
     blink::state::FaceValue face_value;
     face_value.as_byte = getLastValueReceivedOnFace(f);
 
     if ((neighbor_type == NEIGHBOR_TYPE_TARGET) && face_value.target) {
+      *source_face = f;
       return true;
     }
 
     if ((neighbor_type == NEIGHBOR_TYPE_ENEMY) && (face_value.player != 0) &&
         (face_value.player != blink::state::GetPlayer())) {
+      *source_face = f;
       return true;
     }
   }
@@ -36,14 +41,30 @@ static bool __attribute__((noinline)) search_neighbor_type(byte neighbor_type) {
   return false;
 }
 
-static bool do_explosion(byte explode_to_player) {
+static bool do_explosion(byte explode_to_player, byte source_face) {
   if (!blink::state::GetAnimating()) {
     if (!explosion_started_) {
       blink::state::SetAnimating(true);
+      blink::state::SetAnimatingParam(&source_face);
+      blink::state::SetAnimatingFunction([](void* param) -> bool {
+        if (!lightning_done_) {
+          if (!render::animation::Lightning(
+                  game::player::GetColor(blink::state::GetPlayer()),
+                  *(byte*)param)) {
+            return false;
+          }
+
+          lightning_done_ = true;
+        }
+
+        return render::animation::Explosion(
+            game::player::GetColor(blink::state::GetPlayer()));
+      });
       explosion_started_ = true;
     } else {
       blink::state::SetPlayer(explode_to_player);
       explosion_started_ = false;
+      lightning_done_ = false;
       return true;
     }
   }
@@ -202,11 +223,12 @@ static void target_selected(byte* state, byte* specific_state) {
 static void confirm_move(byte* state, byte* specific_state) {
   (void)state;
 
-  if (search_neighbor_type(NEIGHBOR_TYPE_TARGET)) {
+  byte source_face;
+  if (search_neighbor_type(NEIGHBOR_TYPE_TARGET, &source_face)) {
     if (blink::state::GetPlayer() != 0 &&
         blink::state::GetPlayer() != game::state::GetPlayer()) {
       // We are being conquered, trigger explosion animation.
-      do_explosion(game::state::GetPlayer());
+      do_explosion(game::state::GetPlayer(), source_face);
     }
   } else {
     if (blink::state::GetOrigin()) {
@@ -227,7 +249,7 @@ static void confirm_move(byte* state, byte* specific_state) {
   // We are the target, so we are now owned by the current player.
   blink::state::SetPlayer(game::state::GetPlayer());
 
-  if (search_neighbor_type(NEIGHBOR_TYPE_ENEMY)) return;
+  if (search_neighbor_type(NEIGHBOR_TYPE_ENEMY, &source_face)) return;
 
   *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
 }

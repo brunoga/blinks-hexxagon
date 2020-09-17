@@ -23,6 +23,9 @@ static BlinkState state_;
 
 static Timer color_override_timer_;
 
+static void* animating_param_;
+static bool (*animating_function_)(void* param);
+
 void SetOrigin(bool origin) { state_.origin = origin; }
 bool __attribute__((noinline)) GetOrigin() { return state_.origin; }
 
@@ -39,6 +42,15 @@ byte GetPlayer() { return state_.player; }
 
 void SetAnimating(bool animating) { state_.animating = animating; }
 bool GetAnimating() { return state_.animating; }
+
+void SetAnimatingParam(void* animating_param) {
+  animating_param_ = animating_param;
+}
+void SetAnimatingFunction(bool (*animating_function)(void* param)) {
+  animating_function_ = animating_function;
+}
+
+bool RunAnimatingFunction() { return animating_function_(animating_param_); }
 
 void __attribute__((noinline)) StartColorOverride() {
   color_override_timer_.set(200);

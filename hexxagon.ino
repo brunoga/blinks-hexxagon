@@ -16,17 +16,6 @@
 void setup() { game::message::Setup(); }
 
 void loop() {
-  if (isAlone()) {
-    // We are alone. Make it evident.
-    //
-    // TODO(bga): Removing this saves 58 bytes of storage. We do not need it now
-    // but if storage pressure mounts again, we can just eliminate this entire
-    // block. It is a nice to have but has no gameplay effect whatsoever.
-    render::animation::Pulse(WHITE, 63, 2);
-
-    return;
-  }
-
   // Process any pending game messages.
   game::message::Process();
 

@@ -12,6 +12,7 @@ void Spinner(const Color& base_color, const Color& spinner_color,
              byte num_faces, byte slowdown);
 
 bool Explosion(const Color& base_color);
+bool Lightning(const Color& base_color, byte origin_face);
 
 }  // namespace animation
 
