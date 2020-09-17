@@ -32,8 +32,8 @@ byte GetTargetType();
 void SetPlayer(byte player);
 byte GetPlayer();
 
-void SetExploding(bool exploding);
-bool GetExploding();
+void SetAnimating(bool animating);
+bool GetAnimating();
 
 void StartColorOverride();
 bool GetColorOverride();

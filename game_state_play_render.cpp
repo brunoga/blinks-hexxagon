@@ -15,9 +15,9 @@ void Render() {
   byte player = blink::state::GetPlayer();
   Color player_color = game::player::GetColor(player);
 
-  if (blink::state::GetExploding()) {
+  if (blink::state::GetAnimating()) {
     if (render::animation::Explosion(player_color)) {
-      blink::state::SetExploding(false);
+      blink::state::SetAnimating(false);
     }
     return;
   }
