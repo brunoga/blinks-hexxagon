@@ -37,9 +37,9 @@ static bool __attribute__((noinline)) search_neighbor_type(byte neighbor_type) {
 }
 
 static bool do_explosion(byte explode_to_player) {
-  if (!blink::state::GetExploding()) {
+  if (!blink::state::GetAnimating()) {
     if (!explosion_started_) {
-      blink::state::SetExploding(true);
+      blink::state::SetAnimating(true);
       explosion_started_ = true;
     } else {
       blink::state::SetPlayer(explode_to_player);
