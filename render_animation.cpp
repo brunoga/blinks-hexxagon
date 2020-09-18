@@ -77,7 +77,7 @@ bool Lightning(byte origin_face) {
 
     timer_.set(RENDER_ANIMATION_LIGHTNING_MS);
 
-    end_ = random(2);
+    end_ = millis() % 3;  // Pseudo pseudo-random number. :)
   }
 
   setColorOnFace(WHITE, origin_face);
