@@ -15,10 +15,19 @@ static bool animation_started_ = false;
 
 static byte end_;
 
-void Pulse(const Color& base_color, byte start, byte slowdown) {
+static bool reset_timer_if_expired(word ms) {
   if (timer_.isExpired()) {
+    if (!animation_started_) timer_.set(ms);
+
+    return true;
+  }
+
+  return false;
+}
+
+void Pulse(const Color& base_color, byte start, byte slowdown) {
+  if (reset_timer_if_expired((255 - start) * slowdown)) {
     reverse_ = !reverse_;
-    timer_.set((255 - start) * slowdown);
   }
 
   byte base_brightness = timer_.getRemaining() / slowdown;
@@ -29,9 +38,7 @@ void Pulse(const Color& base_color, byte start, byte slowdown) {
 }
 
 void Spinner(const Color& spinner_color, byte num_faces, byte slowdown) {
-  if (timer_.isExpired()) {
-    timer_.set((FACE_COUNT * slowdown) - 1);
-  }
+  reset_timer_if_expired((FACE_COUNT * slowdown) - 1);
 
   byte f = (FACE_COUNT - 1) - timer_.getRemaining() / slowdown;
 
@@ -43,7 +50,7 @@ void Spinner(const Color& spinner_color, byte num_faces, byte slowdown) {
 }
 
 bool Explosion(const Color& base_color) {
-  if (timer_.isExpired()) {
+  if (reset_timer_if_expired(RENDER_ANIMATION_EXPLOSION_MS)) {
     if (animation_started_) {
       animation_started_ = false;
 
@@ -51,8 +58,6 @@ bool Explosion(const Color& base_color) {
     } else {
       animation_started_ = true;
     }
-
-    timer_.set(RENDER_ANIMATION_EXPLOSION_MS);
   }
 
   if (timer_.getRemaining() > 200) {
@@ -62,11 +67,12 @@ bool Explosion(const Color& base_color) {
   } else {
     setColor(OFF);
   }
+
   return false;
 }
 
 bool Lightning(byte origin_face) {
-  if (timer_.isExpired()) {
+  if (reset_timer_if_expired(RENDER_ANIMATION_LIGHTNING_MS)) {
     if (animation_started_) {
       animation_started_ = false;
 
@@ -74,8 +80,6 @@ bool Lightning(byte origin_face) {
     } else {
       animation_started_ = true;
     }
-
-    timer_.set(RENDER_ANIMATION_LIGHTNING_MS);
 
     end_ = millis() % 3;  // Pseudo pseudo-random number. :)
   }
