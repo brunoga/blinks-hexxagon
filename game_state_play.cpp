@@ -17,7 +17,7 @@ namespace play {
 
 static bool auto_select_ = false;
 
-static bool explosion_started_ = false;
+static bool takeover_started_ = false;
 static bool lightning_done_ = false;
 
 static bool __attribute__((noinline))
@@ -41,9 +41,9 @@ search_neighbor_type(byte neighbor_type, byte* source_face) {
   return false;
 }
 
-static bool do_explosion(byte explode_to_player, byte source_face) {
+static bool do_takeover(byte takeover_player, byte source_face) {
   if (!blink::state::GetAnimating()) {
-    if (!explosion_started_) {
+    if (!takeover_started_) {
       blink::state::SetAnimating(true);
       blink::state::SetAnimatingParam(&source_face);
       blink::state::SetAnimatingFunction([](void* param) -> bool {
@@ -60,11 +60,13 @@ static bool do_explosion(byte explode_to_player, byte source_face) {
         return render::animation::Explosion(
             game::player::GetColor(blink::state::GetPlayer()));
       });
-      explosion_started_ = true;
+      takeover_started_ = true;
     } else {
-      blink::state::SetPlayer(explode_to_player);
-      explosion_started_ = false;
+      blink::state::SetPlayer(takeover_player);
+
+      takeover_started_ = false;
       lightning_done_ = false;
+
       return true;
     }
   }
@@ -228,7 +230,7 @@ static void confirm_move(byte* state, byte* specific_state) {
     if (blink::state::GetPlayer() != 0 &&
         blink::state::GetPlayer() != game::state::GetPlayer()) {
       // We are being conquered, trigger explosion animation.
-      do_explosion(game::state::GetPlayer(), source_face);
+      do_takeover(game::state::GetPlayer(), source_face);
     }
   } else {
     if (blink::state::GetOrigin()) {
