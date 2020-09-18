@@ -28,15 +28,12 @@ void Pulse(const Color& base_color, byte start, byte slowdown) {
   setColor(dim(base_color, brightness));
 }
 
-void Spinner(const Color& base_color, const Color& spinner_color,
-             byte num_faces, byte slowdown) {
+void Spinner(const Color& spinner_color, byte num_faces, byte slowdown) {
   if (timer_.isExpired()) {
     timer_.set((FACE_COUNT * slowdown) - 1);
   }
 
   byte f = (FACE_COUNT - 1) - timer_.getRemaining() / slowdown;
-
-  setColor(base_color);
 
   byte step = FACE_COUNT / num_faces;
 
@@ -68,7 +65,7 @@ bool Explosion(const Color& base_color) {
   return false;
 }
 
-bool Lightning(const Color& base_color, byte origin_face) {
+bool Lightning(byte origin_face) {
   if (timer_.isExpired()) {
     if (animation_started_) {
       animation_started_ = false;
@@ -83,24 +80,13 @@ bool Lightning(const Color& base_color, byte origin_face) {
     end_ = random(2);
   }
 
-  byte destination_face = FACE_COUNT;
-  if (timer_.getRemaining() < RENDER_ANIMATION_LIGHTNING_MS - 25) {
-    switch (end_) {
-      case 0:
-        destination_face = (origin_face + 2) % FACE_COUNT;
-        break;
-      case 1:
-        destination_face = (origin_face + FACE_COUNT - 2) % FACE_COUNT;
-        break;
-      case 2:
-        destination_face = (origin_face + 3) % FACE_COUNT;
-    }
-  }
-
-  setColor(base_color);
-
   setColorOnFace(WHITE, origin_face);
-  if (destination_face != FACE_COUNT) setColorOnFace(WHITE, destination_face);
+
+  if (timer_.getRemaining() < RENDER_ANIMATION_LIGHTNING_MS - 25) {
+    byte destination_face = (origin_face + 2 + end_) % FACE_COUNT;
+
+    setColorOnFace(WHITE, destination_face);
+  }
 
   return false;
 }

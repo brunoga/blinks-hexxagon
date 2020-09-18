@@ -15,6 +15,8 @@ void Render() {
   byte player = blink::state::GetPlayer();
   Color player_color = game::player::GetColor(player);
 
+  setColor(player_color);
+
   if (blink::state::GetAnimating()) {
     if (blink::state::RunAnimatingFunction()) {
       blink::state::SetAnimating(false);
@@ -24,7 +26,7 @@ void Render() {
 
   if ((blink::state::GetTarget() && blink::state::GetPlayer() == 0) ||
       blink::state::GetOrigin()) {
-    render::animation::Spinner(player_color, WHITE, 1, 100);
+    render::animation::Spinner(WHITE, 1, 50);
     return;
   }
 
@@ -37,8 +39,6 @@ void Render() {
     setColor(dim(player_color, 94));
     return;
   }
-
-  setColor(player_color);
 }
 
 }  // namespace play
