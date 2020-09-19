@@ -23,18 +23,20 @@ static bool lightning_done_ = false;
 static bool __attribute__((noinline))
 search_neighbor_type(byte neighbor_type, byte* source_face) {
   FOREACH_FACE(f) {
-    blink::state::FaceValue face_value;
-    face_value.as_byte = getLastValueReceivedOnFace(f);
+    if (!isValueReceivedOnFaceExpired(f)) {
+      blink::state::FaceValue face_value;
+      face_value.as_byte = getLastValueReceivedOnFace(f);
 
-    if ((neighbor_type == NEIGHBOR_TYPE_TARGET) && face_value.target) {
-      *source_face = f;
-      return true;
-    }
+      if ((neighbor_type == NEIGHBOR_TYPE_TARGET) && face_value.target) {
+        *source_face = f;
+        return true;
+      }
 
-    if ((neighbor_type == NEIGHBOR_TYPE_ENEMY) && (face_value.player != 0) &&
-        (face_value.player != blink::state::GetPlayer())) {
-      *source_face = f;
-      return true;
+      if ((neighbor_type == NEIGHBOR_TYPE_ENEMY) && (face_value.player != 0) &&
+          (face_value.player != blink::state::GetPlayer())) {
+        *source_face = f;
+        return true;
+      }
     }
   }
 
