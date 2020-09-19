@@ -20,8 +20,7 @@ static bool auto_select_ = false;
 static bool takeover_started_ = false;
 static bool lightning_done_ = false;
 
-static bool __attribute__((noinline))
-search_neighbor_type(byte neighbor_type, byte* source_face) {
+static bool search_neighbor_type(byte neighbor_type, byte* source_face) {
   FOREACH_FACE(f) {
     if (!isValueReceivedOnFaceExpired(f)) {
       blink::state::FaceValue face_value;
