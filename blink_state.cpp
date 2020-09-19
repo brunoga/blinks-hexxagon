@@ -30,7 +30,7 @@ void SetOrigin(bool origin) { state_.origin = origin; }
 bool __attribute__((noinline)) GetOrigin() { return state_.origin; }
 
 void SetTarget(bool target) { state_.target = target; }
-bool GetTarget() { return state_.target; }
+bool __attribute__((noinline)) GetTarget() { return state_.target; }
 
 void SetTargetType(byte target_type) { state_.target_type = target_type; }
 byte GetTargetType() { return state_.target_type; }
