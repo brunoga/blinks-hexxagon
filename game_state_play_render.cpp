@@ -32,7 +32,7 @@ void Render() {
              blink::state::GetOrigin()) {
     // We are either the target Blink (before it is effectively taken over) or
     // the Origin. Render the spinning animation.
-    render::animation::Spinner(WHITE, 3, 50);
+    render::animation::Spinner(WHITE, 1, 50);
   } else if (game::state::GetPlayer() == player) {
     // This Blink belongs to the current player and did not match any of the
     // above conditions. Render a pulsing animation.
