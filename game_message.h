@@ -6,11 +6,11 @@
 #include "game_state.h"
 #include "src/blinks-broadcast/message.h"
 
-#define MESSAGE_GAME_STATE_CHANGE 0
-#define MESSAGE_CHECK_BOARD 1
-#define MESSAGE_GAME_STATE_PLAY_FIND_TARGETS 2
-#define MESSAGE_REPORT_WINNER 3
-#define MESSAGE_FLASH 4
+#define MESSAGE_GAME_STATE_CHANGE 1
+#define MESSAGE_CHECK_BOARD 2
+#define MESSAGE_GAME_STATE_PLAY_FIND_TARGETS 3
+#define MESSAGE_REPORT_WINNER 4
+#define MESSAGE_FLASH 5
 
 namespace game {
 
