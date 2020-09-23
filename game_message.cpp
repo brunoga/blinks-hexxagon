@@ -135,7 +135,7 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
   return len;
 }
 
-static game::state::BlinkCount blink_count_;
+static byte blink_count_[GAME_PLAYER_MAX_PLAYERS + 1];
 static byte upstream_target_;
 
 static void rcv_reply_handler(byte message_id, byte src_face,

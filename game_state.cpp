@@ -18,7 +18,7 @@ struct State {
 };
 static State state_;
 
-static BlinkCount blink_count_;
+static byte blink_count_[GAME_PLAYER_MAX_PLAYERS + 1];
 
 void Set(byte state, bool from_network) {
   state_.previous = state_.current;
@@ -82,13 +82,13 @@ byte UpdateBoardState() {
   return GAME_STATE_UPDATE_BOARD_STATE_OK;
 }
 
-void __attribute__((noinline)) SetBlinkCount(BlinkCount blink_count) {
+void __attribute__((noinline)) SetBlinkCount(byte* blink_count) {
   for (byte i = 0; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
     blink_count_[i] = blink_count == nullptr ? 0 : blink_count[i];
   }
 }
 
-byte GetBlinkCount(byte player) { return blink_count_[player]; }
+byte* GetBlinkCount() { return blink_count_; }
 
 void Reset() {
   state_.current = GAME_STATE_IDLE;

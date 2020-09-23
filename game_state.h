@@ -18,8 +18,6 @@ namespace game {
 
 namespace state {
 
-typedef byte BlinkCount[GAME_PLAYER_MAX_PLAYERS + 1];
-
 void Set(byte state, bool from_network = false);
 byte Get();
 
@@ -32,8 +30,8 @@ void NextPlayer();
 
 byte UpdateBoardState();
 
-void SetBlinkCount(BlinkCount blink_count);
-byte GetBlinkCount(byte player);
+void SetBlinkCount(byte* blink_count);
+byte* GetBlinkCount();
 
 void Reset();
 
