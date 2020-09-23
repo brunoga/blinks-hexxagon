@@ -50,23 +50,18 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       // that this same trick does not work in other state handlers.
       *specific_state = 0;
     }
-  } else {
-    if (buttonDoubleClicked()) {
-      // We seem to be done with setting up the game. We now need to validate if
-      // the board state is actually valid.
-      checking_board_ = true;
-    } else {
-      if (util::NoSleepButtonSingleClicked()) {
-        // Blink was clicked. Switch it to next player. Note that we will never
-        // reach this point if we are validating the game state until we finish
-        // doing it. This is intentional and prevents the local state changing
-        // while we are validating the board. Clicking other Blinks could
-        // potentially mess things up, but there is only so much we can do with
-        // the resources available so we ignore it.
-        blink::state::SetPlayer(
-            game::player::GetNext(blink::state::GetPlayer()));
-      }
-    }
+  } else if (buttonDoubleClicked()) {
+    // We seem to be done with setting up the game. We now need to validate if
+    // the board state is actually valid.
+    checking_board_ = true;
+  } else if (util::NoSleepButtonSingleClicked()) {
+    // Blink was clicked. Switch it to next player. Note that we will never
+    // reach this point if we are validating the game state until we finish
+    // doing it. This is intentional and prevents the local state changing
+    // while we are validating the board. Clicking other Blinks could
+    // potentially mess things up, but there is only so much we can do with
+    // the resources available so we ignore it.
+    blink::state::SetPlayer(game::player::GetNext(blink::state::GetPlayer()));
   }
 }
 

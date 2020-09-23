@@ -11,7 +11,7 @@ namespace idle {
 
 void Render() {
   render::animation::Pulse(game::player::GetColor(0), /*start=*/128,
-                           /*speed=*/10);
+                           /*slowdown=*/10);
 }
 
 }  // namespace idle
