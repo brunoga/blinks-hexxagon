@@ -10,7 +10,8 @@
 #include "render_animation.h"
 
 #ifndef BGA_CUSTOM_BLINKLIB
-#error "This code requires BGA's Custom Blinklib"
+#error \
+    "This code requires a custom blinklib. See https://github.com/brunoga/blinklib/releases/latest"
 #endif
 
 void setup() { game::message::Setup(); }
