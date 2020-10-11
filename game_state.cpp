@@ -6,8 +6,6 @@
 
 namespace game {
 
-namespace state {
-
 struct State {
   byte current;
   byte previous;
@@ -17,6 +15,8 @@ struct State {
   bool from_network;
 };
 static State state_;
+
+namespace state {
 
 static byte blink_count_[GAME_PLAYER_MAX_PLAYERS + 1];
 
