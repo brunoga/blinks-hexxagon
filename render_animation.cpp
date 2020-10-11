@@ -81,7 +81,7 @@ bool Lightning(byte origin_face) {
       animation_started_ = true;
     }
 
-    end_ = millis() % 4;  // Pseudo pseudo-random number. :)
+    end_ = millis() % 3;  // Pseudo pseudo-random number. :)
   }
 
   setColorOnFace(WHITE, origin_face);
