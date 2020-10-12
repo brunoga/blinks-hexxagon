@@ -16,6 +16,7 @@ struct BlinkState {
   bool origin;
   bool target;
   bool animating;
+  bool self_destruct;
   byte player;
   byte target_type;
 };
@@ -40,6 +41,11 @@ void __attribute__((noinline)) SetPlayer(byte player) {
 }
 byte GetPlayer() { return state_.player; }
 
+void SetSelfDestruct(bool self_destruct) {
+  state_.self_destruct = self_destruct;
+}
+byte GetSelfDestruct() { return state_.self_destruct; }
+
 void SetAnimating(bool animating) { state_.animating = animating; }
 bool GetAnimating() { return state_.animating; }
 
@@ -62,6 +68,7 @@ void __attribute__((noinline)) Reset() {
   state_.origin = false;
   state_.target = false;
   state_.animating = false;
+  state_.self_destruct = false;
   state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
   state_.player = 0;
 }
@@ -70,6 +77,7 @@ void __attribute__((noinline)) Render(byte game_state) {
   // "Render" our face value.
   FaceValue face_value;
 
+  face_value.self_destruct = GetSelfDestruct();
   face_value.target = GetTarget();
   face_value.player = GetPlayer();
 

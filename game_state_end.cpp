@@ -27,7 +27,7 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     return;
   }
 
-  if (!blink::state::GetTarget()) return;
+  if (!blink::state::GetTarget() && !blink::state::GetSelfDestruct()) return;
 
   if (state_changed) {
     byte max_count = 0;
@@ -58,6 +58,7 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 
   // Make sure we will not just continue sending messages.
   blink::state::SetTarget(false);
+  blink::state::SetSelfDestruct(false);
 }
 
 }  // namespace end

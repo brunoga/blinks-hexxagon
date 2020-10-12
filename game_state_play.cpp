@@ -8,6 +8,7 @@
 
 #define NEIGHBOR_TYPE_TARGET 0
 #define NEIGHBOR_TYPE_ENEMY 1
+#define NEIGHBOR_TYPE_SELF_DESTRUCT 2
 
 namespace game {
 
@@ -26,15 +27,25 @@ static bool search_neighbor_type(byte neighbor_type, byte* source_face) {
       blink::state::FaceValue face_value;
       face_value.as_byte = getLastValueReceivedOnFace(f);
 
-      if ((neighbor_type == NEIGHBOR_TYPE_TARGET) && face_value.target) {
-        *source_face = f;
-        return true;
-      }
+      *source_face = f;
 
-      if ((neighbor_type == NEIGHBOR_TYPE_ENEMY) && (face_value.player != 0) &&
-          (face_value.player != blink::state::GetPlayer())) {
-        *source_face = f;
-        return true;
+      switch (neighbor_type) {
+        case NEIGHBOR_TYPE_TARGET:
+          if (face_value.target) {
+            return true;
+          }
+          break;
+        case NEIGHBOR_TYPE_ENEMY:
+          if ((face_value.player != 0) &&
+              (face_value.player != blink::state::GetPlayer())) {
+            return true;
+          }
+          break;
+        case NEIGHBOR_TYPE_SELF_DESTRUCT:
+          if (face_value.self_destruct) {
+            return true;
+          }
+          break;
       }
     }
   }
@@ -45,6 +56,10 @@ static bool search_neighbor_type(byte neighbor_type, byte* source_face) {
 static bool do_takeover(byte takeover_player, byte source_face) {
   if (!blink::state::GetAnimating()) {
     if (!takeover_started_) {
+      if (source_face == FACE_COUNT) {
+        lightning_done_ = true;
+      }
+
       blink::state::SetAnimating(true);
       blink::state::SetAnimatingParam(&source_face);
       blink::state::SetAnimatingFunction([](void* param) -> bool {
@@ -89,8 +104,19 @@ static void select_origin(byte* state, byte* specific_state) {
   // Also reset any potential targets.
   blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
 
+  // And reset the self-destruct state.
+  blink::state::SetSelfDestruct(false);
+
   // This blink belongs to a player, but not the current one. Nothing to do.
   if (blink::state::GetPlayer() != game::state::GetPlayer()) return;
+
+  if (buttonMultiClicked()) {
+    blink::state::SetSelfDestruct(true);
+
+    *specific_state = GAME_STATE_PLAY_SELF_DESTRUCT;
+
+    return;
+  }
 
   // We pass all checks, but we do nothing until we get a click.
   if (!button_clicked && !auto_select_) return;
@@ -102,6 +128,36 @@ static void select_origin(byte* state, byte* specific_state) {
 
   // Indicate that an origin was selected.
   *specific_state = GAME_STATE_PLAY_ORIGIN_SELECTED;
+}
+
+static void self_destruct(byte* state, byte* specific_state) {
+  (void)state;
+
+  if (blink::state::GetSelfDestruct()) {
+    // We are the Blink that started self-destructing.
+    if (blink::state::GetPlayer() == 0) {
+      // And we are an empty Blink, which means we already run the takeover
+      // animation.
+      byte unused;
+      if (!search_neighbor_type(NEIGHBOR_TYPE_ENEMY, &unused)) {
+        // No enemy neighbor Blinks. Move on.
+        *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
+      }
+
+      // We are waiting on all Blinks around us to become empty.
+    } else {
+      // Do takeover animation.
+      do_takeover(0, FACE_COUNT);
+    }
+  } else {
+    // We are not the blink that started self-destructing.
+    byte origin_face;
+    if ((blink::state::GetPlayer() != 0) &&
+        search_neighbor_type(NEIGHBOR_TYPE_SELF_DESTRUCT, &origin_face)) {
+      // But is is out neighbor. Do takeover animation.
+      do_takeover(0, origin_face);
+    }
+  }
 }
 
 static void origin_selected(byte* state, byte* specific_state) {
@@ -138,7 +194,8 @@ static void select_target(byte* state, byte* specific_state) {
 
   bool button_clicked = util::NoSleepButtonSingleClicked();
 
-  // We are going to select a target, so reset any blink that is currently one.
+  // We are going to select a target, so reset any blink that is currently
+  // one.
   blink::state::SetTarget(false);
 
   // If we are not a possible target or a Blink that belongs to the current
@@ -157,8 +214,8 @@ static void select_target(byte* state, byte* specific_state) {
   // Are we a blink that belongs to the current player?
   if (blink::state::GetPlayer() == game::state::GetPlayer()) {
     if (!blink::state::GetOrigin()) {
-      // If we are not the origin we automatically switch to the new origin. If
-      // we are the current origin, then we just deselect ourselves.
+      // If we are not the origin we automatically switch to the new origin.
+      // If we are the current origin, then we just deselect ourselves.
       auto_select_ = true;
     }
 
@@ -233,8 +290,8 @@ static void confirm_move(byte* state, byte* specific_state) {
     }
   } else {
     if (blink::state::GetOrigin()) {
-      // We are the origin and the target is not an immediate neighboor. We are
-      // moving from here so reset ourselves.
+      // We are the origin and the target is not an immediate neighboor. We
+      // are moving from here so reset ourselves.
       blink::state::Reset();
     }
   }
@@ -256,7 +313,7 @@ static void confirm_move(byte* state, byte* specific_state) {
 }
 
 static void move_confirmed(byte* state, byte* specific_state) {
-  if (!blink::state::GetTarget()) return;
+  if (!blink::state::GetTarget() && !blink::state::GetSelfDestruct()) return;
 
   byte result = game::state::UpdateBoardState();
 
@@ -283,12 +340,12 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     // Turn is being passed. Switch to next player.
     game::state::NextPlayer();
 
-    // Manually force a state that is not the select origin one so that even if
-    // we are currently in it, the state will be propagate to the other Blinks
-    // (the next player information is propagated with state changes). This is
-    // cheaper than keeping track of the previous player in the game state and
-    // using that for automatically deciding if the state should be propagated
-    // or not.
+    // Manually force a state that is not the select origin one so that even
+    // if we are currently in it, the state will be propagate to the other
+    // Blinks (the next player information is propagated with state changes).
+    // This is cheaper than keeping track of the previous player in the game
+    // state and using that for automatically deciding if the state should be
+    // propagated or not.
     game::state::SetSpecific(GAME_STATE_PLAY_MOVE_CONFIRMED);
 
     // Next player will select origin.
@@ -300,6 +357,9 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
   switch (*specific_state) {
     case GAME_STATE_PLAY_SELECT_ORIGIN:
       select_origin(state, specific_state);
+      break;
+    case GAME_STATE_PLAY_SELF_DESTRUCT:
+      self_destruct(state, specific_state);
       break;
     case GAME_STATE_PLAY_ORIGIN_SELECTED:
       origin_selected(state, specific_state);
