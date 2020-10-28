@@ -16,6 +16,8 @@ jobs:
       # First of all, we clone the repo using the checkout action.
       - name: Checkout
         uses: actions/checkout@master
+        with:
+          submodules: true
  
       # We use the arduino/setup-arduino-cli action to install and
       # configure the Arduino CLI on the system.
@@ -28,11 +30,11 @@ jobs:
         run: |
           arduino-cli core update-index --additional-urls https://github.com/brunoga/blinklib/releases/latest/download/package_bga_blinklib_index.json
           arduino-cli core install arduino:avr
-          arduino-cli core install move38:avr --additional-urls https://github.com/brunoga/blinklib/releases/latest/download/package_bga_blinklib_index.json
+          arduino-cli core install blinklib:avr --additional-urls https://github.com/brunoga/blinklib/releases/latest/download/package_bga_blinklib_index.json
  
       # Finally, we compile the sketch
       - name: Compile Sketch
-        run: arduino-cli compile --fqbn move38:avr:blink --output-dir ./build ./sketch
+        run: arduino-cli compile --fqbn blinklib:avr:blink --output-dir ./build ./sketch
       
       - name: Upload Sketch
         uses: actions/upload-artifact@v2
