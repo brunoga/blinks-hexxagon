@@ -39,7 +39,8 @@ jobs:
       - name: Write Upload Script
         run: | 
           mkdir -p ./build
-          printf '#!/bin/bash\navrdude -B 5 -v -patmega168pb -cusbtiny -Uflash:w:blinks-hexxagon.ino.with_bootloader.hex:i -u\n' > blinks-hexxagon-upload.sh 
+          echo '#!/bin/bash' > blinks-hexxagon-upload.sh
+          echo 'avrdude -B 5 -v -patmega168pb -cusbtiny -Uflash:w:blinks-hexxagon.ino.with_bootloader.hex:i -u' >> blinks-hexxagon-upload.sh 
           chmod u+x ./build/blinks-hexxagon-upload.sh
         
       - name: Upload Sketch
