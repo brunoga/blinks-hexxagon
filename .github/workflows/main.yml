@@ -40,5 +40,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: compiled-game-code
-          path: ./build/
+          path: ./build/blinks-hexxagon.ino.with_bootloader.hex
 
