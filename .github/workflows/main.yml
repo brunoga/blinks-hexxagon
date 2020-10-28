@@ -36,18 +36,22 @@ jobs:
       - name: Compile Sketch
         run: arduino-cli compile --fqbn blinklib:avr:blink --output-dir ./build ./sketch
       
-      - name: Write Upload Script
+      - name: Copy Sketch
         run: | 
-          mkdir -p ./build
-          echo '#!/bin/bash' > ./build/blinks-hexxagon-upload.sh
-          echo 'avrdude -B 5 -v -patmega168pb -cusbtiny -Uflash:w:blinks-hexxagon.ino.with_bootloader.hex:i -u' >> ./build/blinks-hexxagon-upload.sh 
-          chmod u+x ./build/blinks-hexxagon-upload.sh
+          mkdir -p ./blinks-hexxagon/build
+          cp ./build/blinks-hexxagon.ino.with_bootloader.hex ./blinks-hexxagon/build/.
         
       - name: Upload Sketch
         uses: actions/upload-artifact@v2
         with:
           name: blinks-hexxagon
-          path: |
-            ./build/blinks-hexxagon.ino.with_bootloader.hex
-            ./build/blinks-hexxagon-upload.sh
+          path: ./build/
             
+      - name: Commit Sketch
+        uses: EndBug/add-and-commit@v5
+        with:
+          author_name: Bruno Albuquerque
+          author_email: bga@gmail.com
+          add: "build/blinks-hexxagon.ino.with_bootloader.hex"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
