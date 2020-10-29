@@ -38,9 +38,9 @@ void loop() {
     bool state_changed = game::state::Changed(false);
 
     if (game::state::Changed()) {
-      // State (including specific state) changed. Reset animation timer to
-      // improve pulse synchronization.
-      render::animation::ResetTimer();
+      // State (including specific state) changed. Reset pulse timer to
+      // improve synchronization.
+      render::animation::ResetPulseTimer();
     }
 
     // Run our state machine.

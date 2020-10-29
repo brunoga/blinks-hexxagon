@@ -7,7 +7,7 @@ namespace render {
 
 namespace animation {
 
-void ResetTimer();
+void ResetPulseTimer();
 
 void Pulse(const Color& base_color, byte start, byte slowdown);
 void Spinner(const Color& spinner_color, byte num_faces, byte slowdown);
