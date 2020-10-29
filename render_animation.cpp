@@ -10,14 +10,16 @@ namespace render {
 namespace animation {
 
 static Timer timer_;
+static Timer pulse_timer_;
+
 static bool reverse_ = true;
 static bool animation_started_ = false;
 
 static byte end_;
 
-static bool reset_timer_if_expired(word ms) {
-  if (timer_.isExpired()) {
-    if (!animation_started_) timer_.set(ms);
+static bool reset_timer_if_expired(Timer* timer, word ms) {
+  if (timer->isExpired()) {
+    if (!animation_started_) timer->set(ms);
 
     return true;
   }
@@ -26,11 +28,11 @@ static bool reset_timer_if_expired(word ms) {
 }
 
 void Pulse(const Color& base_color, byte start, byte slowdown) {
-  if (reset_timer_if_expired((255 - start) * slowdown)) {
+  if (reset_timer_if_expired(&pulse_timer_, (255 - start) * slowdown)) {
     reverse_ = !reverse_;
   }
 
-  byte base_brightness = timer_.getRemaining() / slowdown;
+  byte base_brightness = pulse_timer_.getRemaining() / slowdown;
 
   byte brightness = reverse_ ? 255 - base_brightness : start + base_brightness;
 
@@ -38,7 +40,7 @@ void Pulse(const Color& base_color, byte start, byte slowdown) {
 }
 
 void Spinner(const Color& spinner_color, byte num_faces, byte slowdown) {
-  reset_timer_if_expired((FACE_COUNT * slowdown) - 1);
+  reset_timer_if_expired(&timer_, (FACE_COUNT * slowdown) - 1);
 
   byte f = (FACE_COUNT - 1) - timer_.getRemaining() / slowdown;
 
@@ -50,7 +52,7 @@ void Spinner(const Color& spinner_color, byte num_faces, byte slowdown) {
 }
 
 bool Explosion(const Color& base_color) {
-  if (reset_timer_if_expired(RENDER_ANIMATION_EXPLOSION_MS)) {
+  if (reset_timer_if_expired(&timer_, RENDER_ANIMATION_EXPLOSION_MS)) {
     if (animation_started_) {
       animation_started_ = false;
 
@@ -72,7 +74,7 @@ bool Explosion(const Color& base_color) {
 }
 
 bool Lightning(byte origin_face) {
-  if (reset_timer_if_expired(RENDER_ANIMATION_LIGHTNING_MS)) {
+  if (reset_timer_if_expired(&timer_, RENDER_ANIMATION_LIGHTNING_MS)) {
     if (animation_started_) {
       animation_started_ = false;
 
