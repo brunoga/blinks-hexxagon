@@ -37,6 +37,12 @@ void loop() {
     byte specific_state = game::state::GetSpecific();
     bool state_changed = game::state::Changed(false);
 
+    if (game::state::Changed()) {
+      // State (including specific state) changed. Reset animation timer to
+      // improve pulse synchronization.
+      render::animation::ResetTimer();
+    }
+
     // Run our state machine.
     switch (state) {
       case GAME_STATE_IDLE:
