@@ -286,7 +286,7 @@ static void confirm_move(byte* state, byte* specific_state) {
     if (blink::state::GetPlayer() != 0 &&
         blink::state::GetPlayer() != game::state::GetPlayer()) {
       // We are being conquered, trigger explosion animation.
-      do_takeover(game::state::GetPlayer(), source_face);
+      if (!do_takeover(game::state::GetPlayer(), source_face)) return;
     }
   } else {
     if (blink::state::GetOrigin()) {
