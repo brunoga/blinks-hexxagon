@@ -168,7 +168,7 @@ static void origin_selected(byte* state, byte* specific_state) {
 
   // Look for possible targets. Only continue when all other blinks report in.
   broadcast::Message reply;
-  if (!game::message::SendGameStatePlayFindTargets(&reply)) return;
+  if (!game::message::SendFindTargets(&reply)) return;
 
   // Did we find any targets?
   if (reply.payload[0] == 0) {

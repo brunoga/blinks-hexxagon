@@ -39,6 +39,8 @@ bool Changed(bool include_specific = true);
 
 bool Propagate();
 
+bool FromNetwork();
+
 }  // namespace state
 
 }  // namespace game

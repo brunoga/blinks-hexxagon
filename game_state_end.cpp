@@ -18,17 +18,6 @@ static byte winner_player_;
 void Handler(bool state_changed, byte* state, byte* specific_state) {
   (void)specific_state;
 
-  if (util::NoSleepButtonSingleClicked()) {
-    // Ok to ignore result.
-    game::message::SendFlash();
-
-    *state = GAME_STATE_IDLE;
-
-    return;
-  }
-
-  if (!blink::state::GetTarget() && !blink::state::GetSelfDestruct()) return;
-
   if (state_changed) {
     byte max_count = 0;
     for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
@@ -41,23 +30,24 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       }
     }
 
-    sent_flash_ = false;
+    sent_flash_ = game::state::FromNetwork();
+  }
+
+  if (util::NoSleepButtonSingleClicked()) {
+    // Ok to ignore result.
+    game::message::SendFlash();
+
+    *state = GAME_STATE_IDLE;
+
+    return;
   }
 
   if (!sent_flash_ && !game::message::SendFlash()) return;
 
   sent_flash_ = true;
 
-  // We need to do this because there might be a draw and, in this case, the
-  // "winner player" is the empty Blink. If we do not switch, we would still
-  // display the color of the last player to move.
+  // Switch to the winner player.
   blink::state::SetPlayer(winner_player_);
-
-  if (!game::message::SendReportWinner(winner_player_)) return;
-
-  // Make sure we will not just continue sending messages.
-  blink::state::SetTarget(false);
-  blink::state::SetSelfDestruct(false);
 }
 
 }  // namespace end

@@ -78,7 +78,7 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
       game::state::SetSpecific(data.specific_state, true);
       game::state::SetPlayer(data.next_player + 1);
       break;
-    case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
+    case MESSAGE_FIND_TARGETS:
       if (blink::state::GetPlayer() != 0) break;
 
       if (abs(int8_t(payload[0])) <= 2 && abs(int8_t(payload[1])) <= 2 &&
@@ -88,9 +88,6 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
       break;
     case MESSAGE_REPORT_BOARD_STATE:
       game::state::SetBlinkCount(payload);
-      break;
-    case MESSAGE_REPORT_WINNER:
-      blink::state::SetPlayer(payload[0]);
       break;
     case MESSAGE_FLASH:
       blink::state::StartColorOverride();
@@ -105,7 +102,7 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
   byte len = MESSAGE_PAYLOAD_BYTES;
 
   switch (message_id) {
-    case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
+    case MESSAGE_FIND_TARGETS:
       if (src_face == FACE_COUNT) {
         // We are the source of the coordinate system. Set payload using the
         // real face number.
@@ -127,7 +124,6 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
       len = 4;
       break;
     case MESSAGE_GAME_STATE_CHANGE:
-    case MESSAGE_REPORT_WINNER:
       len = 1;
       break;
     case MESSAGE_CHECK_BOARD_STATE:
@@ -153,7 +149,7 @@ static void rcv_reply_handler(byte message_id, byte src_face,
       }
       break;
 
-    case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
+    case MESSAGE_FIND_TARGETS:
       if (payload[0] != 0) {
         upstream_target_ = true;
       }
@@ -177,7 +173,7 @@ static byte fwd_reply_handler(byte message_id, byte dst_face, byte* payload) {
 
       len = GAME_PLAYER_MAX_PLAYERS + 1;
       break;
-    case MESSAGE_GAME_STATE_PLAY_FIND_TARGETS:
+    case MESSAGE_FIND_TARGETS:
       if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_TARGET ||
           upstream_target_) {
         // Just indicate in the payload that we are or we know a target.
@@ -250,13 +246,8 @@ bool SendReportBoardState() {
                             GAME_PLAYER_MAX_PLAYERS + 1, nullptr);
 }
 
-bool SendGameStatePlayFindTargets(broadcast::Message* reply) {
-  return sendOrWaitForReply(MESSAGE_GAME_STATE_PLAY_FIND_TARGETS, nullptr, 0,
-                            reply);
-}
-
-bool SendReportWinner(byte winner_player) {
-  return sendOrWaitForReply(MESSAGE_REPORT_WINNER, &winner_player, 1, nullptr);
+bool SendFindTargets(broadcast::Message* reply) {
+  return sendOrWaitForReply(MESSAGE_FIND_TARGETS, nullptr, 0, reply);
 }
 
 bool SendFlash() {

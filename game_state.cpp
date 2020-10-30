@@ -128,6 +128,8 @@ bool Propagate() {
   return true;
 }
 
+bool FromNetwork() { return state_.from_network; }
+
 }  // namespace state
 
 }  // namespace game
