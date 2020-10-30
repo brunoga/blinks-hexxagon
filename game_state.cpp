@@ -58,11 +58,15 @@ void NextPlayer() {
 
 byte UpdateBoardState() {
   broadcast::Message reply;
-  if (!game::message::SendCheckBoard(&reply)) {
+  if (!game::message::SendCheckBoardState(&reply)) {
     return GAME_STATE_UPDATE_BOARD_STATE_UPDATING;
   }
 
   SetBlinkCount(reply.payload);
+
+  // Tell all other Blinks about the computed Blink count. No need to check for
+  // the return code as we just got a reply back at this point.
+  game::message::SendReportBoardState();
 
   if (reply.payload[0] == 0) {
     // We need at least one empty Blink.

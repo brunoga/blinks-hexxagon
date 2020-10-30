@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "blink_state.h"
+#include "game_player.h"
 #include "game_state.h"
 #include "game_state_play.h"
 #include "src/blinks-broadcast/manager.h"
@@ -85,6 +86,9 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
         blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_TARGET);
       }
       break;
+    case MESSAGE_REPORT_BOARD_STATE:
+      game::state::SetBlinkCount(payload);
+      break;
     case MESSAGE_REPORT_WINNER:
       blink::state::SetPlayer(payload[0]);
       break;
@@ -126,7 +130,7 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
     case MESSAGE_REPORT_WINNER:
       len = 1;
       break;
-    case MESSAGE_CHECK_BOARD:
+    case MESSAGE_CHECK_BOARD_STATE:
     case MESSAGE_FLASH:
       len = 0;
       break;
@@ -143,7 +147,7 @@ static void rcv_reply_handler(byte message_id, byte src_face,
   (void)src_face;
 
   switch (message_id) {
-    case MESSAGE_CHECK_BOARD:
+    case MESSAGE_CHECK_BOARD_STATE:
       for (byte i = 0; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
         blink_count_[i] += payload[i];
       }
@@ -163,7 +167,7 @@ static byte fwd_reply_handler(byte message_id, byte dst_face, byte* payload) {
   byte len = MESSAGE_PAYLOAD_BYTES;
 
   switch (message_id) {
-    case MESSAGE_CHECK_BOARD:
+    case MESSAGE_CHECK_BOARD_STATE:
       blink_count_[blink::state::GetPlayer()]++;
 
       for (byte i = 0; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
@@ -213,9 +217,14 @@ static bool sendOrWaitForReply(broadcast::Message* message,
   return false;
 }
 
-static bool sendOrWaitForReply(byte message_id, broadcast::Message* reply) {
+static bool sendOrWaitForReply(byte message_id, const byte* payload,
+                               byte payload_size, broadcast::Message* reply) {
   broadcast::Message message;
-  broadcast::message::Initialize(&message, message_id, false);
+  broadcast::message::Initialize(&message, message_id, reply == nullptr);
+
+  if (payload != nullptr) {
+    memcpy(message.payload, payload, payload_size);
+  }
 
   return sendOrWaitForReply(&message, reply);
 }
@@ -228,38 +237,30 @@ void Setup() {
 void Process() { broadcast::manager::Process(); }
 
 bool SendGameStateChange(byte payload) {
-  broadcast::Message message;
-
-  broadcast::message::Initialize(&message, MESSAGE_GAME_STATE_CHANGE, true);
-
-  message.payload[0] = payload;
-
-  return sendOrWaitForReply(&message, nullptr);
+  return sendOrWaitForReply(MESSAGE_GAME_STATE_CHANGE, &payload, 1, nullptr);
 }
 
-bool SendCheckBoard(broadcast::Message* reply) {
-  return sendOrWaitForReply(MESSAGE_CHECK_BOARD, reply);
+bool SendCheckBoardState(broadcast::Message* reply) {
+  return sendOrWaitForReply(MESSAGE_CHECK_BOARD_STATE, nullptr, 0, reply);
+}
+
+bool SendReportBoardState() {
+  return sendOrWaitForReply(MESSAGE_REPORT_BOARD_STATE,
+                            game::state::GetBlinkCount(),
+                            GAME_PLAYER_MAX_PLAYERS + 1, nullptr);
 }
 
 bool SendGameStatePlayFindTargets(broadcast::Message* reply) {
-  return sendOrWaitForReply(MESSAGE_GAME_STATE_PLAY_FIND_TARGETS, reply);
+  return sendOrWaitForReply(MESSAGE_GAME_STATE_PLAY_FIND_TARGETS, nullptr, 0,
+                            reply);
 }
 
 bool SendReportWinner(byte winner_player) {
-  broadcast::Message message;
-
-  broadcast::message::Initialize(&message, MESSAGE_REPORT_WINNER, true);
-  message.payload[0] = winner_player;
-
-  return sendOrWaitForReply(&message, nullptr);
+  return sendOrWaitForReply(MESSAGE_REPORT_WINNER, &winner_player, 1, nullptr);
 }
 
 bool SendFlash() {
-  broadcast::Message message;
-
-  broadcast::message::Initialize(&message, MESSAGE_FLASH, true);
-
-  if (sendOrWaitForReply(&message, nullptr)) {
+  if (sendOrWaitForReply(MESSAGE_FLASH, nullptr, 0, nullptr)) {
     blink::state::StartColorOverride();
 
     return true;
