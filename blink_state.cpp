@@ -83,7 +83,7 @@ void __attribute__((noinline)) Render(byte game_state) {
 
   setValueSentOnAllFaces(face_value.as_byte);
 
-  if (blink::state::GetColorOverride()) {
+  if (GetColorOverride()) {
     setColor(WHITE);
 
     return;
