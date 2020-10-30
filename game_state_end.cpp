@@ -12,7 +12,6 @@ namespace state {
 
 namespace end {
 
-static bool sent_flash_;
 static byte winner_player_;
 
 void Handler(bool state_changed, byte* state, byte* specific_state) {
@@ -29,8 +28,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
         winner_player_ = 0;
       }
     }
-
-    sent_flash_ = game::state::FromNetwork();
   }
 
   if (util::NoSleepButtonSingleClicked()) {
@@ -41,10 +38,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 
     return;
   }
-
-  if (!sent_flash_ && !game::message::SendFlash()) return;
-
-  sent_flash_ = true;
 
   // Switch to the winner player.
   blink::state::SetPlayer(winner_player_);

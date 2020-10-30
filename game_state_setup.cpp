@@ -30,12 +30,7 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     // over.
     checking_board_ = false;
 
-    if (result == GAME_STATE_UPDATE_BOARD_STATE_ERROR) {
-      // Game is in an invalid state. Warn the user making all Blinks flash
-      // white. It is ok not to check the return value here as we just finished
-      // procesing the board state.
-      game::message::SendFlash();
-    } else {
+    if (result == GAME_STATE_UPDATE_BOARD_STATE_OK) {
       // Game state is good. Switch to first available player.
       game::state::NextPlayer();
 

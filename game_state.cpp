@@ -56,34 +56,77 @@ void NextPlayer() {
   SetPlayer(next_player);
 }
 
+#define UPDATE_BOARD_STATE_UPDATE 0
+#define UPDATE_BOARD_STATE_CHECKING 1
+#define UPDATE_BOARD_STATE_SEND_FLASH 2
+#define UPDATE_BOARD_STATE_REPORT 3
+#define UPDATE_BOARD_STATE_DONE 4
+
+static byte update_board_state_state_ = UPDATE_BOARD_STATE_UPDATE;
+static bool update_board_state_error_;
+
 byte UpdateBoardState() {
-  broadcast::Message reply;
-  if (!game::message::SendCheckBoardState(&reply)) {
-    return GAME_STATE_UPDATE_BOARD_STATE_UPDATING;
+  switch (update_board_state_state_) {
+    case UPDATE_BOARD_STATE_UPDATE: {
+      broadcast::Message reply;
+      if (game::message::SendCheckBoardState(&reply)) {
+        SetBlinkCount(reply.payload);
+
+        update_board_state_state_ = UPDATE_BOARD_STATE_CHECKING;
+      }
+
+      break;
+    }
+    case UPDATE_BOARD_STATE_CHECKING: {
+      update_board_state_state_ = UPDATE_BOARD_STATE_SEND_FLASH;
+      update_board_state_error_ = true;
+
+      byte* blink_count = GetBlinkCount();
+      if (blink_count[0] > 0) {
+        // We have at least one empty Blink.
+
+        // Check player blinks.
+        byte players_count = 0;
+        for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
+          if (blink_count[i] > 0) players_count++;
+        }
+
+        if (players_count >= 2) {
+          // We have at least 2 players. Board state is valid.
+          update_board_state_state_ = UPDATE_BOARD_STATE_REPORT;
+          update_board_state_error_ = false;
+        }
+      }
+
+      break;
+    }
+    case UPDATE_BOARD_STATE_SEND_FLASH:
+      if (game::message::SendFlash()) {
+        update_board_state_state_ = UPDATE_BOARD_STATE_REPORT;
+      }
+
+      break;
+    case UPDATE_BOARD_STATE_REPORT:
+      if (game::message::SendReportBoardState()) {
+        update_board_state_state_ = UPDATE_BOARD_STATE_DONE;
+      }
+
+      break;
+    case UPDATE_BOARD_STATE_DONE:
+      if (isDatagramPendingOnAnyFace()) {
+        return GAME_STATE_UPDATE_BOARD_STATE_UPDATING;
+      }
+
+      update_board_state_state_ = UPDATE_BOARD_STATE_UPDATE;
+
+      if (update_board_state_error_) {
+        return GAME_STATE_UPDATE_BOARD_STATE_ERROR;
+      }
+
+      return GAME_STATE_UPDATE_BOARD_STATE_OK;
   }
 
-  SetBlinkCount(reply.payload);
-
-  // Tell all other Blinks about the computed Blink count. No need to check for
-  // the return code as we just got a reply back at this point.
-  game::message::SendReportBoardState();
-
-  if (reply.payload[0] == 0) {
-    // We need at least one empty Blink.
-    return GAME_STATE_UPDATE_BOARD_STATE_ERROR;
-  }
-
-  byte players_count = 0;
-  for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
-    if (reply.payload[i] > 0) players_count++;
-  }
-
-  if (players_count < 2) {
-    // We need at least two players.
-    return GAME_STATE_UPDATE_BOARD_STATE_ERROR;
-  }
-
-  return GAME_STATE_UPDATE_BOARD_STATE_OK;
+  return GAME_STATE_UPDATE_BOARD_STATE_UPDATING;
 }
 
 void __attribute__((noinline)) SetBlinkCount(byte* blink_count) {
@@ -92,7 +135,7 @@ void __attribute__((noinline)) SetBlinkCount(byte* blink_count) {
   }
 }
 
-byte* GetBlinkCount() { return blink_count_; }
+byte* __attribute__((noinline)) GetBlinkCount() { return blink_count_; }
 
 void Reset() {
   state_.current = GAME_STATE_IDLE;
