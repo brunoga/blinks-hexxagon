@@ -12,13 +12,12 @@
 #define MESSAGE_STATE_SEND_MESSAGE 0
 #define MESSAGE_STATE_WAIT_FOR_RESULT 1
 
-// Coordinates stored in find targets the payload.
+// Coordinates stored in the find targets payload.
 #define PAYLOAD_X 0
 #define PAYLOAD_Y 1
-#define PAYLOAD_Z 2
 
 // Face the find targets payload was originally sent to.
-#define PAYLOAD_FACE 3
+#define PAYLOAD_FACE 2
 
 namespace game {
 
@@ -28,33 +27,29 @@ static const byte opposite_face_[] = {3, 4, 5, 0, 1, 2};
 
 static byte message_state_ = MESSAGE_STATE_SEND_MESSAGE;
 
-static byte abs(int8_t i) { return i < 0 ? -i : i; }
+static byte abs(int8_t i) { return ((i < 0) ? -i : i); }
 
 static void set_payload_for_face(byte* payload, byte f) {
   switch (f) {
     case 0:
       payload[PAYLOAD_Y]--;
-      payload[PAYLOAD_Z]--;
       break;
     case 1:
       payload[PAYLOAD_X]--;
-      payload[PAYLOAD_Y]--;
       break;
     case 2:
       payload[PAYLOAD_X]--;
-      payload[PAYLOAD_Z]++;
+      payload[PAYLOAD_Y]++;
       break;
     case 3:
       payload[PAYLOAD_Y]++;
-      payload[PAYLOAD_Z]++;
       break;
     case 4:
       payload[PAYLOAD_X]++;
-      payload[PAYLOAD_Y]++;
       break;
     case 5:
       payload[PAYLOAD_X]++;
-      payload[PAYLOAD_Z]--;
+      payload[PAYLOAD_Y]--;
   }
 
   payload[PAYLOAD_FACE] = f;
@@ -78,14 +73,18 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
       game::state::SetSpecific(data.specific_state, true);
       game::state::SetPlayer(data.next_player + 1);
       break;
-    case MESSAGE_FIND_TARGETS:
+    case MESSAGE_FIND_TARGETS: {
       if (blink::state::GetPlayer() != 0) break;
 
-      if (abs(int8_t(payload[0])) <= 2 && abs(int8_t(payload[1])) <= 2 &&
-          abs(int8_t(payload[2])) <= 2) {
+      int8_t x = payload[PAYLOAD_X];
+      int8_t y = payload[PAYLOAD_Y];
+      int8_t z = -(x + y);
+
+      if (abs(x) <= 2 && abs(y) <= 2 && abs(z) <= 2) {
         blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_TARGET);
       }
       break;
+    }
     case MESSAGE_REPORT_BOARD_STATE:
       game::state::SetBlinkCount(payload);
       break;
@@ -93,7 +92,7 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
       blink::state::StartColorOverride();
       break;
   }
-}
+}  // namespace message
 
 static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
                                 byte* payload) {
@@ -110,7 +109,7 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
       } else {
         // The input face is the face opposite to the face the message was
         // sent to.
-        byte input_face = opposite_face_[payload[3]];
+        byte input_face = opposite_face_[payload[PAYLOAD_FACE]];
 
         // The output face is the normalized face in relation to the input
         // face.
@@ -121,7 +120,7 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
         set_payload_for_face(payload, output_face);
       }
 
-      len = 4;
+      len = 3;
       break;
     case MESSAGE_GAME_STATE_CHANGE:
       len = 1;
