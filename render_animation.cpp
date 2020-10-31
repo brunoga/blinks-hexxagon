@@ -11,14 +11,6 @@ namespace animation {
 
 static Timer timer_;
 
-// We use a separate timer for the pulse animation so it can be reset on any
-// state changes.
-//
-// TODO(bga): If not using a separate timer, a side effect was that sometimes
-// Blinks that were not involved in a move would trigger the takeover animation
-// and I have no idea why. Investigate this.
-static Timer pulse_timer_;
-
 static bool reverse_ = true;
 static bool animation_started_ = false;
 
@@ -35,17 +27,16 @@ static bool reset_timer_if_expired(word ms) {
 }
 
 void ResetPulseTimer() {
-  pulse_timer_.set(0);
+  timer_.set(0);
   reverse_ = true;
 }
 
 void Pulse(const Color& base_color, byte start, byte slowdown) {
-  if (pulse_timer_.isExpired()) {
-    pulse_timer_.set((255 - start) * slowdown);
+  if (reset_timer_if_expired((255 - start) * slowdown)) {
     reverse_ = !reverse_;
   }
 
-  byte base_brightness = pulse_timer_.getRemaining() / slowdown;
+  byte base_brightness = timer_.getRemaining() / slowdown;
 
   byte brightness = reverse_ ? 255 - base_brightness : start + base_brightness;
 
