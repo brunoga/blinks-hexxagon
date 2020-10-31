@@ -37,4 +37,14 @@ Godspeed.
   </tr>
 </table>
 
-TODO(bga): Add actual instructions.
+As the strategist, your main objective is to decide how and where to move your expansion efforts so you can increase your controlled area and, whenever possible, take over controlled area from other players. You also need to be carefull as the other players will be trying to do just the same.
+
+Your main interface to do that is a highly (if simple-looking) piece of gear: The Battle Linked Interface Network Kit (a.k.a. BLINK). Each BLINK is a small hexagonal piece that represents one unit of area that can be controlled by a player. You will have access to several of these devices that are linked together in a way that represents the disputed area and you will be able to use this representation to direct your troops movement.
+
+## Setting Up
+
+You should have received several BLINKs that might need to be setup before you can start controlling your troops. Please locate the BLINK that is explicitly marked with Hexxagon as that will be the one with the latest version of the strategic software. Set it aside.
+
+Connect all other BLINKs in the shape of the disputed area (keep in mind that the Hexxagon BLINK will be connected later on). Make sure all your BLINKs are powered on (if they are, they should show lights. If not, just click them). Press your Hexxagon BLINK button and hold until you see a fast-flashing blue light animation. Release the button (it will switch to a slower rotating animation) and connect it to your disputed area representation and notice the software being spread to the other BLINKs. Wait until all BLINKs show an ORANGE pulse animation. Please see the instructional video below for more information: https://www.youtube.com/watch?v=PQyzGJMQOqY
+
+TODO(bga): Continue this.
