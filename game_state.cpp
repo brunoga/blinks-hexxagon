@@ -114,7 +114,7 @@ byte UpdateBoardState() {
       break;
     case UPDATE_BOARD_STATE_DONE:
       if (isDatagramPendingOnAnyFace()) {
-        return GAME_STATE_UPDATE_BOARD_STATE_UPDATING;
+        break;
       }
 
       update_board_state_state_ = UPDATE_BOARD_STATE_UPDATE;
