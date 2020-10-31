@@ -169,8 +169,6 @@ static byte fwd_reply_handler(byte message_id, byte dst_face, byte* payload) {
         payload[i] = blink_count_[i];
         blink_count_[i] = 0;
       }
-
-      len = GAME_PLAYER_MAX_PLAYERS + 1;
       break;
     case MESSAGE_FIND_TARGETS:
       if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_TARGET ||
