@@ -61,10 +61,10 @@ static bool do_takeover(byte takeover_player, byte source_face) {
       }
 
       blink::state::SetAnimating(true);
-      blink::state::SetAnimatingParam(&source_face);
-      blink::state::SetAnimatingFunction([](void* param) -> bool {
+      blink::state::SetAnimatingParam(source_face);
+      blink::state::SetAnimatingFunction([](byte param) -> bool {
         if (!lightning_done_) {
-          if (!render::animation::Lightning(*((byte*)param))) {
+          if (!render::animation::Lightning(param)) {
             return false;
           }
 
@@ -74,6 +74,7 @@ static bool do_takeover(byte takeover_player, byte source_face) {
         return render::animation::Explosion(
             game::player::GetColor(blink::state::GetPlayer()));
       });
+
       takeover_started_ = true;
     } else {
       blink::state::SetPlayer(takeover_player);

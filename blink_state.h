@@ -38,8 +38,8 @@ byte GetSelfDestruct();
 
 void SetAnimating(bool animating);
 bool GetAnimating();
-void SetAnimatingParam(void* animating_param);
-void SetAnimatingFunction(bool (*animating_function)(void* param));
+void SetAnimatingParam(byte animating_param);
+void SetAnimatingFunction(bool (*animating_function)(byte param));
 bool RunAnimatingFunction();
 
 void StartColorOverride();

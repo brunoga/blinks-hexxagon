@@ -24,8 +24,8 @@ static BlinkState state_;
 
 static Timer color_override_timer_;
 
-static void* animating_param_;
-static bool (*animating_function_)(void* param);
+static byte animating_param_;
+static bool (*animating_function_)(byte param);
 
 void SetOrigin(bool origin) { state_.origin = origin; }
 bool __attribute__((noinline)) GetOrigin() { return state_.origin; }
@@ -49,10 +49,10 @@ byte GetSelfDestruct() { return state_.self_destruct; }
 void SetAnimating(bool animating) { state_.animating = animating; }
 bool GetAnimating() { return state_.animating; }
 
-void SetAnimatingParam(void* animating_param) {
+void SetAnimatingParam(byte animating_param) {
   animating_param_ = animating_param;
 }
-void SetAnimatingFunction(bool (*animating_function)(void* param)) {
+void SetAnimatingFunction(bool (*animating_function)(byte param)) {
   animating_function_ = animating_function;
 }
 
