@@ -1,6 +1,8 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
+#include <blinklib.h>
+
 #define NEIGHBOR_TYPE_TARGET 0
 #define NEIGHBOR_TYPE_ENEMY 1
 #define NEIGHBOR_TYPE_SELF_DESTRUCT 2
