@@ -1,14 +1,12 @@
 #include "game_state_play.h"
 
+#include <hexxagon_config.h>
+
 #include "blink_state.h"
 #include "game_message.h"
 #include "game_state.h"
 #include "render_animation.h"
 #include "util.h"
-
-#define NEIGHBOR_TYPE_TARGET 0
-#define NEIGHBOR_TYPE_ENEMY 1
-#define NEIGHBOR_TYPE_SELF_DESTRUCT 2
 
 namespace game {
 
@@ -20,38 +18,6 @@ static bool auto_select_ = false;
 
 static bool takeover_started_ = false;
 static bool lightning_done_ = false;
-
-static bool search_neighbor_type(byte neighbor_type, byte* source_face) {
-  FOREACH_FACE(f) {
-    if (!isValueReceivedOnFaceExpired(f)) {
-      blink::state::FaceValue face_value;
-      face_value.as_byte = getLastValueReceivedOnFace(f);
-
-      *source_face = f;
-
-      switch (neighbor_type) {
-        case NEIGHBOR_TYPE_TARGET:
-          if (face_value.target) {
-            return true;
-          }
-          break;
-        case NEIGHBOR_TYPE_ENEMY:
-          if ((face_value.player != 0) &&
-              (face_value.player != blink::state::GetPlayer())) {
-            return true;
-          }
-          break;
-        case NEIGHBOR_TYPE_SELF_DESTRUCT:
-          if (face_value.self_destruct) {
-            return true;
-          }
-          break;
-      }
-    }
-  }
-
-  return false;
-}
 
 static bool do_takeover(byte takeover_player, byte source_face) {
   if (!blink::state::GetAnimating()) {
@@ -142,7 +108,7 @@ static void self_destruct(byte* state, byte* specific_state) {
       // And we are an empty Blink, which means we already run the takeover
       // animation.
       byte unused;
-      if (!search_neighbor_type(NEIGHBOR_TYPE_ENEMY, &unused)) {
+      if (!util::SearchNeighborType(NEIGHBOR_TYPE_ENEMY, &unused)) {
         // No enemy neighbor Blinks. Move on.
         *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
       }
@@ -156,7 +122,7 @@ static void self_destruct(byte* state, byte* specific_state) {
     // We are not the blink that started self-destructing.
     byte origin_face;
     if ((blink::state::GetPlayer() != 0) &&
-        search_neighbor_type(NEIGHBOR_TYPE_SELF_DESTRUCT, &origin_face)) {
+        util::SearchNeighborType(NEIGHBOR_TYPE_SELF_DESTRUCT, &origin_face)) {
       // But is is out neighbor. Do takeover animation.
       do_takeover(0, origin_face);
     }
@@ -287,7 +253,7 @@ static void confirm_move(byte* state, byte* specific_state) {
   (void)state;
 
   byte source_face;
-  if (search_neighbor_type(NEIGHBOR_TYPE_TARGET, &source_face)) {
+  if (util::SearchNeighborType(NEIGHBOR_TYPE_TARGET, &source_face)) {
     if (blink::state::GetPlayer() != 0 &&
         blink::state::GetPlayer() != game::state::GetPlayer()) {
       // We are being conquered, trigger explosion animation.
@@ -312,7 +278,7 @@ static void confirm_move(byte* state, byte* specific_state) {
   // We are the target, so we are now owned by the current player.
   blink::state::SetPlayer(game::state::GetPlayer());
 
-  if (search_neighbor_type(NEIGHBOR_TYPE_ENEMY, &source_face)) return;
+  if (util::SearchNeighborType(NEIGHBOR_TYPE_ENEMY, &source_face)) return;
 
   *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
 }
