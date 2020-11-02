@@ -1,8 +1,6 @@
 #include "game_state_play.h"
 
-#if __has_include(<hexxagon_config.h>)
 #include <hexxagon_config.h>
-#endif
 
 #include "blink_state.h"
 #include "game_message.h"
