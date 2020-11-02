@@ -29,11 +29,6 @@ static bool do_takeover(byte takeover_player, byte source_face) {
       blink::state::SetAnimating(true);
       blink::state::SetAnimatingParam(source_face);
       blink::state::SetAnimatingFunction([](byte param) -> bool {
-#ifdef HEXXAGON_DISABLE_LIGHTNING_ANIMATION
-        (void)param;
-
-        lightning_done_ = true;
-#else
         if (!lightning_done_) {
           if (!render::animation::Lightning(param)) {
             return false;
@@ -41,7 +36,7 @@ static bool do_takeover(byte takeover_player, byte source_face) {
 
           lightning_done_ = true;
         }
-#endif
+
         return render::animation::Explosion(
             game::player::GetColor(blink::state::GetPlayer()));
       });
