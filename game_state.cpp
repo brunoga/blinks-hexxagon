@@ -18,7 +18,6 @@ static State state_;
 
 namespace state {
 
-// [Empty Blinks][Player 1 Blinks][...][Player N Blinks]
 static byte blink_count_[GAME_PLAYER_MAX_PLAYERS + 1];
 
 void Set(byte state, bool from_network) {

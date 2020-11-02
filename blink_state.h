@@ -45,9 +45,6 @@ bool RunAnimatingFunction();
 void StartColorOverride();
 bool GetColorOverride();
 
-void SetLocked(bool locked);
-bool GetLocked();
-
 void Reset();
 
 void Render(byte game_state);

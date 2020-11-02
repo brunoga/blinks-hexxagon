@@ -17,7 +17,6 @@ struct BlinkState {
   bool target;
   bool animating;
   bool self_destruct;
-  bool locked;
   byte player;
   byte target_type;
 };
@@ -65,15 +64,11 @@ void __attribute__((noinline)) StartColorOverride() {
 
 bool GetColorOverride() { return !color_override_timer_.isExpired(); }
 
-void SetLocked(bool locked) { state_.locked = locked; }
-bool GetLocked() { return state_.locked; }
-
 void __attribute__((noinline)) Reset() {
   state_.origin = false;
   state_.target = false;
   state_.animating = false;
   state_.self_destruct = false;
-  state_.locked = false;
   state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
   state_.player = 0;
 }

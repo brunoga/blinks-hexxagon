@@ -35,8 +35,7 @@ void Render() {
     // the Origin. Render the spinning animation.
     render::animation::Spinner(WHITE, 1, 50);
   } else if (game::state::GetPlayer() == player &&
-             game::state::GetSpecific() < GAME_STATE_PLAY_CONFIRM_MOVE &&
-             !blink::state::GetLocked()) {
+             game::state::GetSpecific() < GAME_STATE_PLAY_CONFIRM_MOVE) {
     // This Blink belongs to the current player and did not match any of the
     // above conditions. Render a pulsing animation if we are not confirming the
     // move yet.

@@ -119,8 +119,6 @@ static void select_origin(byte* state, byte* specific_state) {
     return;
   }
 
-  if (blink::state::GetLocked()) return;
-
   // We pass all checks, but we do nothing until we get a click.
   if (!button_clicked && !auto_select_) return;
 
@@ -182,8 +180,6 @@ static void origin_selected(byte* state, byte* specific_state) {
     // the reply for the find targets message so there can not be any message
     // pending to be delivered and send will succeed.
     game::message::SendFlash();
-
-    blink::state::SetLocked(true);
 
     *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
 
@@ -318,8 +314,6 @@ static void confirm_move(byte* state, byte* specific_state) {
 }
 
 static void move_confirmed(byte* state, byte* specific_state) {
-  blink::state::SetLocked(false);
-
   if (!blink::state::GetTarget() && !blink::state::GetSelfDestruct()) return;
 
   byte result = game::state::UpdateBoardState();
