@@ -29,28 +29,15 @@ static byte message_state_ = MESSAGE_STATE_SEND_MESSAGE;
 
 static byte abs(int8_t i) { return ((i < 0) ? -i : i); }
 
+// Lookup array for map traversal. Even coordinates are X, odd are Y. Each pair
+// is the offset to be applied when moving through a specific face.
+static const int8_t traversal_[] = {0, -1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1};
+
 static void set_payload_for_face(byte* payload, byte f) {
-  switch (f) {
-    case 0:
-      payload[PAYLOAD_Y]--;
-      break;
-    case 1:
-      payload[PAYLOAD_X]--;
-      break;
-    case 2:
-      payload[PAYLOAD_X]--;
-      payload[PAYLOAD_Y]++;
-      break;
-    case 3:
-      payload[PAYLOAD_Y]++;
-      break;
-    case 4:
-      payload[PAYLOAD_X]++;
-      break;
-    case 5:
-      payload[PAYLOAD_X]++;
-      payload[PAYLOAD_Y]--;
-  }
+  byte x_pos = f * 2;
+
+  payload[PAYLOAD_X] += traversal_[x_pos];
+  payload[PAYLOAD_Y] += traversal_[x_pos + 1];
 
   payload[PAYLOAD_FACE] = f;
 }
