@@ -37,7 +37,8 @@ void loop() {
     byte specific_state = game::state::GetSpecific();
     bool state_changed = game::state::Changed(false);
 
-    if (game::state::Changed()) {
+    if (game::state::Changed() && state != GAME_STATE_PLAY &&
+        specific_state != GAME_STATE_PLAY_SELECT_TARGET) {
       // State (including specific state) changed. Reset pulse timer to
       // improve synchronization.
       render::animation::ResetPulseTimer();
