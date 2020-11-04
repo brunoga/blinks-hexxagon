@@ -12,7 +12,7 @@ namespace setup {
 void Render() {
   Color player_color = game::player::GetColor(blink::state::GetPlayer());
 
-  setColor(dim(player_color, 63));
+  setColor(dim(player_color, 159));
 }
 
 }  // namespace setup
