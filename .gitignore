@@ -33,3 +33,6 @@
 
 # VScode config files
 .vscode
+
+# Ignore output dir
+output
