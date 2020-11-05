@@ -5,6 +5,7 @@
 #include "game_state.h"
 #include "game_state_play.h"
 #include "render_animation.h"
+#include "render_config.h"
 
 namespace game {
 
@@ -33,17 +34,21 @@ void Render() {
              blink::state::GetOrigin()) {
     // We are either the target Blink (before it is effectively taken over) or
     // the Origin. Render the spinning animation.
-    render::animation::Spinner(WHITE, 1, 50);
+    render::animation::Spinner(RENDER_CONFIG_PLAY_STATE_SPINNER_COLOR,
+                               RENDER_CONFIG_PLAY_STATE_SPINNER_FACES,
+                               RENDER_CONFIG_PLAY_STATE_SPINNER_SLOWDOWN);
   } else if (game::state::GetPlayer() == player &&
              game::state::GetSpecific() < GAME_STATE_PLAY_CONFIRM_MOVE) {
     // This Blink belongs to the current player and did not match any of the
     // above conditions. Render a pulsing animation if we are not confirming the
     // move yet.
-    render::animation::Pulse(player_color, 64, 3);
+    render::animation::Pulse(player_color,
+                             RENDER_CONFIG_PLAY_STATE_PULSE_START_DIM,
+                             RENDER_CONFIG_PLAY_STATE_PULSE_SLOWDOWN);
   } else if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE) {
     // We did not match anything above and we are not a target. Render a dimmed
     // version of the player color.
-    setColor(dim(player_color, 191));
+    setColor(dim(player_color, RENDER_CONFIG_PLAY_STATE_COLOR_DIM));
   }
 }
 
