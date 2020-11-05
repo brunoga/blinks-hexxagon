@@ -40,10 +40,7 @@ void Render() {
     // above conditions. Render a pulsing animation if we are not confirming the
     // move yet.
     render::animation::Pulse(player_color, 64, 3);
-  } else if (blink::state::GetTargetType() != BLINK_STATE_TARGET_TYPE_NONE) {
-    // We are a possible target. Render pulse animation.
-    render::animation::Pulse(player_color, 64, 3);
-  } else {
+  } else if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE) {
     // We did not match anything above and we are not a target. Render a dimmed
     // version of the player color.
     setColor(dim(player_color, 191));
