@@ -10,6 +10,11 @@
 #define NEIGHBOR_TYPE_ENEMY 1
 #define NEIGHBOR_TYPE_SELF_DESTRUCT 2
 
+// Allows disabling the lightning animation to save some space. Some more space
+// can be saved if we decide to do it definitelly as the takeover animation code
+// can be simplified.
+//#define DISABLE_LIGHTNING_ANIMATION
+
 namespace game {
 
 namespace state {
@@ -63,6 +68,11 @@ static bool do_takeover(byte takeover_player, byte source_face) {
       blink::state::SetAnimating(true);
       blink::state::SetAnimatingParam(source_face);
       blink::state::SetAnimatingFunction([](byte param) -> bool {
+#ifdef DISABLE_LIGHTNING_ANIMATION
+        (void)param;
+
+        lightning_done_ = true;
+#else
         if (!lightning_done_) {
           if (!render::animation::Lightning(param)) {
             return false;
@@ -70,6 +80,7 @@ static bool do_takeover(byte takeover_player, byte source_face) {
 
           lightning_done_ = true;
         }
+#endif
 
         return render::animation::Explosion(
             game::player::GetColor(blink::state::GetPlayer()));
