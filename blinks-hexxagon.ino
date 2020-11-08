@@ -71,4 +71,8 @@ void loop() {
   // it most likelly means another Blink woke us up. This will prevent us
   // "swallowing" the first click on this Blink after wakeup.
   hasWoken();
+
+  // Always consume multi-clicks to prevent accidental self-destructing during
+  // gameplay.
+  buttonMultiClicked();
 }
