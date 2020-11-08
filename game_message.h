@@ -43,6 +43,8 @@ bool SendFindTargets(broadcast::Message* reply);
 
 bool SendFlash();
 
+bool SendReset();
+
 }  // namespace message
 
 }  // namespace game

@@ -244,6 +244,10 @@ bool SendFlash() {
   return false;
 }
 
+bool SendReset() {
+  return sendOrWaitForReply(MESSAGE_RESET, nullptr, 0, nullptr);
+}
+
 }  // namespace message
 
 }  // namespace game
