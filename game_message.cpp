@@ -8,6 +8,7 @@
 #include "game_state_play.h"
 #include "src/blinks-broadcast/manager.h"
 #include "src/blinks-broadcast/message.h"
+#include "src/blinks-compass/compass.h"
 
 #define MESSAGE_STATE_SEND_MESSAGE 0
 #define MESSAGE_STATE_WAIT_FOR_RESULT 1
@@ -26,8 +27,6 @@ namespace message {
 static const byte opposite_face_[] = {3, 4, 5, 0, 1, 2};
 
 static byte message_state_ = MESSAGE_STATE_SEND_MESSAGE;
-
-static byte abs(int8_t i) { return ((i < 0) ? -i : i); }
 
 // Lookup array for map traversal. Even coordinates are X, odd are Y. Each pair
 // is the offset to be applied when moving through a specific face.
@@ -67,7 +66,7 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
       int8_t y = payload[PAYLOAD_Y];
       int8_t z = -(x + y);
 
-      if (abs(x) <= 2 && abs(y) <= 2 && abs(z) <= 2) {
+      if (x >= -2 && x <= 2 && y >= -2 && y <= 2 && z >= -2 && z <= 2) {
         blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_TARGET);
       }
       break;
