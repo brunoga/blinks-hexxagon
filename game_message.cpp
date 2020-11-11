@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include "blink_coordinates.h"
 #include "blink_state.h"
 #include "game_player.h"
 #include "game_state.h"
@@ -63,7 +64,10 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
 
       int8_t x = payload[PAYLOAD_X];
       int8_t y = payload[PAYLOAD_Y];
-      int8_t z = -(x + y);
+
+      blink::coordinates::Set(x, y);
+
+      int8_t z = blink::coordinates::Z();
 
       if (x >= -2 && x <= 2 && y >= -2 && y <= 2 && z >= -2 && z <= 2) {
         blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_TARGET);
