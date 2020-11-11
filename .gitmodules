@@ -1,6 +1,3 @@
 [submodule "src/blinks-broadcast"]
 	path = src/blinks-broadcast
 	url = https://github.com/brunoga/blinks-broadcast
-[submodule "src/blinks-compass"]
-	path = src/blinks-compass
-	url = https://github.com/brunoga/blinks-compass
