@@ -87,7 +87,7 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
                                 byte* payload) {
   (void)src_face;
 
-  byte len = MESSAGE_PAYLOAD_BYTES;
+  byte len = 0;
 
   switch (message_id) {
     case MESSAGE_FIND_TARGETS:
@@ -113,10 +113,6 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
       break;
     case MESSAGE_GAME_STATE_CHANGE:
       len = 1;
-      break;
-    case MESSAGE_CHECK_BOARD_STATE:
-    case MESSAGE_FLASH:
-      len = 0;
       break;
   }
 
@@ -148,16 +144,13 @@ static void rcv_reply_handler(byte message_id, byte src_face,
 static byte fwd_reply_handler(byte message_id, byte dst_face, byte* payload) {
   (void)dst_face;
 
-  byte len = MESSAGE_PAYLOAD_BYTES;
+  byte len = GAME_PLAYER_MAX_PLAYERS + 1;
 
   switch (message_id) {
     case MESSAGE_CHECK_BOARD_STATE:
       blink_count_[blink::state::GetPlayer()]++;
-
-      for (byte i = 0; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
-        payload[i] = blink_count_[i];
-        blink_count_[i] = 0;
-      }
+      memcpy(payload, blink_count_, len);
+      memset(blink_count_, 0, len);
       break;
     case MESSAGE_FIND_TARGETS:
       if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_TARGET ||
