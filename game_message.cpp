@@ -90,6 +90,9 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
   byte len = 0;
 
   switch (message_id) {
+    case MESSAGE_REPORT_BOARD_STATE:
+      len = GAME_PLAYER_MAX_PLAYERS + 1;
+      break;
     case MESSAGE_FIND_TARGETS:
       if (src_face == FACE_COUNT) {
         // We are the source of the coordinate system. Set payload using the
