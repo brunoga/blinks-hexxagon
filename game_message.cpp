@@ -163,10 +163,6 @@ static byte fwd_reply_handler(byte message_id, byte dst_face, byte* payload) {
 
       len = 1;
       break;
-    case MESSAGE_RESET:
-      // TODO(bga): This should be done in the broadcast library.
-      len = 0;
-      break;
   }
 
   return len;
