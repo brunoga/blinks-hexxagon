@@ -346,7 +346,9 @@ static void move_confirmed(byte* state, byte* specific_state) {
 }
 
 void Handler(bool state_changed, byte* state, byte* specific_state) {
-  (void)state_changed;
+  if (state_changed) {
+    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
+  }
 
   if (buttonDoubleClicked()) {
     // Turn is being passed. Switch to next player.

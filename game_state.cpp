@@ -146,6 +146,9 @@ void Reset() {
   state_.from_network = false;
 
   SetBlinkCount(nullptr);
+
+  update_board_state_state_ = UPDATE_BOARD_STATE_UPDATE;
+  update_board_state_error_ = false;
 }
 
 bool Changed(bool include_specific) {

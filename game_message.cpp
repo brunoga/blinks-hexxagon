@@ -163,6 +163,10 @@ static byte fwd_reply_handler(byte message_id, byte dst_face, byte* payload) {
 
       len = 1;
       break;
+    case MESSAGE_RESET:
+      // TODO(bga): This should be done in the broadcast library.
+      len = 0;
+      break;
   }
 
   return len;
@@ -210,6 +214,8 @@ void Setup() {
 }
 
 void Process() { broadcast::manager::Process(); }
+
+void Reset() { message_state_ = MESSAGE_STATE_SEND_MESSAGE; }
 
 bool SendGameStateChange(byte payload) {
   return sendOrWaitForReply(MESSAGE_GAME_STATE_CHANGE, &payload, 1, nullptr);

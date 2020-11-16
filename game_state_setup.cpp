@@ -15,7 +15,9 @@ namespace setup {
 static bool checking_board_ = false;
 
 void Handler(bool state_changed, byte* state, byte* specific_state) {
-  (void)state_changed;
+  if (state_changed) {
+    checking_board_ = false;
+  }
 
   if (checking_board_) {
     // We need to either start validating the game state or we are already doing

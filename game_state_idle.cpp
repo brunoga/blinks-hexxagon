@@ -23,8 +23,11 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
   if (state_changed) {
     // We just changed to this state. Reset global (game) and local (Blink)
     // states.
+    game::message::Reset();
     game::state::Reset();
     blink::state::Reset();
+
+    state_ = GAME_STATE_IDLE_WAIT_FOR_BUTTON;
   }
 
   switch (state_) {

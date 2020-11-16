@@ -30,6 +30,8 @@ void Setup();
 
 void Process();
 
+void Reset();
+
 bool SendGameStateChange(byte payload);
 
 // Indices reply: 0 = empty count, 1 = player one count, 2 = player 2 count,
