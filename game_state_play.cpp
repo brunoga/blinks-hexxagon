@@ -334,7 +334,6 @@ static void move_confirmed(byte* state, byte* specific_state) {
   if (result == GAME_STATE_UPDATE_BOARD_STATE_ERROR) {
     // Board is in a state where the game can not continue. The end.
     *state = GAME_STATE_END;
-    *specific_state = 0;
 
     return;
   }
