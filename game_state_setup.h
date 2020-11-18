@@ -3,6 +3,10 @@
 
 #include <blinklib.h>
 
+// Play specific states.
+#define GAME_STATE_SETUP_PLAYERS 0
+#define GAME_STATE_SETUP_MAP 1
+
 namespace game {
 
 namespace state {

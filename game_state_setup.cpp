@@ -14,22 +14,18 @@ namespace setup {
 
 static bool checking_board_ = false;
 
-void Handler(bool state_changed, byte* state, byte* specific_state) {
-  if (state_changed) {
-    checking_board_ = false;
-  }
-
+static void players(byte* state, byte* specific_state) {
   if (checking_board_) {
-    // We need to either start validating the game state or we are already doing
-    // it.
+    // We need to either start validating the game state or we are already
+    // doing it.
     byte result = game::state::UpdateBoardState();
     if (result == GAME_STATE_UPDATE_BOARD_STATE_UPDATING) {
       // Still checking. Try again next loop() iteration.
       return;
     }
 
-    // We finished checking. mark it as so so we do not keep doing it over and
-    // over.
+    // We finished checking. mark it as so so we do not keep doing it over
+    // and over.
     checking_board_ = false;
 
     if (result == GAME_STATE_UPDATE_BOARD_STATE_OK) {
@@ -43,13 +39,13 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       // actually *INCREASE* the binary size. Simply removing the parameter
       // (thus also not doing this here) also increases it.
       //
-      // TODO(bga): Understand why and how can we use it in our benefit. Note
-      // that this same trick does not work in other state handlers.
+      // TODO(bga): Understand why and how can we use it in our benefit.
+      // Note that this same trick does not work in other state handlers.
       *specific_state = 0;
     }
   } else if (buttonDoubleClicked()) {
-    // We seem to be done with setting up the game. We now need to validate if
-    // the board state is actually valid.
+    // We seem to be done with setting up the game. We now need to validate
+    // if the board state is actually valid.
     checking_board_ = true;
   } else if (util::NoSleepButtonSingleClicked()) {
     // Blink was clicked. Switch it to next player. Note that we will never
@@ -59,6 +55,24 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     // potentially mess things up, but there is only so much we can do with
     // the resources available so we ignore it.
     blink::state::SetPlayer(game::player::GetNext(blink::state::GetPlayer()));
+  }
+}
+
+void Handler(bool state_changed, byte* state, byte* specific_state) {
+  if (state_changed) {
+    checking_board_ = false;
+    *specific_state = GAME_STATE_SETUP_PLAYERS;
+  }
+
+  switch (*specific_state) {
+    case GAME_STATE_SETUP_PLAYERS:
+      players(state, specific_state);
+      break;
+    case GAME_STATE_SETUP_MAP:
+      // The mapping state is special because we have to run outside the normal
+      // game loop. Setting the mapping state as below will do that.
+      game::state::SetMapping(true);
+      break;
   }
 }
 
