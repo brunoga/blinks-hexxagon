@@ -20,6 +20,8 @@ namespace state {
 
 static byte blink_count_[GAME_PLAYER_MAX_PLAYERS + 1];
 
+static byte mapping_;
+
 void Set(byte state, bool from_network) {
   state_.previous = state_.current;
   state_.current = state;
@@ -175,6 +177,10 @@ bool Propagate() {
 }
 
 bool FromNetwork() { return state_.from_network; }
+
+void SetMapping(bool mapping) { mapping_ = mapping; }
+
+bool Mapping() { return mapping_; }
 
 }  // namespace state
 

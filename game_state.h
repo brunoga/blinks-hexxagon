@@ -41,6 +41,9 @@ bool Propagate();
 
 bool FromNetwork();
 
+void SetMapping(bool mapping);
+bool Mapping();
+
 }  // namespace state
 
 }  // namespace game
