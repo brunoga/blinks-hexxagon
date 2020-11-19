@@ -1,11 +1,14 @@
 #include "game_map.h"
 
+#include <string.h>
+
 #include "blink_state.h"
 #include "game_state.h"
 #include "src/blinks-orientation/orientation.h"
 #include "src/blinks-position/position.h"
 
 #define GAME_MAP_MAX_BLINKS 128
+#define GAME_MAP_INVALID_COORDINATE -128
 
 namespace game {
 
@@ -17,6 +20,7 @@ struct Data {
 };
 
 static Data map_[GAME_MAP_MAX_BLINKS];
+
 static int8_t last_received_index_ = -1;
 static int8_t last_propagated_index_ = -1;
 
@@ -39,7 +43,7 @@ static bool is_new_data(int8_t x, int8_t y) {
   }
 
   for (byte i = 0; i < GAME_MAP_MAX_BLINKS; ++i) {
-    if (map_[i].coordinates.x == POSITION_INVALID_COORDINATE) break;
+    if (map_[i].coordinates.x == GAME_MAP_INVALID_COORDINATE) break;
 
     if (x == map_[i].coordinates.x && y == map_[i].coordinates.y) {
       return false;
@@ -103,13 +107,17 @@ void StartMapping() {
 void StopMapping() { game::state::SetMapping(false); }
 
 bool EmptySpaceInRange() {
-  for (byte i = 0; i < last_received_index_; ++i) {
+  for (byte i = 0; i <= last_received_index_; ++i) {
     if (map_[i].player == 0 && position::Distance(map_[i].coordinates) <= 2) {
       return true;
     }
   }
 
   return false;
+}
+
+void Reset() {
+  memset(map_, GAME_MAP_INVALID_COORDINATE, GAME_MAP_MAX_BLINKS * sizeof(Data));
 }
 
 }  // namespace map

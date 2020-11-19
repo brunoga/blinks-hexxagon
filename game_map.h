@@ -21,6 +21,8 @@ void StopMapping();
 // Returns true if there is an empty space in range of the local Blink.
 bool EmptySpaceInRange();
 
+void Reset();
+
 }  // namespace map
 
 }  // namespace game
