@@ -7,7 +7,7 @@
 #include "src/blinks-orientation/orientation.h"
 #include "src/blinks-position/position.h"
 
-#define GAME_MAP_MAX_BLINKS 128
+#define GAME_MAP_MAX_BLINKS 74
 #define GAME_MAP_INVALID_COORDINATE -128
 
 namespace game {
@@ -73,7 +73,7 @@ void Process() {
 
     last_received_index_++;
     map_[last_received_index_].coordinates =
-        position::Coordinates{datagram[1], datagram[2]};
+        position::Coordinates{(int8_t)datagram[1], (int8_t)datagram[2]};
     map_[last_received_index_].player = datagram[3];
   }
 
@@ -104,8 +104,6 @@ void StartMapping() {
   initialized_ = true;
 }
 
-void StopMapping() { game::state::SetMapping(false); }
-
 bool EmptySpaceInRange() {
   for (byte i = 0; i <= last_received_index_; ++i) {
     if (map_[i].player == 0 && position::Distance(map_[i].coordinates) <= 2) {
@@ -114,6 +112,15 @@ bool EmptySpaceInRange() {
   }
 
   return false;
+}
+
+byte GetBlinkCount(byte player) {
+  byte blink_count = 0;
+  for (byte i = 0; i <= last_received_index_; ++i) {
+    if (map_[i].player == player) blink_count++;
+  }
+
+  return blink_count;
 }
 
 void Reset() {

@@ -1,6 +1,8 @@
 #ifndef GAME_MAP_H_
 #define GAME_MAP_H_
 
+#include <blinklib.h>
+
 namespace game {
 
 namespace map {
@@ -15,12 +17,13 @@ void Process();
 // badly.
 void StartMapping();
 
-// Stops the mapping process. Should be called by the origin Blink.
-void StopMapping();
-
 // Returns true if there is an empty space in range of the local Blink.
 bool EmptySpaceInRange();
 
+// Returns the number of Blinks in the map that belong to the given player.
+byte GetBlinkCount(byte player);
+
+// Sets all map data to invalid values.
 void Reset();
 
 }  // namespace map
