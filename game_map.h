@@ -19,6 +19,7 @@ void Process();
 // badly.
 void StartMapping(bool origin);
 
+// Returns true if the mapping process is active.
 bool GetMapping();
 
 // Returns true if there is an empty space in range of the local Blink.
@@ -27,6 +28,7 @@ bool EmptySpaceInRange();
 // Returns the number of Blinks in the map that belong to the given player.
 byte GetBlinkCount(byte player);
 
+// Returns the number of different players in the map.
 byte GetPlayerCount();
 
 // Sets all map data to invalid values.

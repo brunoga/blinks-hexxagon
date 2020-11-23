@@ -330,7 +330,7 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       target_selected(state, specific_state);
       break;
     case GAME_STATE_PLAY_CONFIRM_MOVE:
-      // confirm_move(state, specific_state);
+      confirm_move(state, specific_state);
       break;
     case GAME_STATE_PLAY_MOVE_CONFIRMED:
       // move_confirmed(state, specific_state);

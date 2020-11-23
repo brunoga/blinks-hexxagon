@@ -7,7 +7,8 @@
 #include "src/blinks-broadcast/bits.h"
 #include "src/blinks-orientation/orientation.h"
 
-#define GAME_MAP_MAX_BLINKS 20
+#define GAME_MAP_MAX_BLINKS 85
+#define GAME_MAP_DATAGRAM_LEN 4
 
 namespace game {
 
@@ -23,20 +24,20 @@ static PackedData map_[GAME_MAP_MAX_BLINKS];
 static byte map_index_;
 static byte map_propagation_index_;
 
-static bool setup_done_;
-
 static Timer propagation_timer_;
 
 static void propagate(const PackedData& data) {
   FOREACH_FACE(face) {
     if (isValueReceivedOnFaceExpired(face)) continue;
 
-    byte datagram[4] = {orientation::RelativeLocalFace(face), (byte)data.x,
-                        (byte)data.y, (byte)data.player};
+    byte datagram[GAME_MAP_DATAGRAM_LEN] = {
+        orientation::RelativeLocalFace(face), (byte)data.x, (byte)data.y,
+        (byte)data.player};
 
-    if (!sendDatagramOnFace(datagram, 4, face)) {
-      setColor(RED);
-    }
+    // No need to check the return value as it is guaranteed that if we reach
+    // this point, there are no pending datagrams to be sent on any face (so
+    // sendDatagramOnface() will never fail).
+    sendDatagramOnFace(datagram, GAME_MAP_DATAGRAM_LEN, face);
   }
 }
 
@@ -65,25 +66,36 @@ add_to_map(int8_t x, int8_t y, byte player) {
   map_index_++;
 }
 
+static void add_local_to_map() {
+  add_to_map(position::Local().x, position::Local().y,
+             blink::state::GetPlayer());
+}
+
 void Process() {
   // Read any pending datagram and queue new information.
   FOREACH_FACE(face) {
     byte datagram_len = getDatagramLengthOnFace(face);
     const byte* datagram = getDatagramOnFace(face);
 
-    if (datagram_len != 4) continue;
+    if (datagram_len != GAME_MAP_DATAGRAM_LEN) {
+      // Unexpected datagram. This might happen due to propagation delays for
+      // the last normal broadcast message sent.
+      //
+      // TODO(bga): Maybe a better way to fix this is to wait for a while before
+      // starting the mapping process.
+      continue;
+    }
 
     propagation_timer_.set(2000);
 
-    if (!setup_done_) {
+    if (map_index_ == 0) {
+      // We do not have anything on our map, so we need to initialize our local
+      // data and add it to the map.
       orientation::Setup(datagram[0], face);
       position::Setup(orientation::RelativeLocalFace(face), datagram[1],
                       datagram[2]);
 
-      add_to_map(position::Local().x, position::Local().y,
-                 blink::state::GetPlayer());
-
-      setup_done_ = true;
+      add_local_to_map();
     }
 
     position::Coordinates received_coordinates = {(int8_t)datagram[1],
@@ -118,10 +130,8 @@ void StartMapping(bool origin) {
   Reset();
 
   if (origin) {
-    add_to_map(position::Local().x, position::Local().y,
-               blink::state::GetPlayer());
-
-    setup_done_ = true;
+    // We are the mapping origin. Add ourselves to the map.
+    add_local_to_map();
   }
 
   propagation_timer_.set(2000);
@@ -168,8 +178,6 @@ byte GetPlayerCount() {
 void Reset() {
   map_index_ = 0;
   map_propagation_index_ = 0;
-
-  setup_done_ = false;
 
   orientation::Reset();
   position::Reset();
