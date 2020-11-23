@@ -4,48 +4,52 @@
 
 #include "blink_state.h"
 #include "game_state.h"
+#include "src/blinks-broadcast/bits.h"
 #include "src/blinks-orientation/orientation.h"
-#include "src/blinks-position/position.h"
 
-#define GAME_MAP_MAX_BLINKS 74
-#define GAME_MAP_INVALID_COORDINATE -128
+#define GAME_MAP_MAX_BLINKS 20
 
 namespace game {
 
 namespace map {
 
-struct Data {
-  position::Coordinates coordinates;
-  byte player;
+struct PackedData {
+  int16_t x : 6;
+  int16_t y : 6;
+  uint16_t player : 4;
 };
 
-static Data map_[GAME_MAP_MAX_BLINKS];
+static PackedData map_[GAME_MAP_MAX_BLINKS];
+static byte map_index_;
+static byte map_propagation_index_;
 
-static int8_t last_received_index_ = -1;
-static int8_t last_propagated_index_ = -1;
+static bool setup_done_;
 
-static bool initialized_;
+static Timer propagation_timer_;
 
-static void propagate(const position::Coordinates& coordinates, byte player) {
+static void propagate(const PackedData& data) {
   FOREACH_FACE(face) {
     if (isValueReceivedOnFaceExpired(face)) continue;
 
-    byte datagram[4] = {orientation::RelativeLocalFace(face),
-                        (byte)coordinates.x, (byte)coordinates.y, player};
+    byte datagram[4] = {orientation::RelativeLocalFace(face), (byte)data.x,
+                        (byte)data.y, (byte)data.player};
 
-    sendDatagramOnFace(datagram, 4, face);
+    if (!sendDatagramOnFace(datagram, 4, face)) {
+      setColor(RED);
+    }
   }
 }
 
-static bool is_new_data(int8_t x, int8_t y) {
-  if (x == position::Local().x && y == position::Local().y) {
-    return false;
+static void maybe_propagate() {
+  if (map_index_ != map_propagation_index_) {
+    propagate(map_[map_propagation_index_]);
+    map_propagation_index_++;
   }
+}
 
-  for (byte i = 0; i < GAME_MAP_MAX_BLINKS; ++i) {
-    if (map_[i].coordinates.x == GAME_MAP_INVALID_COORDINATE) break;
-
-    if (x == map_[i].coordinates.x && y == map_[i].coordinates.y) {
+static bool should_add_to_map(const position::Coordinates& coordinates) {
+  for (byte i = 0; i < map_index_; ++i) {
+    if (coordinates.x == map_[i].x && coordinates.y == map_[i].y) {
       return false;
     }
   }
@@ -53,28 +57,46 @@ static bool is_new_data(int8_t x, int8_t y) {
   return true;
 }
 
+static void __attribute__((noinline))
+add_to_map(int8_t x, int8_t y, byte player) {
+  map_[map_index_].x = x;
+  map_[map_index_].y = y;
+  map_[map_index_].player = player;
+  map_index_++;
+}
+
 void Process() {
   // Read any pending datagram and queue new information.
   FOREACH_FACE(face) {
-    if (getDatagramLengthOnFace(face) != 4) continue;
-
+    byte datagram_len = getDatagramLengthOnFace(face);
     const byte* datagram = getDatagramOnFace(face);
 
-    if (!initialized_) {
+    if (datagram_len != 4) continue;
+
+    propagation_timer_.set(2000);
+
+    if (!setup_done_) {
       orientation::Setup(datagram[0], face);
-      position::Setup(datagram[0], datagram[1], datagram[2]);
+      position::Setup(orientation::RelativeLocalFace(face), datagram[1],
+                      datagram[2]);
 
-      propagate(position::Local(), blink::state::GetPlayer());
+      add_to_map(position::Local().x, position::Local().y,
+                 blink::state::GetPlayer());
 
-      initialized_ = true;
+      setup_done_ = true;
     }
 
-    if (!is_new_data(datagram[1], datagram[2])) continue;
+    position::Coordinates received_coordinates = {(int8_t)datagram[1],
+                                                  (int8_t)datagram[2]};
 
-    last_received_index_++;
-    map_[last_received_index_].coordinates =
-        position::Coordinates{(int8_t)datagram[1], (int8_t)datagram[2]};
-    map_[last_received_index_].player = datagram[3];
+    if (!should_add_to_map(received_coordinates)) {
+      setColor(OFF);
+      continue;
+    } else {
+      setColor(GREEN);
+    }
+
+    add_to_map(received_coordinates.x, received_coordinates.y, datagram[3]);
   }
 
   if (isDatagramPendingOnAnyFace()) {
@@ -83,30 +105,35 @@ void Process() {
     return;
   }
 
-  if (last_propagated_index_ < last_received_index_) {
-    // Forward a single new pending coordinate. This together with the check
-    // above guarantees that sending will never fail.
-    last_propagated_index_++;
-
-    propagate(map_[last_propagated_index_].coordinates,
-              map_[last_propagated_index_].player);
-  }
+  maybe_propagate();
 }
 
-void StartMapping() {
+void StartMapping(bool origin) {
   // We are the origin of the coordinates system. Reset position and
   // orientation and propagate new values.
-  orientation::Reset();
-  position::Reset();
+  //
+  // TODO(bga): Should add a way to propagate the reset to all Blinks in the
+  // cluster. Probably should be done outside of the mapping loop so we can take
+  // advantage of broadcast messages.
+  Reset();
 
-  propagate(position::Local(), blink::state::GetPlayer());
+  if (origin) {
+    add_to_map(position::Local().x, position::Local().y,
+               blink::state::GetPlayer());
 
-  initialized_ = true;
+    setup_done_ = true;
+  }
+
+  propagation_timer_.set(2000);
 }
 
+bool GetMapping() { return (!propagation_timer_.isExpired()); }
+
 bool EmptySpaceInRange() {
-  for (byte i = 0; i <= last_received_index_; ++i) {
-    if (map_[i].player == 0 && position::Distance(map_[i].coordinates) <= 2) {
+  for (byte i = 0; i < map_index_; ++i) {
+    if (map_[i].player == 0 &&
+        position::Distance(
+            position::Coordinates{(int8_t)map_[i].x, (int8_t)map_[i].y}) <= 2) {
       return true;
     }
   }
@@ -116,15 +143,36 @@ bool EmptySpaceInRange() {
 
 byte GetBlinkCount(byte player) {
   byte blink_count = 0;
-  for (byte i = 0; i <= last_received_index_; ++i) {
+  for (byte i = 0; i < map_index_; ++i) {
     if (map_[i].player == player) blink_count++;
   }
 
   return blink_count;
 }
 
+byte GetPlayerCount() {
+  byte players = 0;
+  byte player_count = 0;
+  for (byte i = 0; i < map_index_; ++i) {
+    if (map_[i].player == 0) continue;
+
+    if (!IS_BIT_SET(players, map_[i].player)) {
+      SET_BIT(players, i);
+      player_count++;
+    }
+  }
+
+  return player_count;
+}
+
 void Reset() {
-  memset(map_, GAME_MAP_INVALID_COORDINATE, GAME_MAP_MAX_BLINKS * sizeof(Data));
+  map_index_ = 0;
+  map_propagation_index_ = 0;
+
+  setup_done_ = false;
+
+  orientation::Reset();
+  position::Reset();
 }
 
 }  // namespace map

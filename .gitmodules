@@ -1,3 +1,9 @@
 [submodule "src/blinks-broadcast"]
 	path = src/blinks-broadcast
 	url = https://github.com/brunoga/blinks-broadcast
+[submodule "src/blinks-orientation"]
+	path = src/blinks-orientation
+	url = https://github.com/brunoga/blinks-orientation
+[submodule "src/blinks-position"]
+	path = src/blinks-position
+	url = https://github.com/brunoga/blinks-position

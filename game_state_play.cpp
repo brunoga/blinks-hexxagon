@@ -1,19 +1,20 @@
 #include "game_state_play.h"
 
 #include "blink_state.h"
+#include "game_map.h"
 #include "game_message.h"
 #include "game_state.h"
 #include "render_animation.h"
+#include "src/blinks-position/position.h"
 #include "util.h"
 
 #define NEIGHBOR_TYPE_TARGET 0
 #define NEIGHBOR_TYPE_ENEMY 1
-#define NEIGHBOR_TYPE_SELF_DESTRUCT 2
 
 // Allows disabling the lightning animation to save some space. Some more space
 // can be saved if we decide to do it definitelly as the takeover animation code
 // can be simplified.
-//#define DISABLE_LIGHTNING_ANIMATION
+#define DISABLE_LIGHTNING_ANIMATION
 
 namespace game {
 
@@ -26,7 +27,8 @@ static bool auto_select_ = false;
 static bool takeover_started_ = false;
 static bool lightning_done_ = false;
 
-static bool search_neighbor_type(byte neighbor_type, byte* source_face) {
+static bool __attribute__((noinline))
+search_neighbor_type(byte neighbor_type, byte* source_face) {
   FOREACH_FACE(f) {
     if (!isValueReceivedOnFaceExpired(f)) {
       blink::state::FaceValue face_value;
@@ -43,11 +45,6 @@ static bool search_neighbor_type(byte neighbor_type, byte* source_face) {
         case NEIGHBOR_TYPE_ENEMY:
           if ((face_value.player != 0) &&
               (face_value.player != blink::state::GetPlayer())) {
-            return true;
-          }
-          break;
-        case NEIGHBOR_TYPE_SELF_DESTRUCT:
-          if (face_value.self_destruct) {
             return true;
           }
           break;
@@ -116,17 +113,12 @@ static void select_origin(byte* state, byte* specific_state) {
   // Also reset any potential targets.
   blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
 
-  // And reset the self-destruct state.
-  blink::state::SetSelfDestruct(false);
-
   // This blink belongs to a player, but not the current one. Nothing to do.
   if (blink::state::GetPlayer() != game::state::GetPlayer()) return;
 
-  if (buttonMultiClicked()) {
-    blink::state::SetSelfDestruct(true);
-
-    *specific_state = GAME_STATE_PLAY_SELF_DESTRUCT;
-
+  if (blink::state::GetLocked() || !game::map::EmptySpaceInRange()) {
+    // We have no place to move to.
+    blink::state::SetLocked(true);
     return;
   }
 
@@ -135,69 +127,25 @@ static void select_origin(byte* state, byte* specific_state) {
 
   auto_select_ = false;
 
-  // Ok, we are now the origin.
   blink::state::SetOrigin(true);
 
   // Indicate that an origin was selected.
   *specific_state = GAME_STATE_PLAY_ORIGIN_SELECTED;
 }
 
-static void self_destruct(byte* state, byte* specific_state) {
-  (void)state;
-
-  if (blink::state::GetSelfDestruct()) {
-    // We are the Blink that started self-destructing.
-    if (blink::state::GetPlayer() == 0) {
-      // And we are an empty Blink, which means we already run the takeover
-      // animation.
-      byte unused;
-      if (!search_neighbor_type(NEIGHBOR_TYPE_ENEMY, &unused)) {
-        // No enemy neighbor Blinks. Move on.
-        *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
-      }
-
-      // We are waiting on all Blinks around us to become empty.
-    } else {
-      // Do takeover animation.
-      do_takeover(0, FACE_COUNT);
-    }
-  } else {
-    // We are not the blink that started self-destructing.
-    byte origin_face;
-    if ((blink::state::GetPlayer() != 0) &&
-        search_neighbor_type(NEIGHBOR_TYPE_SELF_DESTRUCT, &origin_face)) {
-      // But is is out neighbor. Do takeover animation.
-      do_takeover(0, origin_face);
-    }
-  }
-}
-
 static void origin_selected(byte* state, byte* specific_state) {
   (void)state;
 
-  // Only the origin blink has anything to do here.
-  if (!blink::state::GetOrigin()) return;
-
-  // Look for possible targets. Only continue when all other blinks report in.
-  broadcast::Message reply;
-  if (!game::message::SendFindTargets(&reply)) return;
-
-  // Did we find any targets?
-  if (reply.payload[0] == 0) {
-    // Nope. Notify the player and reset to selecting an origin (hoppefully a
-    // different one).
-    //
-    // It is ok to not check the return value here as we know we just received
-    // the reply for the find targets message so there can not be any message
-    // pending to be delivered and send will succeed.
-    game::message::SendFlash();
-
-    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
-
+  if (!blink::state::GetOrigin()) {
+    // Only the origin Blink has anything to do here.
     return;
   }
 
-  // We have at least one possible target.
+  if (!game::message::SendSelectOrigin(position::Local().x,
+                                       position::Local().y)) {
+    return;
+  }
+
   *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
 }
 
@@ -325,19 +273,20 @@ static void confirm_move(byte* state, byte* specific_state) {
 }
 
 static void move_confirmed(byte* state, byte* specific_state) {
-  if (!blink::state::GetTarget() && !blink::state::GetSelfDestruct()) return;
+  if (!blink::state::GetTarget()) return;
 
-  byte result = game::state::UpdateBoardState();
+  /*
+    byte result = game::state::UpdateBoardState();
 
-  if (result == GAME_STATE_UPDATE_BOARD_STATE_UPDATING) return;
+    if (result == GAME_STATE_UPDATE_BOARD_STATE_UPDATING) return;
 
-  if (result == GAME_STATE_UPDATE_BOARD_STATE_ERROR) {
-    // Board is in a state where the game can not continue. The end.
-    *state = GAME_STATE_END;
+    if (result == GAME_STATE_UPDATE_BOARD_STATE_ERROR) {
+      // Board is in a state where the game can not continue. The end.
+      *state = GAME_STATE_END;
 
-    return;
-  }
-
+      return;
+    }
+  */
   // Move to next turn.
   game::state::NextPlayer();
 
@@ -371,9 +320,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     case GAME_STATE_PLAY_SELECT_ORIGIN:
       select_origin(state, specific_state);
       break;
-    case GAME_STATE_PLAY_SELF_DESTRUCT:
-      self_destruct(state, specific_state);
-      break;
     case GAME_STATE_PLAY_ORIGIN_SELECTED:
       origin_selected(state, specific_state);
       break;
@@ -384,10 +330,10 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       target_selected(state, specific_state);
       break;
     case GAME_STATE_PLAY_CONFIRM_MOVE:
-      confirm_move(state, specific_state);
+      // confirm_move(state, specific_state);
       break;
     case GAME_STATE_PLAY_MOVE_CONFIRMED:
-      move_confirmed(state, specific_state);
+      // move_confirmed(state, specific_state);
       break;
   }
 }

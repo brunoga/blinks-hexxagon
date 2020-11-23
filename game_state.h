@@ -28,11 +28,6 @@ void SetPlayer(byte next_player);
 byte GetPlayer();
 void NextPlayer();
 
-byte UpdateBoardState();
-
-void SetBlinkCount(byte* blink_count);
-byte* GetBlinkCount();
-
 void Reset();
 
 bool Changed(bool include_specific = true);
@@ -40,9 +35,6 @@ bool Changed(bool include_specific = true);
 bool Propagate();
 
 bool FromNetwork();
-
-void SetMapping(bool mapping);
-bool Mapping();
 
 }  // namespace state
 

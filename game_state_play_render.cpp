@@ -38,7 +38,8 @@ void Render() {
                                RENDER_CONFIG_PLAY_STATE_SPINNER_FACES,
                                RENDER_CONFIG_PLAY_STATE_SPINNER_SLOWDOWN);
   } else if (game::state::GetPlayer() == player &&
-             game::state::GetSpecific() < GAME_STATE_PLAY_CONFIRM_MOVE) {
+             game::state::GetSpecific() < GAME_STATE_PLAY_CONFIRM_MOVE &&
+             !blink::state::GetLocked()) {
     // This Blink belongs to the current player and did not match any of the
     // above conditions. Render a pulsing animation if we are not confirming the
     // move yet.

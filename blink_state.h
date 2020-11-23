@@ -12,10 +12,9 @@ namespace state {
 
 union FaceValue {
   struct {
-    byte unused : 3;         // Unused for now.
-    bool self_destruct : 1;  // Is self-destruct in progress?
-    bool target : 1;         // Is it the current target?
-    byte player : 3;         // 0 means empty.
+    byte unused : 4;  // Unused for now.
+    bool target : 1;  // Is it the current target?
+    byte player : 3;  // 0 means empty.
   };
 
   byte as_byte;
@@ -33,8 +32,8 @@ byte GetTargetType();
 void SetPlayer(byte player);
 byte GetPlayer();
 
-void SetSelfDestruct(bool self_destruct);
-byte GetSelfDestruct();
+void SetLocked(bool locked);
+bool GetLocked();
 
 void SetAnimating(bool animating);
 bool GetAnimating();

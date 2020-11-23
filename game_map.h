@@ -3,6 +3,8 @@
 
 #include <blinklib.h>
 
+#include "src/blinks-position/position.h"
+
 namespace game {
 
 namespace map {
@@ -15,13 +17,17 @@ void Process();
 // system origin (0, 0, 0). Only a single Blink in the cluster should call this
 // otherwise the behavior will be undefined and will probably break everything
 // badly.
-void StartMapping();
+void StartMapping(bool origin);
+
+bool GetMapping();
 
 // Returns true if there is an empty space in range of the local Blink.
 bool EmptySpaceInRange();
 
 // Returns the number of Blinks in the map that belong to the given player.
 byte GetBlinkCount(byte player);
+
+byte GetPlayerCount();
 
 // Sets all map data to invalid values.
 void Reset();
