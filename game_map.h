@@ -31,6 +31,8 @@ byte GetBlinkCount(byte player);
 // Returns the number of different players in the map.
 byte GetPlayerCount();
 
+bool ValidState();
+
 // Sets all map data to invalid values.
 void Reset();
 

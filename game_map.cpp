@@ -175,6 +175,8 @@ byte GetPlayerCount() {
   return player_count;
 }
 
+bool ValidState() { return ((GetBlinkCount(0) > 0) && (GetPlayerCount() > 1)); }
+
 void Reset() {
   map_index_ = 0;
   map_propagation_index_ = 0;

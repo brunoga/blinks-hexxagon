@@ -275,18 +275,14 @@ static void confirm_move(byte* state, byte* specific_state) {
 static void move_confirmed(byte* state, byte* specific_state) {
   if (!blink::state::GetTarget()) return;
 
-  /*
-    byte result = game::state::UpdateBoardState();
+  if (!game::map::ValidState()) {
+    if (!game::message::SendFlash()) return;
 
-    if (result == GAME_STATE_UPDATE_BOARD_STATE_UPDATING) return;
+    *state = GAME_STATE_END;
 
-    if (result == GAME_STATE_UPDATE_BOARD_STATE_ERROR) {
-      // Board is in a state where the game can not continue. The end.
-      *state = GAME_STATE_END;
+    return;
+  }
 
-      return;
-    }
-  */
   // Move to next turn.
   game::state::NextPlayer();
 
@@ -333,7 +329,7 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       confirm_move(state, specific_state);
       break;
     case GAME_STATE_PLAY_MOVE_CONFIRMED:
-      // move_confirmed(state, specific_state);
+      move_confirmed(state, specific_state);
       break;
   }
 }

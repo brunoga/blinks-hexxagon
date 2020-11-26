@@ -63,7 +63,7 @@ static void validate(byte* state, byte* specific_state) {
 
   if (!wait_timer_.isExpired()) return;
 
-  if (game::map::GetPlayerCount() >= 2 && game::map::GetBlinkCount(0) > 0) {
+  if (game::map::ValidState()) {
     // Game state is good. Switch to first available player.
     game::state::NextPlayer();
 
