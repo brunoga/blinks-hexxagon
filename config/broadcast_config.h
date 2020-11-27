@@ -4,6 +4,6 @@
 #include "../game_player.h"
 
 // This is the maximum payload we will need.
-#define MESSAGE_PAYLOAD_BYTES GAME_PLAYER_MAX_PLAYERS + 1
+#define BROADCAST_MESSAGE_PAYLOAD_BYTES GAME_PLAYER_MAX_PLAYERS + 1
 
 #endif
