@@ -14,7 +14,7 @@
 // Allows disabling the lightning animation to save some space. Some more space
 // can be saved if we decide to do it definitelly as the takeover animation code
 // can be simplified.
-#define DISABLE_LIGHTNING_ANIMATION
+//#define DISABLE_LIGHTNING_ANIMATION
 
 namespace game {
 
