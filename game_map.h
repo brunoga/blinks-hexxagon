@@ -5,6 +5,8 @@
 
 #include "src/blinks-position/position.h"
 
+#define GAME_MAP_MAX_BLINKS 85
+
 namespace game {
 
 namespace map {
@@ -22,8 +24,20 @@ void StartMapping(bool origin);
 // Returns true if the mapping process is active.
 bool GetMapping();
 
+void ComputeMapStats();
+
+void SetMoveOrigin(int8_t x, int8_t y);
+
+void SetMoveTarget(int8_t x, int8_t y);
+
+// Computes the player move from origin to destination, updating the game
+// map accordingly.
+void ConfirmMove();
+
 // Returns true if there is an empty space in range of the local Blink.
 bool EmptySpaceInRange();
+
+byte GetBlinkCount();
 
 // Returns the number of Blinks in the map that belong to the given player.
 byte GetBlinkCount(byte player);

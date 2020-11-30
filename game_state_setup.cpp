@@ -5,6 +5,7 @@
 #include "game_message.h"
 #include "game_player.h"
 #include "game_state.h"
+#include "src/blinks-orientation/orientation.h"
 #include "util.h"
 
 namespace game {
@@ -12,8 +13,6 @@ namespace game {
 namespace state {
 
 namespace setup {
-
-static bool validating_;
 
 static Timer wait_timer_;
 
@@ -26,6 +25,11 @@ static void players(byte* state, byte* specific_state) {
 
     // We overload origin here to mean the coordinate system origin.
     blink::state::SetOrigin(true);
+
+    // Reset our position and orientation, making us the origin of the
+    // coordinate system.
+    orientation::Reset();
+    position::Reset();
 
     wait_timer_.set(1000);
 
@@ -63,12 +67,13 @@ static void validate(byte* state, byte* specific_state) {
 
   if (!wait_timer_.isExpired()) return;
 
+  game::map::ComputeMapStats();
+
   if (game::map::ValidState()) {
     // Game state is good. Switch to first available player.
     game::state::NextPlayer();
 
     blink::state::SetOrigin(false);
-    validating_ = false;
 
     *state = GAME_STATE_PLAY;
     *specific_state = 0;
@@ -80,14 +85,11 @@ static void validate(byte* state, byte* specific_state) {
 
   blink::state::SetOrigin(false);
 
-  validating_ = false;
-
   *specific_state = GAME_STATE_SETUP_SELECT_PLAYERS;
 }
 
 void Handler(bool state_changed, byte* state, byte* specific_state) {
   if (state_changed) {
-    validating_ = false;
     *specific_state = GAME_STATE_SETUP_SELECT_PLAYERS;
   }
 

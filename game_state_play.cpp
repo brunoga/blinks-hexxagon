@@ -14,7 +14,7 @@
 // Allows disabling the lightning animation to save some space. Some more space
 // can be saved if we decide to do it definitelly as the takeover animation code
 // can be simplified.
-#define DISABLE_LIGHTNING_ANIMATION
+//#define DISABLE_LIGHTNING_ANIMATION
 
 namespace game {
 
@@ -27,8 +27,7 @@ static bool auto_select_ = false;
 static bool takeover_started_ = false;
 static bool lightning_done_ = false;
 
-static bool __attribute__((noinline))
-search_neighbor_type(byte neighbor_type, byte* source_face) {
+static bool search_neighbor_type(byte neighbor_type, byte* source_face) {
   FOREACH_FACE(f) {
     if (!isValueReceivedOnFaceExpired(f)) {
       blink::state::FaceValue face_value;
@@ -102,6 +101,12 @@ static void select_origin(byte* state, byte* specific_state) {
 
   bool button_clicked = util::NoSleepButtonSingleClicked();
 
+  // Wasteful calling this every loop iteration, but we are focusing on space
+  // now.
+  //
+  // TODO(bga): Revisit this.
+  game::map::ComputeMapStats();
+
   // We are going to select an origin, so reset any Blink that is currently
   // one.
   blink::state::SetOrigin(false);
@@ -116,9 +121,8 @@ static void select_origin(byte* state, byte* specific_state) {
   // This blink belongs to a player, but not the current one. Nothing to do.
   if (blink::state::GetPlayer() != game::state::GetPlayer()) return;
 
-  if (blink::state::GetLocked() || !game::map::EmptySpaceInRange()) {
-    // We have no place to move to.
-    blink::state::SetLocked(true);
+  if (!game::map::EmptySpaceInRange()) {
+    // We can not move.
     return;
   }
 
@@ -127,7 +131,9 @@ static void select_origin(byte* state, byte* specific_state) {
 
   auto_select_ = false;
 
+  // Ok, we are now the origin.
   blink::state::SetOrigin(true);
+  game::map::SetMoveOrigin(position::Local().x, position::Local().y);
 
   // Indicate that an origin was selected.
   *specific_state = GAME_STATE_PLAY_ORIGIN_SELECTED;
@@ -136,10 +142,8 @@ static void select_origin(byte* state, byte* specific_state) {
 static void origin_selected(byte* state, byte* specific_state) {
   (void)state;
 
-  if (!blink::state::GetOrigin()) {
-    // Only the origin Blink has anything to do here.
-    return;
-  }
+  // Only the origin blink has anything to do here.
+  if (!blink::state::GetOrigin()) return;
 
   if (!game::message::SendSelectOrigin(position::Local().x,
                                        position::Local().y)) {
@@ -158,13 +162,6 @@ static void select_target(byte* state, byte* specific_state) {
   // one.
   blink::state::SetTarget(false);
 
-  // If we are not a possible target or a Blink that belongs to the current
-  // player, then there is also nothing to do.
-  if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE &&
-      blink::state::GetPlayer() != game::state::GetPlayer()) {
-    return;
-  }
-
   // We pass all checks, but we do nothing until we get a click or auto
   // selection is enabled.
   if (!button_clicked && !auto_select_) return;
@@ -172,7 +169,8 @@ static void select_target(byte* state, byte* specific_state) {
   auto_select_ = false;
 
   // Are we a blink that belongs to the current player?
-  if (blink::state::GetPlayer() == game::state::GetPlayer()) {
+  if (blink::state::GetPlayer() == game::state::GetPlayer() &&
+      game::map::EmptySpaceInRange()) {
     if (!blink::state::GetOrigin()) {
       // If we are not the origin we automatically switch to the new origin.
       // If we are the current origin, then we just deselect ourselves.
@@ -185,13 +183,31 @@ static void select_target(byte* state, byte* specific_state) {
     return;
   }
 
+  if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE) return;
+
   // We are a valid target.
+
   blink::state::SetTarget(true);
+  game::map::SetMoveTarget(position::Local().x, position::Local().y);
 
   *specific_state = GAME_STATE_PLAY_TARGET_SELECTED;
 }
 
 static void target_selected(byte* state, byte* specific_state) {
+  (void)state;
+
+  // Only the target blink has anything to do here.
+  if (!blink::state::GetTarget()) return;
+
+  if (!game::message::SendSelectTarget(position::Local().x,
+                                       position::Local().y)) {
+    return;
+  }
+
+  *specific_state = GAME_STATE_PLAY_CONFIRM_MOVE;
+}
+
+static void confirm_move(byte* state, byte* specific_state) {
   (void)state;
 
   bool button_clicked = util::NoSleepButtonSingleClicked();
@@ -207,9 +223,11 @@ static void target_selected(byte* state, byte* specific_state) {
   // We pass all checks, but we do nothing until we get a click.
   if (!button_clicked) return;
 
-  // Button was clicked and we are the selected target. Confirmn move.
+  // Button was clicked and we are the selected target. Move confirmed.
   if (blink::state::GetTarget()) {
-    *specific_state = GAME_STATE_PLAY_CONFIRM_MOVE;
+    game::map::ConfirmMove();
+
+    *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
 
     return;
   }
@@ -238,8 +256,11 @@ static void target_selected(byte* state, byte* specific_state) {
   }
 }
 
-static void confirm_move(byte* state, byte* specific_state) {
+static void move_confirmed(byte* state, byte* specific_state) {
   (void)state;
+
+  // TODOD(bga): Use map information here to determine if we should be taken
+  // over. Might help with storage.
 
   byte source_face;
   if (search_neighbor_type(NEIGHBOR_TYPE_TARGET, &source_face)) {
@@ -269,17 +290,14 @@ static void confirm_move(byte* state, byte* specific_state) {
 
   if (search_neighbor_type(NEIGHBOR_TYPE_ENEMY, &source_face)) return;
 
-  *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
+  *specific_state = GAME_STATE_PLAY_RESOLVE_MOVE;
 }
 
-static void move_confirmed(byte* state, byte* specific_state) {
+static void resolve_move(byte* state, byte* specific_state) {
   if (!blink::state::GetTarget()) return;
 
   if (!game::map::ValidState()) {
-    if (!game::message::SendFlash()) return;
-
     *state = GAME_STATE_END;
-
     return;
   }
 
@@ -330,6 +348,9 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       break;
     case GAME_STATE_PLAY_MOVE_CONFIRMED:
       move_confirmed(state, specific_state);
+      break;
+    case GAME_STATE_PLAY_RESOLVE_MOVE:
+      resolve_move(state, specific_state);
       break;
   }
 }

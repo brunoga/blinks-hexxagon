@@ -15,7 +15,6 @@ namespace state {
 struct BlinkState {
   bool origin;
   bool target;
-  bool locked;
   bool animating;
   byte player;
   byte target_type;
@@ -40,9 +39,6 @@ void __attribute__((noinline)) SetPlayer(byte player) {
   state_.player = player;
 }
 byte GetPlayer() { return state_.player; }
-
-void SetLocked(bool locked) { state_.locked = locked; }
-bool GetLocked() { return state_.locked; }
 
 void SetAnimating(bool animating) { state_.animating = animating; }
 bool GetAnimating() { return state_.animating; }

@@ -1,6 +1,7 @@
 #include "game_state_play_render.h"
 
 #include "blink_state.h"
+#include "game_map.h"
 #include "game_player.h"
 #include "game_state.h"
 #include "game_state_play.h"
@@ -39,7 +40,7 @@ void Render() {
                                RENDER_CONFIG_PLAY_STATE_SPINNER_SLOWDOWN);
   } else if (game::state::GetPlayer() == player &&
              game::state::GetSpecific() < GAME_STATE_PLAY_CONFIRM_MOVE &&
-             !blink::state::GetLocked()) {
+             game::map::EmptySpaceInRange()) {
     // This Blink belongs to the current player and did not match any of the
     // above conditions. Render a pulsing animation if we are not confirming the
     // move yet.

@@ -32,9 +32,6 @@ byte GetTargetType();
 void SetPlayer(byte player);
 byte GetPlayer();
 
-void SetLocked(bool locked);
-bool GetLocked();
-
 void SetAnimating(bool animating);
 bool GetAnimating();
 void SetAnimatingParam(byte animating_param);

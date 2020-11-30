@@ -3,36 +3,47 @@
 #include <string.h>
 
 #include "blink_state.h"
+#include "debug.h"
 #include "game_state.h"
 #include "src/blinks-broadcast/bits.h"
 #include "src/blinks-orientation/orientation.h"
 
-#define GAME_MAP_MAX_BLINKS 85
 #define GAME_MAP_DATAGRAM_LEN 4
 
 namespace game {
 
 namespace map {
 
-struct PackedData {
+struct MapData {
   int16_t x : 6;
   int16_t y : 6;
   uint16_t player : 4;
 };
 
-static PackedData map_[GAME_MAP_MAX_BLINKS];
+static MapData map_[GAME_MAP_MAX_BLINKS];
 static byte map_index_;
 static byte map_propagation_index_;
 
+static byte player_count_;
+static byte player_blink_count_[GAME_PLAYER_MAX_PLAYERS + 1];
+static bool empty_space_in_range_;
+
 static Timer propagation_timer_;
 
-static void propagate(const PackedData& data) {
+struct MoveData {
+  position::Coordinates origin;
+  position::Coordinates target;
+};
+
+static MoveData move_data_;
+
+static void propagate(MapData map_data) {
   FOREACH_FACE(face) {
     if (isValueReceivedOnFaceExpired(face)) continue;
 
     byte datagram[GAME_MAP_DATAGRAM_LEN] = {
-        orientation::RelativeLocalFace(face), (byte)data.x, (byte)data.y,
-        (byte)data.player};
+        orientation::RelativeLocalFace(face), (byte)map_data.x,
+        (byte)map_data.y, (byte)map_data.player};
 
     // No need to check the return value as it is guaranteed that if we reach
     // this point, there are no pending datagrams to be sent on any face (so
@@ -60,6 +71,13 @@ static bool should_add_to_map(const position::Coordinates& coordinates) {
 
 static void __attribute__((noinline))
 add_to_map(int8_t x, int8_t y, byte player) {
+  LOGF("Adding to map: ");
+  LOG(x);
+  LOGF(",");
+  LOG(y);
+  LOGF(" ");
+  LOGLN(player);
+
   map_[map_index_].x = x;
   map_[map_index_].y = y;
   map_[map_index_].player = player;
@@ -71,11 +89,55 @@ static void add_local_to_map() {
              blink::state::GetPlayer());
 }
 
+static void compute_map_stats(byte* player_count, byte* player_blink_count,
+                              bool* empty_space_in_range) {
+  *player_count = 0;
+  *empty_space_in_range = false;
+  memset(player_blink_count, 0, GAME_PLAYER_MAX_PLAYERS + 1);
+
+  for (byte i = 0; i < map_index_; ++i) {
+    const MapData& map_data = map_[i];
+    // Update number of players.
+    if (player_blink_count[map_data.player] == 0) (*player_count)++;
+
+    // Update player blink count.
+    player_blink_count[map_data.player]++;
+
+    // Update empty space in range.
+    if (!(*empty_space_in_range)) {
+      *empty_space_in_range =
+          ((map_[i].player == 0) &&
+           (position::Distance(position::Coordinates{(int8_t)map_[i].x,
+                                                     (int8_t)map_[i].y}) <= 2));
+    }
+  }
+}
+
+static void __attribute__((noinline))
+update_blinks(position::Coordinates coordinates, byte player,
+              bool update_neighbors) {
+  for (byte i = 0; i < map_index_; ++i) {
+    if ((map_[i].x == coordinates.x) && (map_[i].y == coordinates.y)) {
+      // This is the position being updates. Change it to belong to the given
+      // player.
+      map_[i].player = player;
+    }
+
+    if (update_neighbors && (map_[i].player != 0) &&
+        (position::coordinates::Distance(
+             coordinates, {(int8_t)map_[i].x, (int8_t)map_[i].y}) == 1)) {
+      // Neighbor from a different player. Now belongs to the given player.
+      map_[i].player = player;
+    }
+  }
+}
+
 void Process() {
   // Read any pending datagram and queue new information.
   FOREACH_FACE(face) {
     byte datagram_len = getDatagramLengthOnFace(face);
     const byte* datagram = getDatagramOnFace(face);
+    markDatagramReadOnFace(face);
 
     if (datagram_len != GAME_MAP_DATAGRAM_LEN) {
       // Unexpected datagram. This might happen due to propagation delays for
@@ -121,12 +183,7 @@ void Process() {
 }
 
 void StartMapping(bool origin) {
-  // We are the origin of the coordinates system. Reset position and
-  // orientation and propagate new values.
-  //
-  // TODO(bga): Should add a way to propagate the reset to all Blinks in the
-  // cluster. Probably should be done outside of the mapping loop so we can take
-  // advantage of broadcast messages.
+  // Mapping just started. Reset map.
   Reset();
 
   if (origin) {
@@ -139,41 +196,41 @@ void StartMapping(bool origin) {
 
 bool GetMapping() { return (!propagation_timer_.isExpired()); }
 
-bool EmptySpaceInRange() {
-  for (byte i = 0; i < map_index_; ++i) {
-    if (map_[i].player == 0 &&
-        position::Distance(
-            position::Coordinates{(int8_t)map_[i].x, (int8_t)map_[i].y}) <= 2) {
-      return true;
-    }
-  }
-
-  return false;
+void ComputeMapStats() {
+  compute_map_stats(&player_count_, player_blink_count_,
+                    &empty_space_in_range_);
 }
 
-byte GetBlinkCount(byte player) {
-  byte blink_count = 0;
-  for (byte i = 0; i < map_index_; ++i) {
-    if (map_[i].player == player) blink_count++;
-  }
-
-  return blink_count;
+void SetMoveOrigin(int8_t x, int8_t y) {
+  move_data_.origin.x = x;
+  move_data_.origin.y = y;
 }
 
-byte GetPlayerCount() {
-  byte players = 0;
-  byte player_count = 0;
-  for (byte i = 0; i < map_index_; ++i) {
-    if (map_[i].player == 0) continue;
+void SetMoveTarget(int8_t x, int8_t y) {
+  move_data_.target.x = x;
+  move_data_.target.y = y;
+}
 
-    if (!IS_BIT_SET(players, map_[i].player)) {
-      SET_BIT(players, i);
-      player_count++;
-    }
+void ConfirmMove() {
+  if (position::coordinates::Distance(move_data_.origin, move_data_.target) >
+      1) {
+    update_blinks(move_data_.origin, 0, false);
   }
 
-  return player_count;
+  update_blinks(move_data_.target, game::state::GetPlayer(), true);
+
+  ComputeMapStats();
 }
+
+bool EmptySpaceInRange() { return empty_space_in_range_; }
+
+byte GetBlinkCount() { return map_index_; }
+
+byte __attribute__((noinline)) GetBlinkCount(byte player) {
+  return player_blink_count_[player];
+}
+
+byte GetPlayerCount() { return player_count_; }
 
 bool ValidState() { return ((GetBlinkCount(0) > 0) && (GetPlayerCount() > 1)); }
 
@@ -181,8 +238,7 @@ void Reset() {
   map_index_ = 0;
   map_propagation_index_ = 0;
 
-  orientation::Reset();
-  position::Reset();
+  ComputeMapStats();
 }
 
 }  // namespace map

@@ -8,7 +8,8 @@
 
 #define MESSAGE_GAME_STATE_CHANGE 1
 #define MESSAGE_SELECT_ORIGIN 2
-#define MESSAGE_FLASH 3
+#define MESSAGE_SELECT_TARGET 3
+#define MESSAGE_FLASH 4
 
 namespace game {
 
@@ -28,15 +29,13 @@ void Setup();
 
 void Process();
 
-void Reset();
-
 bool SendGameStateChange(byte payload);
 
 bool SendSelectOrigin(int8_t x, int8_t y);
 
-bool SendFlash();
+bool SendSelectTarget(int8_t x, int8_t y);
 
-bool SendReset();
+bool SendFlash();
 
 }  // namespace message
 

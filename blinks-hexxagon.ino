@@ -63,7 +63,7 @@ void loop() {
         game::state::play::Handler(state_changed, &state, &specific_state);
         break;
       case GAME_STATE_END:
-        // game::state::end::Handler(state_changed, &state, &specific_state);
+        game::state::end::Handler(state_changed, &state, &specific_state);
         break;
     }
 
