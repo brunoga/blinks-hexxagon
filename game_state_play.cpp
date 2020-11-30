@@ -14,7 +14,7 @@
 // Allows disabling the lightning animation to save some space. Some more space
 // can be saved if we decide to do it definitelly as the takeover animation code
 // can be simplified.
-//#define DISABLE_LIGHTNING_ANIMATION
+#define DISABLE_LIGHTNING_ANIMATION
 
 namespace game {
 
@@ -100,12 +100,6 @@ static void select_origin(byte* state, byte* specific_state) {
   (void)state;
 
   bool button_clicked = util::NoSleepButtonSingleClicked();
-
-  // Wasteful calling this every loop iteration, but we are focusing on space
-  // now.
-  //
-  // TODO(bga): Revisit this.
-  game::map::ComputeMapStats();
 
   // We are going to select an origin, so reset any Blink that is currently
   // one.
@@ -225,8 +219,6 @@ static void confirm_move(byte* state, byte* specific_state) {
 
   // Button was clicked and we are the selected target. Move confirmed.
   if (blink::state::GetTarget()) {
-    game::map::ConfirmMove();
-
     *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
 
     return;
@@ -294,6 +286,8 @@ static void move_confirmed(byte* state, byte* specific_state) {
 }
 
 static void resolve_move(byte* state, byte* specific_state) {
+  game::map::CommitMove();
+
   if (!blink::state::GetTarget()) return;
 
   if (!game::map::ValidState()) {

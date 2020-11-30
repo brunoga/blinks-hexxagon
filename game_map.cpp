@@ -3,12 +3,12 @@
 #include <string.h>
 
 #include "blink_state.h"
-#include "debug.h"
 #include "game_state.h"
 #include "src/blinks-broadcast/bits.h"
 #include "src/blinks-orientation/orientation.h"
 
 #define GAME_MAP_DATAGRAM_LEN 4
+#define GAME_MAP_PROPAGATION_TIMEOUT 2000
 
 namespace game {
 
@@ -29,6 +29,8 @@ static byte player_blink_count_[GAME_PLAYER_MAX_PLAYERS + 1];
 static bool empty_space_in_range_;
 
 static Timer propagation_timer_;
+
+static bool move_commited_;
 
 struct MoveData {
   position::Coordinates origin;
@@ -71,13 +73,6 @@ static bool should_add_to_map(const position::Coordinates& coordinates) {
 
 static void __attribute__((noinline))
 add_to_map(int8_t x, int8_t y, byte player) {
-  LOGF("Adding to map: ");
-  LOG(x);
-  LOGF(",");
-  LOG(y);
-  LOGF(" ");
-  LOGLN(player);
-
   map_[map_index_].x = x;
   map_[map_index_].y = y;
   map_[map_index_].player = player;
@@ -98,7 +93,9 @@ static void compute_map_stats(byte* player_count, byte* player_blink_count,
   for (byte i = 0; i < map_index_; ++i) {
     const MapData& map_data = map_[i];
     // Update number of players.
-    if (player_blink_count[map_data.player] == 0) (*player_count)++;
+    if (map_data.player != 0 && player_blink_count[map_data.player] == 0) {
+      (*player_count)++;
+    }
 
     // Update player blink count.
     player_blink_count[map_data.player]++;
@@ -118,7 +115,7 @@ update_blinks(position::Coordinates coordinates, byte player,
               bool update_neighbors) {
   for (byte i = 0; i < map_index_; ++i) {
     if ((map_[i].x == coordinates.x) && (map_[i].y == coordinates.y)) {
-      // This is the position being updates. Change it to belong to the given
+      // This is the position being updated. Change it to belong to the given
       // player.
       map_[i].player = player;
     }
@@ -148,7 +145,7 @@ void Process() {
       continue;
     }
 
-    propagation_timer_.set(2000);
+    propagation_timer_.set(GAME_MAP_PROPAGATION_TIMEOUT);
 
     if (map_index_ == 0) {
       // We do not have anything on our map, so we need to initialize our local
@@ -191,7 +188,7 @@ void StartMapping(bool origin) {
     add_local_to_map();
   }
 
-  propagation_timer_.set(2000);
+  propagation_timer_.set(GAME_MAP_PROPAGATION_TIMEOUT);
 }
 
 bool GetMapping() { return (!propagation_timer_.isExpired()); }
@@ -204,14 +201,18 @@ void ComputeMapStats() {
 void SetMoveOrigin(int8_t x, int8_t y) {
   move_data_.origin.x = x;
   move_data_.origin.y = y;
+  move_commited_ = false;
 }
 
 void SetMoveTarget(int8_t x, int8_t y) {
   move_data_.target.x = x;
   move_data_.target.y = y;
+  move_commited_ = false;
 }
 
-void ConfirmMove() {
+void CommitMove() {
+  if (move_commited_) return;
+
   if (position::coordinates::Distance(move_data_.origin, move_data_.target) >
       1) {
     update_blinks(move_data_.origin, 0, false);
@@ -220,6 +221,8 @@ void ConfirmMove() {
   update_blinks(move_data_.target, game::state::GetPlayer(), true);
 
   ComputeMapStats();
+
+  move_commited_ = true;
 }
 
 bool EmptySpaceInRange() { return empty_space_in_range_; }
@@ -232,7 +235,9 @@ byte __attribute__((noinline)) GetBlinkCount(byte player) {
 
 byte GetPlayerCount() { return player_count_; }
 
-bool ValidState() { return ((GetBlinkCount(0) > 0) && (GetPlayerCount() > 1)); }
+bool ValidState() {
+  return (player_blink_count_[0] > 0) && (player_count_ > 1);
+}
 
 void Reset() {
   map_index_ = 0;

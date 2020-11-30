@@ -5,7 +5,7 @@
 
 #include "src/blinks-position/position.h"
 
-#define GAME_MAP_MAX_BLINKS 85
+#define GAME_MAP_MAX_BLINKS 80
 
 namespace game {
 
@@ -32,7 +32,7 @@ void SetMoveTarget(int8_t x, int8_t y);
 
 // Computes the player move from origin to destination, updating the game
 // map accordingly.
-void ConfirmMove();
+void CommitMove();
 
 // Returns true if there is an empty space in range of the local Blink.
 bool EmptySpaceInRange();

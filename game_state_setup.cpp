@@ -63,11 +63,11 @@ static void mapped(byte* state, byte* specific_state) {
 }
 
 static void validate(byte* state, byte* specific_state) {
+  game::map::ComputeMapStats();
+
   if (!blink::state::GetOrigin()) return;
 
   if (!wait_timer_.isExpired()) return;
-
-  game::map::ComputeMapStats();
 
   if (game::map::ValidState()) {
     // Game state is good. Switch to first available player.
