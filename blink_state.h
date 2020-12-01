@@ -32,11 +32,10 @@ byte GetTargetType();
 void SetPlayer(byte player);
 byte GetPlayer();
 
-void SetAnimating(bool animating);
-bool GetAnimating();
-void SetAnimatingParam(byte animating_param);
-void SetAnimatingFunction(bool (*animating_function)(byte param));
-bool RunAnimatingFunction();
+void SetTakeOver(bool take_over);
+bool GetTakeOver();
+void SetTakeOverFace(byte face);
+byte GetTakeOverFace();
 
 void StartColorOverride();
 bool GetColorOverride();

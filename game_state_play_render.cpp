@@ -25,11 +25,12 @@ void Render() {
   // animations only render an overlay.
   setColor(player_color);
 
-  if (blink::state::GetAnimating()) {
-    // Render predefined animation. Currently this is always lightning +
+  if (blink::state::GetTakeOver()) {
+    // Render take over animation. Currently this is always lightning +
     // explosion.
-    if (blink::state::RunAnimatingFunction()) {
-      blink::state::SetAnimating(false);
+    if (render::animation::TakeOver(player_color,
+                                    blink::state::GetTakeOverFace())) {
+      blink::state::SetTakeOver(false);
     }
   } else if ((blink::state::GetTarget() && player == 0) ||
              blink::state::GetOrigin()) {

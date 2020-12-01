@@ -15,16 +15,14 @@ namespace state {
 struct BlinkState {
   bool origin;
   bool target;
-  bool animating;
+  bool take_over;
+  byte take_over_face;
   byte player;
   byte target_type;
 };
 static BlinkState state_;
 
 static Timer color_override_timer_;
-
-static byte animating_param_;
-static bool (*animating_function_)(byte param);
 
 void SetOrigin(bool origin) { state_.origin = origin; }
 bool __attribute__((noinline)) GetOrigin() { return state_.origin; }
@@ -40,17 +38,15 @@ void __attribute__((noinline)) SetPlayer(byte player) {
 }
 byte GetPlayer() { return state_.player; }
 
-void SetAnimating(bool animating) { state_.animating = animating; }
-bool GetAnimating() { return state_.animating; }
+void SetTakeOver(bool take_over) { state_.take_over = take_over; }
 
-void SetAnimatingParam(byte animating_param) {
-  animating_param_ = animating_param;
-}
-void SetAnimatingFunction(bool (*animating_function)(byte param)) {
-  animating_function_ = animating_function;
+bool GetTakeOver() { return state_.take_over; }
+
+void SetTakeOverFace(byte take_over_face) {
+  state_.take_over_face = take_over_face;
 }
 
-bool RunAnimatingFunction() { return animating_function_(animating_param_); }
+byte GetTakeOverFace() { return state_.take_over_face; }
 
 void __attribute__((noinline)) StartColorOverride() {
   color_override_timer_.set(200);
@@ -61,7 +57,7 @@ bool GetColorOverride() { return !color_override_timer_.isExpired(); }
 void __attribute__((noinline)) Reset() {
   state_.origin = false;
   state_.target = false;
-  state_.animating = false;
+  state_.take_over = false;
   state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
   state_.player = 0;
 }

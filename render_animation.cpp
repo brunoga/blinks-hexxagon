@@ -16,6 +16,8 @@ static bool animation_started_ = false;
 
 static byte end_;
 
+static bool take_over_lightning_done_;
+
 static bool reset_timer_if_expired(word ms) {
   if (timer_.isExpired()) {
     if (!animation_started_) timer_.set(ms);
@@ -99,6 +101,18 @@ bool Lightning(byte origin_face) {
   }
 
   return false;
+}
+
+bool TakeOver(const Color& base_color, byte origin_face) {
+  if (!take_over_lightning_done_ && !Lightning(origin_face)) return false;
+
+  take_over_lightning_done_ = true;
+
+  if (!Explosion(base_color)) return false;
+
+  take_over_lightning_done_ = false;
+
+  return true;
 }
 
 }  // namespace animation

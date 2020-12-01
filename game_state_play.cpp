@@ -11,11 +11,6 @@
 #define NEIGHBOR_TYPE_TARGET 0
 #define NEIGHBOR_TYPE_ENEMY 1
 
-// Allows disabling the lightning animation to save some space. Some more space
-// can be saved if we decide to do it definitelly as the takeover animation code
-// can be simplified.
-//#define DISABLE_LIGHTNING_ANIMATION
-
 namespace game {
 
 namespace state {
@@ -24,8 +19,7 @@ namespace play {
 
 static bool auto_select_ = false;
 
-static bool takeover_started_ = false;
-static bool lightning_done_ = false;
+static bool take_over_started_ = false;
 
 static bool search_neighbor_type(byte neighbor_type, byte* source_face) {
   FOREACH_FACE(f) {
@@ -55,39 +49,16 @@ static bool search_neighbor_type(byte neighbor_type, byte* source_face) {
 }
 
 static bool do_takeover(byte takeover_player, byte source_face) {
-  if (!blink::state::GetAnimating()) {
-    if (!takeover_started_) {
-      if (source_face == FACE_COUNT) {
-        lightning_done_ = true;
-      }
+  if (!blink::state::GetTakeOver()) {
+    if (!take_over_started_) {
+      blink::state::SetTakeOverFace(source_face);
+      blink::state::SetTakeOver(true);
 
-      blink::state::SetAnimating(true);
-      blink::state::SetAnimatingParam(source_face);
-      blink::state::SetAnimatingFunction([](byte param) -> bool {
-#ifdef DISABLE_LIGHTNING_ANIMATION
-        (void)param;
-
-        lightning_done_ = true;
-#else
-        if (!lightning_done_) {
-          if (!render::animation::Lightning(param)) {
-            return false;
-          }
-
-          lightning_done_ = true;
-        }
-#endif
-
-        return render::animation::Explosion(
-            game::player::GetColor(blink::state::GetPlayer()));
-      });
-
-      takeover_started_ = true;
+      take_over_started_ = true;
     } else {
       blink::state::SetPlayer(takeover_player);
 
-      takeover_started_ = false;
-      lightning_done_ = false;
+      take_over_started_ = false;
 
       return true;
     }
