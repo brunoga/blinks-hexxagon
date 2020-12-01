@@ -97,16 +97,12 @@ void Pulse(const Color& base_color, byte start, byte slowdown) {
   setColor(dim(base_color, brightness));
 }
 
-void Spinner(const Color& spinner_color, byte num_faces, byte slowdown) {
+void Spinner(const Color& spinner_color, byte slowdown) {
   reset_timer_if_expired((FACE_COUNT * slowdown) - 1);
 
   byte f = (FACE_COUNT - 1) - timer_.getRemaining() / slowdown;
 
-  byte step = FACE_COUNT / num_faces;
-
-  for (byte face = 0; face < FACE_COUNT; face += step) {
-    setColorOnFace(spinner_color, (f + face) % FACE_COUNT);
-  }
+  setColorOnFace(spinner_color, f);
 }
 
 #ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING

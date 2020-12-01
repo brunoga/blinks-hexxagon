@@ -47,8 +47,9 @@ void NextPlayer() {
   byte current_player = GetPlayer();
 
   byte next_player = game::player::GetNext(current_player);
-  while (((game::map::GetStats().player_blink_count[next_player] == 0) ||
-          (next_player == 0)) &&
+  while (((game::map::GetStats().player[next_player].blink_count == 0) ||
+          (next_player == 0) ||
+          !game::map::GetStats().player[next_player].can_move) &&
          (next_player != current_player)) {
     next_player = game::player::GetNext(next_player);
   }

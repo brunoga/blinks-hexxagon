@@ -12,9 +12,14 @@ namespace game {
 
 namespace map {
 
+struct PlayerStats {
+  byte blink_count : 7;
+  bool can_move : 1;
+};
+
 struct Stats {
   byte player_count;
-  byte player_blink_count[GAME_PLAYER_MAX_PLAYERS + 1];
+  PlayerStats player[GAME_PLAYER_MAX_PLAYERS + 1];
   bool local_blink_empty_space_in_range;
 };
 

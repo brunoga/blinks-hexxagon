@@ -41,7 +41,6 @@ void Render() {
     // We are either the target Blink (before it is effectively taken over) or
     // the Origin. Render the spinning animation.
     render::animation::Spinner(RENDER_CONFIG_PLAY_STATE_SPINNER_COLOR,
-                               RENDER_CONFIG_PLAY_STATE_SPINNER_FACES,
                                RENDER_CONFIG_PLAY_STATE_SPINNER_SLOWDOWN);
   } else if ((game::state::GetPlayer() == player) &&
              (game::state::GetSpecific() < GAME_STATE_PLAY_MOVE_CONFIRMED) &&

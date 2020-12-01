@@ -112,16 +112,16 @@ void Process() {
       // Unexpected datagram. This might happen due to propagation delays for
       // the last normal broadcast message sent.
       //
-      // TODO(bga): Maybe a better way to fix this is to wait for a while before
-      // starting the mapping process.
+      // TODO(bga): Maybe a better way to fix this is to wait for a while
+      // before starting the mapping process.
       continue;
     }
 
     propagation_timer_.set(GAME_MAP_PROPAGATION_TIMEOUT);
 
     if (map_index_ == 0) {
-      // We do not have anything on our map, so we need to initialize our local
-      // data and add it to the map.
+      // We do not have anything on our map, so we need to initialize our
+      // local data and add it to the map.
       orientation::Setup(datagram[0], face);
       position::Setup(orientation::RelativeLocalFace(face), datagram[1],
                       datagram[2]);
@@ -136,7 +136,7 @@ void Process() {
       setColor(OFF);
       continue;
     } else {
-      setColor(GREEN);
+      setColor(game::player::GetColor(blink::state::GetPlayer()));
     }
 
     add_to_map(received_coordinates.x, received_coordinates.y, datagram[3]);
@@ -172,19 +172,30 @@ void ComputeMapStats() {
     const MapData& map_data = map_[i];
     // Update number of players.
     if (map_data.player != 0 &&
-        stats_.player_blink_count[map_data.player] == 0) {
+        stats_.player[map_data.player].blink_count == 0) {
       stats_.player_count++;
     }
 
     // Update player blink count.
-    stats_.player_blink_count[map_data.player]++;
+    stats_.player[map_data.player].blink_count++;
+
+    // Update player can move.
+    for (byte j = 0; j < map_index_; ++j) {
+      if ((map_[j].player == 0) &&
+          (position::coordinates::Distance(
+               {(int8_t)map_data.x, (int8_t)map_data.y},
+               {(int8_t)map_[j].x, (int8_t)map_[j].y}) <= 2)) {
+        stats_.player[map_data.player].can_move = true;
+        break;
+      }
+    }
 
     // Update empty space in range.
     if (!(stats_.local_blink_empty_space_in_range)) {
       stats_.local_blink_empty_space_in_range =
-          ((map_[i].player == 0) &&
-           (position::Distance(position::Coordinates{(int8_t)map_[i].x,
-                                                     (int8_t)map_[i].y}) <= 2));
+          ((map_data.player == 0) &&
+           (position::Distance(position::Coordinates{
+                (int8_t)map_data.x, (int8_t)map_data.y}) <= 2));
     }
   }
 }
@@ -225,7 +236,7 @@ void CommitMove() {
 const Stats& GetStats() { return stats_; }
 
 bool __attribute__((noinline)) ValidState() {
-  return (stats_.player_blink_count[0] > 0) && (stats_.player_count > 1);
+  return (stats_.player[0].blink_count > 0) && (stats_.player_count > 1);
 }
 
 void Reset() {

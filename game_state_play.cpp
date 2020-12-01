@@ -48,13 +48,15 @@ static bool search_neighbor_type(byte neighbor_type, byte* source_face) {
   return false;
 }
 
+#ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
 static bool do_takeover(byte takeover_player, byte source_face) {
+#else
+static bool do_takeover(byte takeover_player) {
+#endif
   if (!blink::state::GetTakeOver()) {
     if (!take_over_started_) {
 #ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
       blink::state::SetTakeOverFace(source_face);
-#else
-      (void)source_face;
 #endif
       blink::state::SetTakeOver(true);
 
@@ -176,35 +178,24 @@ static void target_selected(byte* state, byte* specific_state) {
 static void confirm_move(byte* state, byte* specific_state) {
   (void)state;
 
-  bool button_clicked = util::NoSleepButtonSingleClicked();
+  if (!util::NoSleepButtonSingleClicked()) return;
 
-  if (!blink::state::GetTarget() &&
-      blink::state::GetTargetType() != BLINK_STATE_TARGET_TYPE_TARGET &&
-      blink::state::GetPlayer() != game::state::GetPlayer()) {
-    // We are not the currently selected target, an alternate
-    // target or a Blink that belongs to the current player.
-    return;
-  }
-
-  // We pass all checks, but we do nothing until we get a click.
-  if (!button_clicked) return;
-
-  // Button was clicked and we are the selected target. Move confirmed.
   if (blink::state::GetTarget()) {
+    // Button was clicked and we are the selected target. Move confirmed.
     *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
 
     return;
   }
 
-  // Origin was clicked. Deselect it.
   if (blink::state::GetOrigin()) {
+    // Origin was clicked. Deselect it.
     *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
 
     return;
   }
 
-  // Another target was clicked. Select it.
   if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_TARGET) {
+    // Another target was clicked. Select it.
     auto_select_ = true;
 
     *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
@@ -212,8 +203,8 @@ static void confirm_move(byte* state, byte* specific_state) {
     return;
   }
 
-  // Another origin was clicked. Select it.
   if (blink::state::GetPlayer() == game::state::GetPlayer()) {
+    // Another origin was clicked. Select it.
     auto_select_ = true;
 
     *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
@@ -227,8 +218,12 @@ static void move_confirmed(byte* state, byte* specific_state) {
   if (search_neighbor_type(NEIGHBOR_TYPE_TARGET, &source_face)) {
     if (blink::state::GetPlayer() != 0 &&
         blink::state::GetPlayer() != game::state::GetPlayer()) {
-      // We are being conquered, trigger explosion animation.
+      // We are being conquered, trigger animation.
+#ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
       if (!do_takeover(game::state::GetPlayer(), source_face)) return;
+#else
+      if (!do_takeover(game::state::GetPlayer())) return;
+#endif
     }
   } else {
     if (blink::state::GetOrigin()) {
@@ -276,24 +271,6 @@ static void resolve_move(byte* state, byte* specific_state) {
 void Handler(bool state_changed, byte* state, byte* specific_state) {
   if (state_changed) {
     *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
-  }
-
-  if (buttonDoubleClicked()) {
-    // Turn is being passed. Switch to next player.
-    game::state::NextPlayer();
-
-    // Manually force a state that is not the select origin one so that even
-    // if we are currently in it, the state will be propagate to the other
-    // Blinks (the next player information is propagated with state changes).
-    // This is cheaper than keeping track of the previous player in the game
-    // state and using that for automatically deciding if the state should be
-    // propagated or not.
-    game::state::SetSpecific(GAME_STATE_PLAY_MOVE_CONFIRMED);
-
-    // Next player will select origin.
-    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
-
-    return;
   }
 
   switch (*specific_state) {

@@ -20,7 +20,7 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
     byte max_count = 0;
     byte winner_player = 0;
     for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
-      byte player_count = game::map::GetStats().player_blink_count[i];
+      byte player_count = game::map::GetStats().player[i].blink_count;
       if (player_count > max_count) {
         max_count = player_count;
         winner_player = i;

@@ -15,7 +15,7 @@ namespace animation {
 void ResetPulseTimer();
 
 void Pulse(const Color& base_color, byte start, byte slowdown);
-void Spinner(const Color& spinner_color, byte num_faces, byte slowdown);
+void Spinner(const Color& spinner_color, byte slowdown);
 
 #ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
 bool TakeOver(const Color& base_color, byte origin_face);
