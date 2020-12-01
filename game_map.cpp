@@ -3,11 +3,12 @@
 #include <string.h>
 
 #include "blink_state.h"
+#include "game_message.h"
 #include "game_state.h"
-#include "src/blinks-broadcast/bits.h"
+#include "src/blinks-broadcast/handler.h"
+#include "src/blinks-broadcast/manager.h"
 #include "src/blinks-orientation/orientation.h"
 
-#define GAME_MAP_DATAGRAM_LEN 4
 #define GAME_MAP_PROPAGATION_TIMEOUT 2000
 
 namespace game {
@@ -37,25 +38,13 @@ struct MoveData {
 
 static MoveData move_data_;
 
-static void propagate(MapData map_data) {
-  FOREACH_FACE(face) {
-    if (isValueReceivedOnFaceExpired(face)) continue;
-
-    byte datagram[GAME_MAP_DATAGRAM_LEN] = {
-        orientation::RelativeLocalFace(face), (byte)map_data.x,
-        (byte)map_data.y, (byte)map_data.player};
-
-    // No need to check the return value as it is guaranteed that if we reach
-    // this point, there are no pending datagrams to be sent on any face (so
-    // sendDatagramOnface() will never fail).
-    sendDatagramOnFace(datagram, GAME_MAP_DATAGRAM_LEN, face);
-  }
-}
-
 static void maybe_propagate() {
   if (map_index_ != map_propagation_index_) {
-    propagate(map_[map_propagation_index_]);
-    map_propagation_index_++;
+    if (game::message::SendExternalPropagateCoordinates(
+            map_[map_propagation_index_].x, map_[map_propagation_index_].y,
+            map_[map_propagation_index_].player)) {
+      map_propagation_index_++;
+    }
   }
 }
 
@@ -101,64 +90,47 @@ update_blinks(position::Coordinates coordinates, byte player,
   }
 }
 
-void Process() {
-  // Read any pending datagram and queue new information.
-  FOREACH_FACE(face) {
-    byte datagram_len = getDatagramLengthOnFace(face);
-    const byte* datagram = getDatagramOnFace(face);
-    markDatagramReadOnFace(face);
+void consume(const broadcast::Message* message, byte face) {
+  propagation_timer_.set(GAME_MAP_PROPAGATION_TIMEOUT);
 
-    if (datagram_len != GAME_MAP_DATAGRAM_LEN) {
-      // Unexpected datagram. This might happen due to propagation delays for
-      // the last normal broadcast message sent.
-      //
-      // TODO(bga): Maybe a better way to fix this is to wait for a while
-      // before starting the mapping process.
-      continue;
-    }
+  if (map_index_ == 0) {
+    // We do not have anything on our map, so we need to initialize our
+    // local data and add it to the map.
+    orientation::Setup(message->payload[0], face);
+    position::Setup(orientation::RelativeLocalFace(face), message->payload[1],
+                    message->payload[2]);
 
-    propagation_timer_.set(GAME_MAP_PROPAGATION_TIMEOUT);
-
-    if (map_index_ == 0) {
-      // We do not have anything on our map, so we need to initialize our
-      // local data and add it to the map.
-      orientation::Setup(datagram[0], face);
-      position::Setup(orientation::RelativeLocalFace(face), datagram[1],
-                      datagram[2]);
-
-      add_local_to_map();
-    }
-
-    position::Coordinates received_coordinates = {(int8_t)datagram[1],
-                                                  (int8_t)datagram[2]};
-
-    if (!should_add_to_map(received_coordinates)) {
-      setColor(OFF);
-      continue;
-    } else {
-      setColor(game::player::GetColor(blink::state::GetPlayer()));
-    }
-
-    add_to_map(received_coordinates.x, received_coordinates.y, datagram[3]);
+    add_local_to_map();
   }
 
-  if (isDatagramPendingOnAnyFace()) {
-    // Wait until all pending datagrams are sent to continue processing any
-    // other data.
+  position::Coordinates received_coordinates = {(int8_t)message->payload[1],
+                                                (int8_t)message->payload[2]};
+
+  if (!should_add_to_map(received_coordinates)) {
+    setColor(OFF);
+
     return;
   }
 
-  maybe_propagate();
+  setColor(game::player::GetColor(blink::state::GetPlayer()));
+
+  add_to_map(received_coordinates.x, received_coordinates.y,
+             message->payload[3]);
 }
 
-void StartMapping(bool origin) {
+void Setup() {
+  broadcast::message::handler::Set(
+      {MESSAGE_EXTERNAL_PROPAGATE_COORDINATES, consume});
+}
+
+void Process() { maybe_propagate(); }
+
+void __attribute__((noinline)) StartMapping() {
   // Mapping just started. Reset map.
   Reset();
 
-  if (origin) {
-    // We are the mapping origin. Add ourselves to the map.
-    add_local_to_map();
-  }
+  // We are the mapping origin. Add ourselves to the map.
+  add_local_to_map();
 
   propagation_timer_.set(GAME_MAP_PROPAGATION_TIMEOUT);
 }
@@ -218,7 +190,7 @@ void SetMoveTarget(int8_t x, int8_t y) {
   set_data(x, y, &move_data_.target, blink::state::SetTarget);
 }
 
-void CommitMove() {
+void __attribute__((noinline)) CommitMove() {
   if (move_commited_) return;
 
   if (position::coordinates::Distance(move_data_.origin, move_data_.target) >

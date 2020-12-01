@@ -14,8 +14,6 @@ namespace state {
 
 namespace setup {
 
-static Timer wait_timer_;
-
 static void players(byte* state, byte* specific_state) {
   (void)state;
 
@@ -31,7 +29,7 @@ static void players(byte* state, byte* specific_state) {
     orientation::Reset();
     position::Reset();
 
-    wait_timer_.set(1000);
+    game::map::StartMapping();
 
     *specific_state = GAME_STATE_SETUP_MAP;
   } else if (util::NoSleepButtonSingleClicked()) {
@@ -43,22 +41,11 @@ static void players(byte* state, byte* specific_state) {
 static void map(byte* state, byte* specific_state) {
   (void)state;
 
-  // TODO(bga): Double check if this is needed. It seems to be as without it
-  // sometimes we get wrong mapping results.
-  if (!wait_timer_.isExpired()) return;
+  game::map::Process();
 
-  // And start the mapping process.
-  game::map::StartMapping(blink::state::GetOrigin());
+  if (game::map::GetMapping() || !blink::state::GetOrigin()) return;
 
   // When we return from mapping, we go straight to board validation.
-  *specific_state = GAME_STATE_SETUP_MAPPED;
-}
-
-static void mapped(byte* state, byte* specific_state) {
-  (void)state;
-
-  wait_timer_.set(2000);
-
   *specific_state = GAME_STATE_SETUP_VALIDATE;
 }
 
@@ -66,8 +53,6 @@ static void validate(byte* state, byte* specific_state) {
   game::map::ComputeMapStats();
 
   if (!blink::state::GetOrigin()) return;
-
-  if (!wait_timer_.isExpired()) return;
 
   bool valid;
   if (util::CheckValidateStateAndReport(&valid)) {
@@ -96,9 +81,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       break;
     case GAME_STATE_SETUP_MAP:
       map(state, specific_state);
-      break;
-    case GAME_STATE_SETUP_MAPPED:
-      mapped(state, specific_state);
       break;
     case GAME_STATE_SETUP_VALIDATE:
       validate(state, specific_state);

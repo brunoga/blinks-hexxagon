@@ -30,18 +30,15 @@ void SetOrigin(bool origin) { state_.origin = origin; }
 bool __attribute__((noinline)) GetOrigin() { return state_.origin; }
 
 void SetTarget(bool target) { state_.target = target; }
-bool __attribute__((noinline)) GetTarget() { return state_.target; }
+bool GetTarget() { return state_.target; }
 
 void SetTargetType(byte target_type) { state_.target_type = target_type; }
 byte GetTargetType() { return state_.target_type; }
 
-void __attribute__((noinline)) SetPlayer(byte player) {
-  state_.player = player;
-}
+void SetPlayer(byte player) { state_.player = player; }
 byte GetPlayer() { return state_.player; }
 
 void SetTakeOver(bool take_over) { state_.take_over = take_over; }
-
 bool GetTakeOver() { return state_.take_over; }
 
 #ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
@@ -67,7 +64,7 @@ void __attribute__((noinline)) Reset() {
   state_.player = 0;
 }
 
-void __attribute__((noinline)) Render(byte game_state) {
+void Render(byte game_state) {
   // "Render" our face value.
   FaceValue face_value;
 

@@ -26,7 +26,7 @@ void Set(byte state, bool from_network) {
   state_.from_network = from_network;
 }
 
-byte Get() { return state_.current; }
+byte __attribute__((noinline)) Get() { return state_.current; }
 
 void SetSpecific(byte specific_state, bool from_network) {
   state_.previous_specific = state_.current_specific;
@@ -37,9 +37,7 @@ void SetSpecific(byte specific_state, bool from_network) {
 
 byte GetSpecific() { return state_.current_specific; }
 
-void __attribute__((noinline)) SetPlayer(byte player) {
-  state_.player = player;
-}
+void SetPlayer(byte player) { state_.player = player; }
 
 byte __attribute__((noinline)) GetPlayer() { return state_.player; }
 

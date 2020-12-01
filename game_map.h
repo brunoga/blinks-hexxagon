@@ -23,6 +23,8 @@ struct Stats {
   bool local_blink_empty_space_in_range;
 };
 
+void Setup();
+
 // Process should be called at the top of the mapping loop and will handle all
 // incoming mapping messages.
 void Process();
@@ -31,7 +33,7 @@ void Process();
 // system origin (0, 0, 0). Only a single Blink in the cluster should call this
 // otherwise the behavior will be undefined and will probably break everything
 // badly.
-void StartMapping(bool origin);
+void StartMapping();
 
 // Returns true if the mapping process is active.
 bool GetMapping();

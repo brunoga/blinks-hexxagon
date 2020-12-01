@@ -9,6 +9,7 @@
 #include "game_state_play.h"
 #include "src/blinks-broadcast/manager.h"
 #include "src/blinks-broadcast/message.h"
+#include "src/blinks-orientation/orientation.h"
 #include "src/blinks-position/position.h"
 
 #define MESSAGE_STATE_SEND_MESSAGE 0
@@ -62,7 +63,6 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
 static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
                                 byte* payload) {
   (void)src_face;
-  (void)dst_face;
   (void)payload;
 
   byte len = 2;
@@ -70,6 +70,10 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
   switch (message_id) {
     case MESSAGE_GAME_STATE_CHANGE:
       len = 1;
+      break;
+    case MESSAGE_EXTERNAL_PROPAGATE_COORDINATES:
+      payload[0] = orientation::RelativeLocalFace(dst_face);
+      len = 4;
       break;
   }
 
@@ -92,7 +96,7 @@ void Setup() {
   broadcast::manager::Setup(rcv_message_handler, fwd_message_handler);
 }
 
-void Process() { broadcast::manager::Process(); }
+void __attribute__((noinline)) Process() { broadcast::manager::Process(); }
 
 bool SendGameStateChange(byte payload) {
   return sendMessage(MESSAGE_GAME_STATE_CHANGE, &payload, 1);
@@ -106,6 +110,11 @@ bool SendSelectOrigin(int8_t x, int8_t y) {
 bool SendSelectTarget(int8_t x, int8_t y) {
   byte payload[2] = {(byte)x, (byte)y};
   return sendMessage(MESSAGE_SELECT_TARGET, payload, 2);
+}
+
+bool SendExternalPropagateCoordinates(int8_t x, int8_t y, byte player) {
+  byte payload[4] = {FACE_COUNT, (byte)x, (byte)y, player};
+  return sendMessage(MESSAGE_EXTERNAL_PROPAGATE_COORDINATES, payload, 4);
 }
 
 bool SendFlash() {

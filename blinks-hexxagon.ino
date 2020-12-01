@@ -15,16 +15,12 @@
     "This code requires a custom blinklib. See https://github.com/brunoga/blinklib/releases/latest"
 #endif
 
-void setup() { game::message::Setup(); }
+void setup() {
+  game::message::Setup();
+  game::map::Setup();
+}
 
 void loop() {
-  if (game::map::GetMapping()) {
-    // We are mapping Blinks.
-    game::map::Process();
-
-    return;
-  }
-
   // Process any pending game messages.
   game::message::Process();
 
