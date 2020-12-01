@@ -79,7 +79,7 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
 static bool sendMessage(byte message_id, const byte* payload,
                         byte payload_size) {
   broadcast::Message message;
-  broadcast::message::Initialize(&message, message_id);
+  message.header.id = message_id;
 
   if (payload != nullptr) {
     memcpy(message.payload, payload, payload_size);
