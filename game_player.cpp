@@ -4,7 +4,8 @@ namespace game {
 
 namespace player {
 
-static const Color colors_[] = {ORANGE, RED, BLUE, GREEN, MAGENTA};
+static const Color colors_[] = {MAKECOLOR_5BIT_RGB(31, 25, 0), RED, BLUE, GREEN,
+                                MAGENTA};
 
 byte __attribute__((noinline)) GetNext(byte current_player) {
   byte next_player = current_player + 1;
