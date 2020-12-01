@@ -126,7 +126,6 @@ static void select_origin(byte* state, byte* specific_state) {
   auto_select_ = false;
 
   // Ok, we are now the origin.
-  blink::state::SetOrigin(true);
   game::map::SetMoveOrigin(position::Local().x, position::Local().y);
 
   // Indicate that an origin was selected.
@@ -180,8 +179,6 @@ static void select_target(byte* state, byte* specific_state) {
   if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE) return;
 
   // We are a valid target.
-
-  blink::state::SetTarget(true);
   game::map::SetMoveTarget(position::Local().x, position::Local().y);
 
   *specific_state = GAME_STATE_PLAY_TARGET_SELECTED;
@@ -250,9 +247,6 @@ static void confirm_move(byte* state, byte* specific_state) {
 
 static void move_confirmed(byte* state, byte* specific_state) {
   (void)state;
-
-  // TODOD(bga): Use map information here to determine if we should be taken
-  // over. Might help with storage.
 
   byte source_face;
   if (search_neighbor_type(NEIGHBOR_TYPE_TARGET, &source_face)) {

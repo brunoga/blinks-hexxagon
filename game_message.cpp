@@ -57,7 +57,7 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
       blink::state::StartColorOverride();
       break;
   }
-}  // namespace message
+}
 
 static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
                                 byte* payload) {

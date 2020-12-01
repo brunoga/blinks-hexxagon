@@ -189,16 +189,34 @@ void ComputeMapStats() {
   }
 }
 
-void SetMoveOrigin(int8_t x, int8_t y) {
-  move_data_.origin.x = x;
-  move_data_.origin.y = y;
+static void set_data(int8_t x, int8_t y, position::Coordinates* coordinates,
+                     void (*setter)(bool)) {
+  coordinates->x = x;
+  coordinates->y = y;
+
+  setter(true);
+
   move_commited_ = false;
 }
 
-void __attribute__((noinline)) SetMoveTarget(int8_t x, int8_t y) {
-  move_data_.target.x = x;
-  move_data_.target.y = y;
-  move_commited_ = false;
+void SetMoveOrigin(int8_t x, int8_t y) {
+  set_data(x, y, &move_data_.origin, blink::state::SetOrigin);
+}
+
+void SetMoveTarget(int8_t x, int8_t y) {
+  set_data(x, y, &move_data_.target, blink::state::SetTarget);
+}
+
+byte FindTargetFace() {
+  FOREACH_FACE(f) {
+    position::Coordinates remote_coordinates = position::Remote(f);
+    if (remote_coordinates.x == move_data_.target.x &&
+        remote_coordinates.y == move_data_.target.y) {
+      return orientation::AbsoluteLocalFace(f);
+    }
+  }
+
+  return FACE_COUNT;
 }
 
 void CommitMove() {
