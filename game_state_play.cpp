@@ -284,15 +284,18 @@ static void resolve_move(byte* state, byte* specific_state) {
 
   if (!blink::state::GetTarget()) return;
 
-  if (!game::map::ValidState()) {
-    *state = GAME_STATE_END;
-    return;
+  bool valid;
+  if (util::CheckValidateStateAndReport(&valid)) {
+    if (valid) {
+      // Move to next turn.
+      game::state::NextPlayer();
+
+      *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
+    } else {
+      // Game over.
+      *state = GAME_STATE_END;
+    }
   }
-
-  // Move to next turn.
-  game::state::NextPlayer();
-
-  *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
 }
 
 void Handler(bool state_changed, byte* state, byte* specific_state) {

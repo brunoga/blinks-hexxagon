@@ -69,23 +69,20 @@ static void validate(byte* state, byte* specific_state) {
 
   if (!wait_timer_.isExpired()) return;
 
-  if (game::map::ValidState()) {
-    // Game state is good. Switch to first available player.
-    game::state::NextPlayer();
+  bool valid;
+  if (util::CheckValidateStateAndReport(&valid)) {
+    if (valid) {
+      // Game state is good. Switch to first available player.
+      game::state::NextPlayer();
+
+      *state = GAME_STATE_PLAY;
+      *specific_state = 0;
+    } else {
+      *specific_state = GAME_STATE_SETUP_SELECT_PLAYERS;
+    }
 
     blink::state::SetOrigin(false);
-
-    *state = GAME_STATE_PLAY;
-    *specific_state = 0;
-
-    return;
   }
-
-  if (!game::message::SendFlash()) return;
-
-  blink::state::SetOrigin(false);
-
-  *specific_state = GAME_STATE_SETUP_SELECT_PLAYERS;
 }
 
 void Handler(bool state_changed, byte* state, byte* specific_state) {
