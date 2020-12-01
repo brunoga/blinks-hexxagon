@@ -194,7 +194,7 @@ static void set_data(int8_t x, int8_t y, position::Coordinates* coordinates,
   coordinates->x = x;
   coordinates->y = y;
 
-  setter(true);
+  if (x == position::Local().x && y == position::Local().y) setter(true);
 
   move_commited_ = false;
 }
@@ -205,18 +205,6 @@ void SetMoveOrigin(int8_t x, int8_t y) {
 
 void SetMoveTarget(int8_t x, int8_t y) {
   set_data(x, y, &move_data_.target, blink::state::SetTarget);
-}
-
-byte FindTargetFace() {
-  FOREACH_FACE(f) {
-    position::Coordinates remote_coordinates = position::Remote(f);
-    if (remote_coordinates.x == move_data_.target.x &&
-        remote_coordinates.y == move_data_.target.y) {
-      return orientation::AbsoluteLocalFace(f);
-    }
-  }
-
-  return FACE_COUNT;
 }
 
 void CommitMove() {
@@ -236,7 +224,7 @@ void CommitMove() {
 
 const Stats& GetStats() { return stats_; }
 
-bool ValidState() {
+bool __attribute__((noinline)) ValidState() {
   return (stats_.player_blink_count[0] > 0) && (stats_.player_count > 1);
 }
 
