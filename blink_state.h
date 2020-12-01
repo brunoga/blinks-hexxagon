@@ -3,6 +3,8 @@
 
 #include <blinklib.h>
 
+#include "render_animation.h"
+
 #define BLINK_STATE_TARGET_TYPE_NONE 0
 #define BLINK_STATE_TARGET_TYPE_TARGET 1
 
@@ -34,8 +36,10 @@ byte GetPlayer();
 
 void SetTakeOver(bool take_over);
 bool GetTakeOver();
+#ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
 void SetTakeOverFace(byte face);
 byte GetTakeOverFace();
+#endif
 
 void StartColorOverride();
 bool GetColorOverride();

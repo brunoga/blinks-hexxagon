@@ -28,8 +28,12 @@ void Render() {
   if (blink::state::GetTakeOver()) {
     // Render take over animation. Currently this is always lightning +
     // explosion.
+#ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
     if (render::animation::TakeOver(player_color,
                                     blink::state::GetTakeOverFace())) {
+#else
+    if (render::animation::TakeOver(player_color)) {
+#endif
       blink::state::SetTakeOver(false);
     }
   } else if ((blink::state::GetTarget() && player == 0) ||

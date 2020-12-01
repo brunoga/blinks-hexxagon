@@ -16,7 +16,9 @@ struct BlinkState {
   bool origin;
   bool target;
   bool take_over;
+#ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
   byte take_over_face;
+#endif
   byte player;
   byte target_type;
 };
@@ -42,11 +44,14 @@ void SetTakeOver(bool take_over) { state_.take_over = take_over; }
 
 bool GetTakeOver() { return state_.take_over; }
 
+#ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
 void SetTakeOverFace(byte take_over_face) {
   state_.take_over_face = take_over_face;
 }
 
 byte GetTakeOverFace() { return state_.take_over_face; }
+
+#endif
 
 void __attribute__((noinline)) StartColorOverride() {
   color_override_timer_.set(200);

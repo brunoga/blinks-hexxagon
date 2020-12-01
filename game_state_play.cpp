@@ -51,7 +51,11 @@ static bool search_neighbor_type(byte neighbor_type, byte* source_face) {
 static bool do_takeover(byte takeover_player, byte source_face) {
   if (!blink::state::GetTakeOver()) {
     if (!take_over_started_) {
+#ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
       blink::state::SetTakeOverFace(source_face);
+#else
+      (void)source_face;
+#endif
       blink::state::SetTakeOver(true);
 
       take_over_started_ = true;
