@@ -40,7 +40,7 @@ void Render() {
                                RENDER_CONFIG_PLAY_STATE_SPINNER_SLOWDOWN);
   } else if ((game::state::GetPlayer() == player) &&
              (game::state::GetSpecific() < GAME_STATE_PLAY_MOVE_CONFIRMED) &&
-             (game::map::EmptySpaceInRange())) {
+             game::map::GetStats().local_blink_empty_space_in_range) {
     // This Blink belongs to the current player and did not match any of the
     // above conditions. Render a pulsing animation if we are not confirming the
     // move yet.

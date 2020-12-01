@@ -115,7 +115,7 @@ static void select_origin(byte* state, byte* specific_state) {
   // This blink belongs to a player, but not the current one. Nothing to do.
   if (blink::state::GetPlayer() != game::state::GetPlayer()) return;
 
-  if (!game::map::EmptySpaceInRange()) {
+  if (!game::map::GetStats().local_blink_empty_space_in_range) {
     // We can not move.
     return;
   }
@@ -164,7 +164,7 @@ static void select_target(byte* state, byte* specific_state) {
 
   // Are we a blink that belongs to the current player?
   if (blink::state::GetPlayer() == game::state::GetPlayer() &&
-      game::map::EmptySpaceInRange()) {
+      game::map::GetStats().local_blink_empty_space_in_range) {
     if (!blink::state::GetOrigin()) {
       // If we are not the origin we automatically switch to the new origin.
       // If we are the current origin, then we just deselect ourselves.

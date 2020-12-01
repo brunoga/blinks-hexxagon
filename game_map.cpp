@@ -24,9 +24,7 @@ static MapData map_[GAME_MAP_MAX_BLINKS];
 static byte map_index_;
 static byte map_propagation_index_;
 
-static byte player_count_;
-static byte player_blink_count_[GAME_PLAYER_MAX_PLAYERS + 1];
-static bool empty_space_in_range_;
+Stats stats_;
 
 static Timer propagation_timer_;
 
@@ -82,32 +80,6 @@ add_to_map(int8_t x, int8_t y, byte player) {
 static void add_local_to_map() {
   add_to_map(position::Local().x, position::Local().y,
              blink::state::GetPlayer());
-}
-
-static void compute_map_stats(byte* player_count, byte* player_blink_count,
-                              bool* empty_space_in_range) {
-  *player_count = 0;
-  *empty_space_in_range = false;
-  memset(player_blink_count, 0, GAME_PLAYER_MAX_PLAYERS + 1);
-
-  for (byte i = 0; i < map_index_; ++i) {
-    const MapData& map_data = map_[i];
-    // Update number of players.
-    if (map_data.player != 0 && player_blink_count[map_data.player] == 0) {
-      (*player_count)++;
-    }
-
-    // Update player blink count.
-    player_blink_count[map_data.player]++;
-
-    // Update empty space in range.
-    if (!(*empty_space_in_range)) {
-      *empty_space_in_range =
-          ((map_[i].player == 0) &&
-           (position::Distance(position::Coordinates{(int8_t)map_[i].x,
-                                                     (int8_t)map_[i].y}) <= 2));
-    }
-  }
 }
 
 static void __attribute__((noinline))
@@ -194,8 +166,27 @@ void StartMapping(bool origin) {
 bool GetMapping() { return (!propagation_timer_.isExpired()); }
 
 void ComputeMapStats() {
-  compute_map_stats(&player_count_, player_blink_count_,
-                    &empty_space_in_range_);
+  memset(&stats_, 0, sizeof(Stats));
+
+  for (byte i = 0; i < map_index_; ++i) {
+    const MapData& map_data = map_[i];
+    // Update number of players.
+    if (map_data.player != 0 &&
+        stats_.player_blink_count[map_data.player] == 0) {
+      stats_.player_count++;
+    }
+
+    // Update player blink count.
+    stats_.player_blink_count[map_data.player]++;
+
+    // Update empty space in range.
+    if (!(stats_.local_blink_empty_space_in_range)) {
+      stats_.local_blink_empty_space_in_range =
+          ((map_[i].player == 0) &&
+           (position::Distance(position::Coordinates{(int8_t)map_[i].x,
+                                                     (int8_t)map_[i].y}) <= 2));
+    }
+  }
 }
 
 void SetMoveOrigin(int8_t x, int8_t y) {
@@ -204,7 +195,7 @@ void SetMoveOrigin(int8_t x, int8_t y) {
   move_commited_ = false;
 }
 
-void SetMoveTarget(int8_t x, int8_t y) {
+void __attribute__((noinline)) SetMoveTarget(int8_t x, int8_t y) {
   move_data_.target.x = x;
   move_data_.target.y = y;
   move_commited_ = false;
@@ -225,18 +216,10 @@ void CommitMove() {
   move_commited_ = true;
 }
 
-bool EmptySpaceInRange() { return empty_space_in_range_; }
-
-byte GetBlinkCount() { return map_index_; }
-
-byte __attribute__((noinline)) GetBlinkCount(byte player) {
-  return player_blink_count_[player];
-}
-
-byte GetPlayerCount() { return player_count_; }
+const Stats& GetStats() { return stats_; }
 
 bool ValidState() {
-  return (player_blink_count_[0] > 0) && (player_count_ > 1);
+  return (stats_.player_blink_count[0] > 0) && (stats_.player_count > 1);
 }
 
 void Reset() {
