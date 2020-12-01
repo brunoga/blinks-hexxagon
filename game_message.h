@@ -7,10 +7,9 @@
 #include "src/blinks-broadcast/message.h"
 
 #define MESSAGE_GAME_STATE_CHANGE 1
-#define MESSAGE_CHECK_BOARD_STATE 2
-#define MESSAGE_REPORT_BOARD_STATE 3
-#define MESSAGE_FIND_TARGETS 4
-#define MESSAGE_FLASH 5
+#define MESSAGE_SELECT_ORIGIN 2
+#define MESSAGE_SELECT_TARGET 3
+#define MESSAGE_FLASH 4
 
 namespace game {
 
@@ -30,22 +29,13 @@ void Setup();
 
 void Process();
 
-void Reset();
-
 bool SendGameStateChange(byte payload);
 
-// Indices reply: 0 = empty count, 1 = player one count, 2 = player 2 count,
-// etc.
-bool SendCheckBoardState(broadcast::Message* reply);
+bool SendSelectOrigin(int8_t x, int8_t y);
 
-bool SendReportBoardState();
-
-// Indices reply: 0 = target found.
-bool SendFindTargets(broadcast::Message* reply);
+bool SendSelectTarget(int8_t x, int8_t y);
 
 bool SendFlash();
-
-bool SendReset();
 
 }  // namespace message
 

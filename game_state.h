@@ -28,11 +28,6 @@ void SetPlayer(byte next_player);
 byte GetPlayer();
 void NextPlayer();
 
-byte UpdateBoardState();
-
-void SetBlinkCount(byte* blink_count);
-byte* GetBlinkCount();
-
 void Reset();
 
 bool Changed(bool include_specific = true);

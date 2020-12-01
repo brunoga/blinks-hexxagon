@@ -1,6 +1,7 @@
 #include <blinklib.h>
 
 #include "blink_state.h"
+#include "game_map.h"
 #include "game_message.h"
 #include "game_state.h"
 #include "game_state_end.h"
@@ -17,6 +18,13 @@
 void setup() { game::message::Setup(); }
 
 void loop() {
+  if (game::map::GetMapping()) {
+    // We are mapping Blinks.
+    game::map::Process();
+
+    return;
+  }
+
   // Process any pending game messages.
   game::message::Process();
 
@@ -56,6 +64,7 @@ void loop() {
         break;
       case GAME_STATE_END:
         game::state::end::Handler(state_changed, &state, &specific_state);
+        break;
     }
 
     // Switch our state to the computed one. This will be propagated to other
@@ -71,8 +80,4 @@ void loop() {
   // it most likelly means another Blink woke us up. This will prevent us
   // "swallowing" the first click on this Blink after wakeup.
   hasWoken();
-
-  // Always consume multi-clicks to prevent accidental self-destructing during
-  // gameplay.
-  buttonMultiClicked();
 }

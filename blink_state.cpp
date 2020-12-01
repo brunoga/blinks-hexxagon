@@ -15,17 +15,16 @@ namespace state {
 struct BlinkState {
   bool origin;
   bool target;
-  bool animating;
-  bool self_destruct;
+  bool take_over;
+#ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
+  byte take_over_face;
+#endif
   byte player;
   byte target_type;
 };
 static BlinkState state_;
 
 static Timer color_override_timer_;
-
-static byte animating_param_;
-static bool (*animating_function_)(byte param);
 
 void SetOrigin(bool origin) { state_.origin = origin; }
 bool __attribute__((noinline)) GetOrigin() { return state_.origin; }
@@ -41,22 +40,18 @@ void __attribute__((noinline)) SetPlayer(byte player) {
 }
 byte GetPlayer() { return state_.player; }
 
-void SetSelfDestruct(bool self_destruct) {
-  state_.self_destruct = self_destruct;
-}
-byte GetSelfDestruct() { return state_.self_destruct; }
+void SetTakeOver(bool take_over) { state_.take_over = take_over; }
 
-void SetAnimating(bool animating) { state_.animating = animating; }
-bool GetAnimating() { return state_.animating; }
+bool GetTakeOver() { return state_.take_over; }
 
-void SetAnimatingParam(byte animating_param) {
-  animating_param_ = animating_param;
-}
-void SetAnimatingFunction(bool (*animating_function)(byte param)) {
-  animating_function_ = animating_function;
+#ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
+void SetTakeOverFace(byte take_over_face) {
+  state_.take_over_face = take_over_face;
 }
 
-bool RunAnimatingFunction() { return animating_function_(animating_param_); }
+byte GetTakeOverFace() { return state_.take_over_face; }
+
+#endif
 
 void __attribute__((noinline)) StartColorOverride() {
   color_override_timer_.set(200);
@@ -67,8 +62,7 @@ bool GetColorOverride() { return !color_override_timer_.isExpired(); }
 void __attribute__((noinline)) Reset() {
   state_.origin = false;
   state_.target = false;
-  state_.animating = false;
-  state_.self_destruct = false;
+  state_.take_over = false;
   state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
   state_.player = 0;
 }
@@ -77,7 +71,6 @@ void __attribute__((noinline)) Render(byte game_state) {
   // "Render" our face value.
   FaceValue face_value;
 
-  face_value.self_destruct = GetSelfDestruct();
   face_value.target = GetTarget();
   face_value.player = GetPlayer();
 

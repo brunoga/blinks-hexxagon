@@ -1,6 +1,7 @@
 #include "game_state_end.h"
 
 #include "blink_state.h"
+#include "game_map.h"
 #include "game_message.h"
 #include "game_player.h"
 #include "game_state.h"
@@ -12,22 +13,24 @@ namespace state {
 
 namespace end {
 
-static byte winner_player_;
-
 void Handler(bool state_changed, byte* state, byte* specific_state) {
   (void)specific_state;
 
   if (state_changed) {
     byte max_count = 0;
+    byte winner_player = 0;
     for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
-      byte player_count = GetBlinkCount()[i];
+      byte player_count = game::map::GetStats().player[i].blink_count;
       if (player_count > max_count) {
         max_count = player_count;
-        winner_player_ = i;
+        winner_player = i;
       } else if (player_count == max_count) {
-        winner_player_ = 0;
+        winner_player = 0;
       }
     }
+
+    // Switch to the winner player.
+    blink::state::SetPlayer(winner_player);
   }
 
   if (util::NoSleepButtonSingleClicked()) {
@@ -38,9 +41,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
 
     return;
   }
-
-  // Switch to the winner player.
-  blink::state::SetPlayer(winner_player_);
 }
 
 }  // namespace end

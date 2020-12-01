@@ -1,9 +1,11 @@
 #include "game_state_setup.h"
 
 #include "blink_state.h"
+#include "game_map.h"
 #include "game_message.h"
 #include "game_player.h"
 #include "game_state.h"
+#include "src/blinks-orientation/orientation.h"
 #include "util.h"
 
 namespace game {
@@ -12,53 +14,95 @@ namespace state {
 
 namespace setup {
 
-static bool checking_board_ = false;
+static Timer wait_timer_;
 
-void Handler(bool state_changed, byte* state, byte* specific_state) {
-  if (state_changed) {
-    checking_board_ = false;
+static void players(byte* state, byte* specific_state) {
+  (void)state;
+
+  if (buttonDoubleClicked()) {
+    // We seem to be done with setting up the game. We now need to validate
+    // if the board state is actually valid.
+
+    // We overload origin here to mean the coordinate system origin.
+    blink::state::SetOrigin(true);
+
+    // Reset our position and orientation, making us the origin of the
+    // coordinate system.
+    orientation::Reset();
+    position::Reset();
+
+    wait_timer_.set(1000);
+
+    *specific_state = GAME_STATE_SETUP_MAP;
+  } else if (util::NoSleepButtonSingleClicked()) {
+    // Blink was clicked. Switch it to next player.
+    blink::state::SetPlayer(game::player::GetNext(blink::state::GetPlayer()));
   }
+}
 
-  if (checking_board_) {
-    // We need to either start validating the game state or we are already doing
-    // it.
-    byte result = game::state::UpdateBoardState();
-    if (result == GAME_STATE_UPDATE_BOARD_STATE_UPDATING) {
-      // Still checking. Try again next loop() iteration.
-      return;
-    }
+static void map(byte* state, byte* specific_state) {
+  (void)state;
 
-    // We finished checking. mark it as so so we do not keep doing it over and
-    // over.
-    checking_board_ = false;
+  // TODO(bga): Double check if this is needed. It seems to be as without it
+  // sometimes we get wrong mapping results.
+  if (!wait_timer_.isExpired()) return;
 
-    if (result == GAME_STATE_UPDATE_BOARD_STATE_OK) {
+  // And start the mapping process.
+  game::map::StartMapping(blink::state::GetOrigin());
+
+  // When we return from mapping, we go straight to board validation.
+  *specific_state = GAME_STATE_SETUP_MAPPED;
+}
+
+static void mapped(byte* state, byte* specific_state) {
+  (void)state;
+
+  wait_timer_.set(2000);
+
+  *specific_state = GAME_STATE_SETUP_VALIDATE;
+}
+
+static void validate(byte* state, byte* specific_state) {
+  game::map::ComputeMapStats();
+
+  if (!blink::state::GetOrigin()) return;
+
+  if (!wait_timer_.isExpired()) return;
+
+  bool valid;
+  if (util::CheckValidateStateAndReport(&valid)) {
+    if (valid) {
       // Game state is good. Switch to first available player.
       game::state::NextPlayer();
 
-      // And move to the play state.
       *state = GAME_STATE_PLAY;
-
-      // Strictly speaking, we do not need this but if we do not do it, we
-      // actually *INCREASE* the binary size. Simply removing the parameter
-      // (thus also not doing this here) also increases it.
-      //
-      // TODO(bga): Understand why and how can we use it in our benefit. Note
-      // that this same trick does not work in other state handlers.
       *specific_state = 0;
+    } else {
+      *specific_state = GAME_STATE_SETUP_SELECT_PLAYERS;
     }
-  } else if (buttonDoubleClicked()) {
-    // We seem to be done with setting up the game. We now need to validate if
-    // the board state is actually valid.
-    checking_board_ = true;
-  } else if (util::NoSleepButtonSingleClicked()) {
-    // Blink was clicked. Switch it to next player. Note that we will never
-    // reach this point if we are validating the game state until we finish
-    // doing it. This is intentional and prevents the local state changing
-    // while we are validating the board. Clicking other Blinks could
-    // potentially mess things up, but there is only so much we can do with
-    // the resources available so we ignore it.
-    blink::state::SetPlayer(game::player::GetNext(blink::state::GetPlayer()));
+
+    blink::state::SetOrigin(false);
+  }
+}
+
+void Handler(bool state_changed, byte* state, byte* specific_state) {
+  if (state_changed) {
+    *specific_state = GAME_STATE_SETUP_SELECT_PLAYERS;
+  }
+
+  switch (*specific_state) {
+    case GAME_STATE_SETUP_SELECT_PLAYERS:
+      players(state, specific_state);
+      break;
+    case GAME_STATE_SETUP_MAP:
+      map(state, specific_state);
+      break;
+    case GAME_STATE_SETUP_MAPPED:
+      mapped(state, specific_state);
+      break;
+    case GAME_STATE_SETUP_VALIDATE:
+      validate(state, specific_state);
+      break;
   }
 }
 

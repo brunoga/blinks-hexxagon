@@ -1,6 +1,7 @@
 #include "game_state_play_render.h"
 
 #include "blink_state.h"
+#include "game_map.h"
 #include "game_player.h"
 #include "game_state.h"
 #include "game_state_play.h"
@@ -24,21 +25,26 @@ void Render() {
   // animations only render an overlay.
   setColor(player_color);
 
-  if (blink::state::GetAnimating()) {
-    // Render predefined animation. Currently this is always lightning +
+  if (blink::state::GetTakeOver()) {
+    // Render take over animation. Currently this is always lightning +
     // explosion.
-    if (blink::state::RunAnimatingFunction()) {
-      blink::state::SetAnimating(false);
+#ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
+    if (render::animation::TakeOver(player_color,
+                                    blink::state::GetTakeOverFace())) {
+#else
+    if (render::animation::TakeOver(player_color)) {
+#endif
+      blink::state::SetTakeOver(false);
     }
   } else if ((blink::state::GetTarget() && player == 0) ||
              blink::state::GetOrigin()) {
     // We are either the target Blink (before it is effectively taken over) or
     // the Origin. Render the spinning animation.
     render::animation::Spinner(RENDER_CONFIG_PLAY_STATE_SPINNER_COLOR,
-                               RENDER_CONFIG_PLAY_STATE_SPINNER_FACES,
                                RENDER_CONFIG_PLAY_STATE_SPINNER_SLOWDOWN);
-  } else if (game::state::GetPlayer() == player &&
-             game::state::GetSpecific() < GAME_STATE_PLAY_CONFIRM_MOVE) {
+  } else if ((game::state::GetPlayer() == player) &&
+             (game::state::GetSpecific() < GAME_STATE_PLAY_MOVE_CONFIRMED) &&
+             game::map::GetStats().local_blink_empty_space_in_range) {
     // This Blink belongs to the current player and did not match any of the
     // above conditions. Render a pulsing animation if we are not confirming the
     // move yet.

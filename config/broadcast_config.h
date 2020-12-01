@@ -1,9 +1,9 @@
 #ifndef BROADCAST_CONFIG_H_
 #define BROADCAST_CONFIG_H_
 
-#include "../game_player.h"
-
 // This is the maximum payload we will need.
-#define BROADCAST_MESSAGE_PAYLOAD_BYTES GAME_PLAYER_MAX_PLAYERS + 1
+#define BROADCAST_MESSAGE_PAYLOAD_BYTES 2
+
+#define BROADCAST_DISABLE_REPLIES
 
 #endif
