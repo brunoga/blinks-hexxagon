@@ -17,6 +17,14 @@ namespace setup {
 static void players(byte* state, byte* specific_state) {
   (void)state;
 
+  // Make sure map is empty.
+  //
+  // TODO(bga): There might be a race condition between the state change message
+  // and the propagation of the map coordinates. If somehow a blink receive a
+  // cordinate and only aftyer that gets the state change, the map will be reset
+  // and the added Blink will be removed. Investigate.
+  game::map::Reset();
+
   if (buttonDoubleClicked()) {
     // We seem to be done with setting up the game. We now need to validate
     // if the board state is actually valid.
@@ -45,7 +53,6 @@ static void map(byte* state, byte* specific_state) {
 
   if (game::map::GetMapping() || !blink::state::GetOrigin()) return;
 
-  // When we return from mapping, we go straight to board validation.
   *specific_state = GAME_STATE_SETUP_VALIDATE;
 }
 
