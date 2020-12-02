@@ -15,10 +15,6 @@
 #define MESSAGE_STATE_SEND_MESSAGE 0
 #define MESSAGE_STATE_WAIT_FOR_RESULT 1
 
-// Coordinates stored in the find targets payload.
-#define PAYLOAD_X 0
-#define PAYLOAD_Y 1
-
 namespace game {
 
 namespace message {
@@ -39,7 +35,8 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
 
       game::state::Set(data.state, true);
       game::state::SetSpecific(data.specific_state, true);
-      game::state::SetPlayer(data.next_player + 1);
+      game::state::SetPlayer(data.next_player +
+                             1);  // TODO(bga): This limits us to 4 players.
       break;
     case MESSAGE_SELECT_ORIGIN:
       game::map::SetMoveOrigin((int8_t)payload[0], (int8_t)payload[1]);
@@ -72,7 +69,10 @@ static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
       len = 1;
       break;
     case MESSAGE_EXTERNAL_PROPAGATE_COORDINATES:
+      // Orientation and position where set when the message was received. See
+      // consume() in game_map.cpp.
       payload[0] = orientation::RelativeLocalFace(dst_face);
+
       len = 4;
       break;
   }
