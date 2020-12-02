@@ -9,7 +9,10 @@
 #include "src/blinks-broadcast/manager.h"
 #include "src/blinks-orientation/orientation.h"
 
-#define GAME_MAP_PROPAGATION_TIMEOUT 2000
+// As we can not known beforehand how many Blinks are in the map, we need a
+// timeout to consider that everything cleared up. This is the time since the
+// last mapping message was received.
+#define GAME_MAP_PROPAGATION_TIMEOUT 3000
 
 namespace game {
 
@@ -126,9 +129,6 @@ void Setup() {
 void Process() { maybe_propagate(); }
 
 void __attribute__((noinline)) StartMapping() {
-  // Mapping just started. Reset map.
-  Reset();
-
   // We are the mapping origin. Add ourselves to the map.
   add_local_to_map();
 
