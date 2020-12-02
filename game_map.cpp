@@ -44,8 +44,9 @@ static MoveData move_data_;
 static void maybe_propagate() {
   if (map_index_ != map_propagation_index_) {
     if (game::message::SendExternalPropagateCoordinates(
-            map_[map_propagation_index_].x, map_[map_propagation_index_].y,
-            map_[map_propagation_index_].player)) {
+            (int8_t)map_[map_propagation_index_].x,
+            (int8_t)map_[map_propagation_index_].y,
+            (byte)map_[map_propagation_index_].player)) {
       map_propagation_index_++;
     }
   }
