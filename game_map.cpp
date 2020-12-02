@@ -51,14 +51,14 @@ static void maybe_propagate() {
   }
 }
 
-static bool should_add_to_map(const position::Coordinates& coordinates) {
+static MapData* find_entry_in_map(int8_t x, int8_t y) {
   for (byte i = 0; i < map_index_; ++i) {
-    if (coordinates.x == map_[i].x && coordinates.y == map_[i].y) {
-      return false;
+    if (x == map_[i].x && y == map_[i].y) {
+      return &map_[i];
     }
   }
 
-  return true;
+  return nullptr;
 }
 
 static void __attribute__((noinline))
@@ -93,23 +93,21 @@ update_blinks(position::Coordinates coordinates, byte player,
   }
 }
 
-void consume(const broadcast::Message* message, byte face) {
+void consume(const broadcast::Message* message, byte local_absolute_face) {
   propagation_timer_.set(GAME_MAP_PROPAGATION_TIMEOUT);
 
   if (map_index_ == 0) {
     // We do not have anything on our map, so we need to initialize our
     // local data and add it to the map.
-    orientation::Setup(message->payload[0], face);
-    position::Setup(orientation::RelativeLocalFace(face), message->payload[1],
-                    message->payload[2]);
+    orientation::Setup(message->payload[0], local_absolute_face);
+    position::Setup(orientation::RelativeLocalFace(local_absolute_face),
+                    (int8_t)message->payload[1], (int8_t)message->payload[2]);
 
     add_local_to_map();
   }
 
-  position::Coordinates received_coordinates = {(int8_t)message->payload[1],
-                                                (int8_t)message->payload[2]};
-
-  if (!should_add_to_map(received_coordinates)) {
+  if (find_entry_in_map((int8_t)message->payload[1],
+                        (int8_t)message->payload[2]) != nullptr) {
     setColor(OFF);
 
     return;
@@ -117,7 +115,7 @@ void consume(const broadcast::Message* message, byte face) {
 
   setColor(game::player::GetColor(blink::state::GetPlayer()));
 
-  add_to_map(received_coordinates.x, received_coordinates.y,
+  add_to_map((int8_t)message->payload[1], (int8_t)message->payload[2],
              message->payload[3]);
 }
 
