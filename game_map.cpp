@@ -79,16 +79,14 @@ static void __attribute__((noinline))
 update_blinks(position::Coordinates coordinates, byte player,
               bool update_neighbors) {
   for (byte i = 0; i < map_index_; ++i) {
-    if ((map_[i].x == coordinates.x) && (map_[i].y == coordinates.y)) {
-      // This is the position being updated. Change it to belong to the given
-      // player.
-      map_[i].player = player;
-    }
-
-    if (update_neighbors && (map_[i].player != 0) &&
-        (position::coordinates::Distance(
-             coordinates, {(int8_t)map_[i].x, (int8_t)map_[i].y}) == 1)) {
-      // Neighbor from a different player. Now belongs to the given player.
+    if (((map_[i].x == coordinates.x) && (map_[i].y == coordinates.y)) ||
+        (update_neighbors && (map_[i].player != 0) &&
+         (position::coordinates::Distance(
+              coordinates, {(int8_t)map_[i].x, (int8_t)map_[i].y}) == 1))) {
+      // This is either the position we are updating or we also want to update
+      // neighboors and this is a non-empty neighbor (we just needed to update
+      // neighbors of different players, but that would be an extra check and
+      // use more storage due to that. Updating a player to itself is harmless).
       map_[i].player = player;
     }
   }
