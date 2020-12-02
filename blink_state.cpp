@@ -66,10 +66,7 @@ void __attribute__((noinline)) Reset() {
 
 void Render(byte game_state) {
   // "Render" our face value.
-  FaceValue face_value;
-
-  face_value.target = GetTarget();
-  face_value.player = GetPlayer();
+  FaceValue face_value = {0, GetTarget(), GetPlayer()};
 
   setValueSentOnAllFaces(face_value.as_byte);
 
