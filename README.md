@@ -30,7 +30,7 @@ Godspeed.
     <td><b>Number of Players</b></td><td>2 to 4</td>
   </tr>
   <tr>
-    <td><b>Number of Blinks</b></td><td>12 to 255</td>
+    <td><b>Number of Blinks</b></td><td>12 to 85</td>
   </tr>
   <tr>
     <td><b>Play Time</b></td><td>5 to 30 minutes</td>
