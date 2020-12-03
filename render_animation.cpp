@@ -80,7 +80,7 @@ static bool lightning(byte origin_face) {
 }
 #endif
 
-void ResetPulseTimer() {
+void ResetTimer() {
   timer_.set(0);
   reverse_ = true;
 }
