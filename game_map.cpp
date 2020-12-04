@@ -196,7 +196,7 @@ void __attribute__((noinline)) CommitMove() {
   move_commited_ = true;
 }
 
-const Statistics& GetStats() { return stats_; }
+const Statistics& GetStatistics() { return stats_; }
 
 bool __attribute__((noinline)) ValidState() {
   return (stats_.player[0].blink_count > 0) && (stats_.player_count > 1);

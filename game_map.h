@@ -18,7 +18,7 @@ struct Data {
   uint16_t player : 4;
 };
 
-struct Stats {
+struct Statistics {
   byte player_count;
   struct {
     byte blink_count : 7;
@@ -52,7 +52,7 @@ void SetMoveTarget(int8_t x, int8_t y);
 // map accordingly.
 void CommitMove();
 
-const Stats& GetStats();
+const Statistics& GetStatistics();
 
 bool ValidState();
 
