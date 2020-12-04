@@ -18,17 +18,11 @@ namespace game {
 
 namespace map {
 
-struct MapData {
-  int16_t x : 6;
-  int16_t y : 6;
-  uint16_t player : 4;
-};
-
-static MapData map_[GAME_MAP_MAX_BLINKS];
+static Data map_[GAME_MAP_MAX_BLINKS];
 static byte map_index_;
 static byte map_propagation_index_;
 
-Stats stats_;
+Statistics stats_;
 
 static Timer propagation_timer_;
 
@@ -52,7 +46,7 @@ static void maybe_propagate() {
   }
 }
 
-static MapData* find_entry_in_map(int8_t x, int8_t y) {
+static Data* find_entry_in_map(int8_t x, int8_t y) {
   for (byte i = 0; i < map_index_; ++i) {
     if (x == map_[i].x && y == map_[i].y) {
       return &map_[i];
@@ -135,10 +129,10 @@ void __attribute__((noinline)) StartMapping() {
 bool GetMapping() { return (!propagation_timer_.isExpired()); }
 
 void ComputeMapStats() {
-  memset(&stats_, 0, sizeof(Stats));
+  memset(&stats_, 0, sizeof(Statistics));
 
   for (byte i = 0; i < map_index_; ++i) {
-    const MapData& map_data = map_[i];
+    const Data& map_data = map_[i];
     // Update number of players.
     if (map_data.player != 0 &&
         stats_.player[map_data.player].blink_count == 0) {
@@ -202,7 +196,7 @@ void __attribute__((noinline)) CommitMove() {
   move_commited_ = true;
 }
 
-const Stats& GetStats() { return stats_; }
+const Statistics& GetStats() { return stats_; }
 
 bool __attribute__((noinline)) ValidState() {
   return (stats_.player[0].blink_count > 0) && (stats_.player_count > 1);
