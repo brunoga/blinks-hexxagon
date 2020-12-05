@@ -96,7 +96,18 @@ void Setup() {
   broadcast::manager::Setup(rcv_message_handler, fwd_message_handler);
 }
 
-void __attribute__((noinline)) Process() { broadcast::manager::Process(); }
+void Process() {
+  // Check if any face is requesting a map upload and, if so, upload it to
+  // the first one detected.
+  FOREACH_FACE(face) {
+    if (game::map::Upload(face) == GAME_MAP_UPLOAD_UPLOADING) {
+      // Do not try to process other messages before we finish to upload.
+      return;
+    }
+  }
+
+  broadcast::manager::Process();
+}
 
 bool SendGameStateChange(byte payload) {
   return sendMessage(MESSAGE_GAME_STATE_CHANGE, &payload, 1);

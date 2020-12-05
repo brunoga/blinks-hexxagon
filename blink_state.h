@@ -14,9 +14,10 @@ namespace state {
 
 union FaceValue {
   struct {
-    byte unused : 4;  // Unused for now.
-    bool target : 1;  // Is it the current target?
-    byte player : 3;  // 0 means empty.
+    byte unused : 3;         // Unused for now.
+    bool map_requested : 1;  // Map data was requested on this face.
+    bool target : 1;         // Is it the current target?
+    byte player : 3;         // 0 means empty.
   };
 
   byte as_byte;

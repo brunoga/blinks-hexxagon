@@ -14,6 +14,11 @@
 // last mapping message was received.
 #define GAME_MAP_PROPAGATION_TIMEOUT 3000
 
+#define GAME_MAP_UPLOAD_STATE_SEND_SIZE 1
+#define GAME_MAP_UPLOAD_STATE_UPLOAD 2
+
+#define GAME_MAP_UPLOAD_MAX_CHUNK_SIZE 5
+
 namespace game {
 
 namespace map {
@@ -21,6 +26,7 @@ namespace map {
 static Data map_[GAME_MAP_MAX_BLINKS];
 static byte map_index_;
 static byte map_propagation_index_;
+static byte map_upload_index_;
 
 Statistics stats_;
 
@@ -34,6 +40,8 @@ struct MoveData {
 };
 
 static MoveData move_data_;
+
+static byte upload_state_;
 
 static void maybe_propagate() {
   if (map_index_ != map_propagation_index_) {
@@ -202,9 +210,50 @@ bool __attribute__((noinline)) ValidState() {
   return (stats_.player[0].blink_count > 0) && (stats_.player_count > 1);
 }
 
+byte Upload(byte face) {
+  // Parse face value. Notge it might be stale but we are checking for that
+  // below (we do this so we can do all checks at once).
+  blink::state::FaceValue face_value = {.as_byte =
+                                            getLastValueReceivedOnFace(face)};
+
+  if (isValueReceivedOnFaceExpired(face) || !face_value.map_requested ||
+      (map_upload_index_ == map_index_)) {
+    // Either we can not upload or there is nothing to upload. Either way, we
+    // are done.
+    upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_SIZE;
+    map_upload_index_ = 0;
+
+    return GAME_MAP_UPLOAD_DONE;
+  }
+
+  switch (upload_state_) {
+    case GAME_MAP_UPLOAD_STATE_SEND_SIZE:
+      // Upload just started. Send map size.
+      if (sendDatagramOnFace(&map_index_, 1, face)) {
+        // Size sent. Switch to actual map upload.
+        upload_state_ = GAME_MAP_UPLOAD_STATE_UPLOAD;
+      }
+      break;
+    case GAME_MAP_UPLOAD_STATE_UPLOAD:
+      // Now upload the actual map in chunks of GAME_MAP_UPLOAD_MAX_CHUNK_SIZE.
+      byte remaining = map_index_ - map_upload_index_;
+      byte delta = remaining > GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
+                       ? GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
+                       : remaining;
+      if (sendDatagramOnFace(&(map_[map_upload_index_]), delta, face)) {
+        // CHunk sent. Increase the map upload index.
+        map_upload_index_ += delta;
+      }
+  }
+
+  return GAME_MAP_UPLOAD_UPLOADING;
+}
+
 void Reset() {
   map_index_ = 0;
   map_propagation_index_ = 0;
+  map_upload_index_ = 0;
+  upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_SIZE;
 
   ComputeMapStats();
 }

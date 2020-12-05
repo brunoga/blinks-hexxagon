@@ -8,6 +8,9 @@
 
 #define GAME_MAP_MAX_BLINKS 85
 
+#define GAME_MAP_UPLOAD_UPLOADING 0
+#define GAME_MAP_UPLOAD_DONE 1
+
 namespace game {
 
 namespace map {
@@ -55,6 +58,8 @@ void CommitMove();
 const Statistics& GetStatistics();
 
 bool ValidState();
+
+byte Upload(byte face);
 
 // Sets all map data to invalid values.
 void Reset();
