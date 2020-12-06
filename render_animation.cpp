@@ -22,7 +22,7 @@ static bool reset_timer_if_expired(word ms) {
   return false;
 }
 
-void ResetTimer() {
+void __attribute__((noinline)) ResetTimer() {
   timer_.set(0);
   reverse_ = true;
 }

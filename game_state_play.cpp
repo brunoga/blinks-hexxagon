@@ -8,8 +8,6 @@
 #include "src/blinks-position/position.h"
 #include "util.h"
 
-#define NEIGHBOR_TYPE_ENEMY 0
-
 namespace game {
 
 namespace state {
@@ -18,19 +16,16 @@ namespace play {
 
 static bool auto_select_ = false;
 
-static bool search_neighbor_type(byte neighbor_type) {
+// Returns true if there is any Blink around us that belongs to another player.
+static bool has_enemy_neighbor() {
   FOREACH_FACE(face) {
     if (!isValueReceivedOnFaceExpired(face)) {
-      blink::state::FaceValue face_value;
-      face_value.as_byte = getLastValueReceivedOnFace(face);
+      blink::state::FaceValue face_value = {
+          .as_byte = getLastValueReceivedOnFace(face)};
 
-      switch (neighbor_type) {
-        case NEIGHBOR_TYPE_ENEMY:
-          if ((face_value.player != 0) &&
-              (face_value.player != blink::state::GetPlayer())) {
-            return true;
-          }
-          break;
+      if ((face_value.player != 0) &&
+          (face_value.player != blink::state::GetPlayer())) {
+        return true;
       }
     }
   }
@@ -125,8 +120,6 @@ static void select_target(byte* state, byte* specific_state) {
   // We are a valid target.
   game::map::SetMoveTarget(position::Local().x, position::Local().y);
 
-  render::animation::ResetTimer();
-
   blink::state::SetPlayer(game::state::GetPlayer());
 
   *specific_state = GAME_STATE_PLAY_TARGET_SELECTED;
@@ -162,7 +155,7 @@ static void move_confirmed(byte* state, byte* specific_state) {
 
   if (!blink::state::GetTarget()) return;
 
-  if (search_neighbor_type(NEIGHBOR_TYPE_ENEMY)) return;
+  if (has_enemy_neighbor()) return;
 
   *specific_state = GAME_STATE_PLAY_RESOLVE_MOVE;
 }
