@@ -35,12 +35,8 @@ byte GetTargetType();
 void SetPlayer(byte player);
 byte GetPlayer();
 
-void SetTakeOver(bool take_over);
-bool GetTakeOver();
-#ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
-void SetTakeOverFace(byte face);
-byte GetTakeOverFace();
-#endif
+void SetExplosion(bool take_over);
+bool GetExplosion();
 
 void StartColorOverride();
 bool GetColorOverride();

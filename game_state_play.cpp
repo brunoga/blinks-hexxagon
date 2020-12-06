@@ -48,17 +48,10 @@ static bool search_neighbor_type(byte neighbor_type, byte* source_face) {
   return false;
 }
 
-#ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
-static bool do_takeover(byte takeover_player, byte source_face) {
-#else
 static bool do_takeover(byte takeover_player) {
-#endif
-  if (!blink::state::GetTakeOver()) {
+  if (!blink::state::GetExplosion()) {
     if (!take_over_started_) {
-#ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
-      blink::state::SetTakeOverFace(source_face);
-#endif
-      blink::state::SetTakeOver(true);
+      blink::state::SetExplosion(true);
 
       take_over_started_ = true;
     } else {
@@ -189,11 +182,7 @@ static void move_confirmed(byte* state, byte* specific_state) {
     if (blink::state::GetPlayer() != 0 &&
         blink::state::GetPlayer() != game::state::GetPlayer()) {
       // We are being conquered, trigger animation.
-#ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
-      if (!do_takeover(game::state::GetPlayer(), source_face)) return;
-#else
       if (!do_takeover(game::state::GetPlayer())) return;
-#endif
     }
   } else {
     if (blink::state::GetOrigin()) {

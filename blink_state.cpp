@@ -15,10 +15,7 @@ namespace state {
 struct BlinkState {
   bool origin;
   bool target;
-  bool take_over;
-#ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
-  byte take_over_face;
-#endif
+  bool explosion;
   byte player;
   byte target_type;
 };
@@ -38,17 +35,8 @@ byte GetTargetType() { return state_.target_type; }
 void SetPlayer(byte player) { state_.player = player; }
 byte GetPlayer() { return state_.player; }
 
-void SetTakeOver(bool take_over) { state_.take_over = take_over; }
-bool GetTakeOver() { return state_.take_over; }
-
-#ifndef RENDER_ANIMATION_TAKE_OVER_DISABLE_LIGHTNING
-void SetTakeOverFace(byte take_over_face) {
-  state_.take_over_face = take_over_face;
-}
-
-byte GetTakeOverFace() { return state_.take_over_face; }
-
-#endif
+void SetExplosion(bool explosion) { state_.explosion = explosion; }
+bool GetExplosion() { return state_.explosion; }
 
 void __attribute__((noinline)) StartColorOverride() {
   color_override_timer_.set(200);
@@ -59,7 +47,7 @@ bool GetColorOverride() { return !color_override_timer_.isExpired(); }
 void __attribute__((noinline)) Reset() {
   state_.origin = false;
   state_.target = false;
-  state_.take_over = false;
+  state_.explosion = false;
   state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
   state_.player = 0;
 }
