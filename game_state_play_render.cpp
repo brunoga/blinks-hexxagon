@@ -36,14 +36,13 @@ void Render() {
 #endif
       blink::state::SetTakeOver(false);
     }
-  } else if ((blink::state::GetTarget() && player == 0) ||
-             blink::state::GetOrigin()) {
+  } else if (blink::state::GetOrigin()) {
     // We are either the target Blink (before it is effectively taken over) or
     // the Origin. Render the spinning animation.
     render::animation::Spinner(RENDER_CONFIG_PLAY_STATE_SPINNER_COLOR,
                                RENDER_CONFIG_PLAY_STATE_SPINNER_SLOWDOWN);
   } else if ((game::state::GetPlayer() == player) &&
-             (game::state::GetSpecific() < GAME_STATE_PLAY_MOVE_CONFIRMED) &&
+             (game::state::GetSpecific() < GAME_STATE_PLAY_TARGET_SELECTED) &&
              game::map::GetStatistics().local_blink_empty_space_in_range) {
     // This Blink belongs to the current player and did not match any of the
     // above conditions. Render a pulsing animation if we are not confirming the

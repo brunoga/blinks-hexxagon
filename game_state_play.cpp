@@ -162,6 +162,8 @@ static void select_target(byte* state, byte* specific_state) {
 
   render::animation::ResetTimer();
 
+  blink::state::SetPlayer(game::state::GetPlayer());
+
   *specific_state = GAME_STATE_PLAY_TARGET_SELECTED;
 }
 
@@ -176,43 +178,7 @@ static void target_selected(byte* state, byte* specific_state) {
     return;
   }
 
-  *specific_state = GAME_STATE_PLAY_CONFIRM_MOVE;
-}
-
-static void confirm_move(byte* state, byte* specific_state) {
-  (void)state;
-
-  if (!util::NoSleepButtonSingleClicked()) return;
-
-  if (blink::state::GetTarget()) {
-    // Button was clicked and we are the selected target. Move confirmed.
-    *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
-
-    return;
-  }
-
-  if (blink::state::GetOrigin()) {
-    // Origin was clicked. Deselect it.
-    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
-
-    return;
-  }
-
-  if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_TARGET) {
-    // Another target was clicked. Select it.
-    auto_select_ = true;
-
-    *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
-
-    return;
-  }
-
-  if (blink::state::GetPlayer() == game::state::GetPlayer()) {
-    // Another origin was clicked. Select it.
-    auto_select_ = true;
-
-    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
-  }
+  *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
 }
 
 static void move_confirmed(byte* state, byte* specific_state) {
@@ -244,9 +210,6 @@ static void move_confirmed(byte* state, byte* specific_state) {
   blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
 
   if (!blink::state::GetTarget()) return;
-
-  // We are the target, so we are now owned by the current player.
-  blink::state::SetPlayer(game::state::GetPlayer());
 
   if (search_neighbor_type(NEIGHBOR_TYPE_ENEMY, &source_face)) return;
 
@@ -289,9 +252,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       break;
     case GAME_STATE_PLAY_TARGET_SELECTED:
       target_selected(state, specific_state);
-      break;
-    case GAME_STATE_PLAY_CONFIRM_MOVE:
-      confirm_move(state, specific_state);
       break;
     case GAME_STATE_PLAY_MOVE_CONFIRMED:
       move_confirmed(state, specific_state);
