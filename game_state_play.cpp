@@ -8,8 +8,7 @@
 #include "src/blinks-position/position.h"
 #include "util.h"
 
-#define NEIGHBOR_TYPE_TARGET 0
-#define NEIGHBOR_TYPE_ENEMY 1
+#define NEIGHBOR_TYPE_ENEMY 0
 
 namespace game {
 
@@ -19,22 +18,13 @@ namespace play {
 
 static bool auto_select_ = false;
 
-static bool take_over_started_ = false;
-
-static bool search_neighbor_type(byte neighbor_type, byte* source_face) {
-  FOREACH_FACE(f) {
-    if (!isValueReceivedOnFaceExpired(f)) {
+static bool search_neighbor_type(byte neighbor_type) {
+  FOREACH_FACE(face) {
+    if (!isValueReceivedOnFaceExpired(face)) {
       blink::state::FaceValue face_value;
-      face_value.as_byte = getLastValueReceivedOnFace(f);
-
-      *source_face = f;
+      face_value.as_byte = getLastValueReceivedOnFace(face);
 
       switch (neighbor_type) {
-        case NEIGHBOR_TYPE_TARGET:
-          if (face_value.target) {
-            return true;
-          }
-          break;
         case NEIGHBOR_TYPE_ENEMY:
           if ((face_value.player != 0) &&
               (face_value.player != blink::state::GetPlayer())) {
@@ -42,24 +32,6 @@ static bool search_neighbor_type(byte neighbor_type, byte* source_face) {
           }
           break;
       }
-    }
-  }
-
-  return false;
-}
-
-static bool do_takeover(byte takeover_player) {
-  if (!blink::state::GetExplosion()) {
-    if (!take_over_started_) {
-      blink::state::SetExplosion(true);
-
-      take_over_started_ = true;
-    } else {
-      blink::state::SetPlayer(takeover_player);
-
-      take_over_started_ = false;
-
-      return true;
     }
   }
 
@@ -177,30 +149,20 @@ static void target_selected(byte* state, byte* specific_state) {
 static void move_confirmed(byte* state, byte* specific_state) {
   (void)state;
 
-  byte source_face;
-  if (search_neighbor_type(NEIGHBOR_TYPE_TARGET, &source_face)) {
-    if (blink::state::GetPlayer() != 0 &&
-        blink::state::GetPlayer() != game::state::GetPlayer()) {
-      // We are being conquered, trigger animation.
-      if (!do_takeover(game::state::GetPlayer())) return;
-    }
-  } else {
-    if (blink::state::GetOrigin()) {
-      // We are the origin and the target is not an immediate neighboor. We
-      // are moving from here so reset ourselves.
-      blink::state::Reset();
-    }
+  if (blink::state::GetOrigin() &&
+      position::coordinates::Distance(game::map::GetMoveOrigin(),
+                                      game::map::GetMoveTarget()) != 1) {
+    // We are the origin and the target is not an immediate neighboor. We
+    // are moving from here so reset ourselves.
+    blink::state::Reset();
   }
-
-  // Reset origin so the spinning animation stops.
-  blink::state::SetOrigin(false);
 
   // Clear target type for everybody.
   blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
 
   if (!blink::state::GetTarget()) return;
 
-  if (search_neighbor_type(NEIGHBOR_TYPE_ENEMY, &source_face)) return;
+  if (search_neighbor_type(NEIGHBOR_TYPE_ENEMY)) return;
 
   *specific_state = GAME_STATE_PLAY_RESOLVE_MOVE;
 }

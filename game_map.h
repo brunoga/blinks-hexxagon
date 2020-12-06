@@ -6,7 +6,7 @@
 #include "game_player.h"
 #include "src/blinks-position/position.h"
 
-#define GAME_MAP_MAX_BLINKS 84
+#define GAME_MAP_MAX_BLINKS 85
 
 #define GAME_MAP_UPLOAD_UPLOADING 0
 #define GAME_MAP_UPLOAD_DONE 1
@@ -48,8 +48,10 @@ bool GetMapping();
 void ComputeMapStats();
 
 void SetMoveOrigin(int8_t x, int8_t y);
+position::Coordinates GetMoveOrigin();
 
 void SetMoveTarget(int8_t x, int8_t y);
+position::Coordinates GetMoveTarget();
 
 // Computes the player move from origin to destination, updating the game
 // map accordingly.

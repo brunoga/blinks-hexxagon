@@ -185,9 +185,13 @@ void SetMoveOrigin(int8_t x, int8_t y) {
   set_data(x, y, &move_data_.origin, blink::state::SetOrigin);
 }
 
+position::Coordinates GetMoveOrigin() { return move_data_.origin; }
+
 void SetMoveTarget(int8_t x, int8_t y) {
   set_data(x, y, &move_data_.target, blink::state::SetTarget);
 }
+
+position::Coordinates GetMoveTarget() { return move_data_.target; }
 
 void __attribute__((noinline)) CommitMove() {
   if (move_commited_) return;

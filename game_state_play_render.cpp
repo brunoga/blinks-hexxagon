@@ -25,12 +25,16 @@ void Render() {
   // animations only render an overlay.
   setColor(player_color);
 
-  if (blink::state::GetExplosion()) {
+  if ((game::state::GetSpecific() == GAME_STATE_PLAY_MOVE_CONFIRMED) &&
+      (blink::state::GetPlayer() != 0) &&
+      (blink::state::GetPlayer() != game::state::GetPlayer()) &&
+      position::Distance(game::map::GetMoveTarget()) == 1) {
     // Render takeover (explosion) animation.
     if (render::animation::Explosion(player_color)) {
-      blink::state::SetExplosion(false);
+      blink::state::SetPlayer(game::state::GetPlayer());
     }
-  } else if (blink::state::GetOrigin()) {
+  } else if (blink::state::GetOrigin() &&
+             game::state::GetSpecific() < GAME_STATE_PLAY_TARGET_SELECTED) {
     // We are either the target Blink (before it is effectively taken over) or
     // the Origin. Render the spinning animation.
     render::animation::Spinner(RENDER_CONFIG_PLAY_STATE_SPINNER_COLOR,
