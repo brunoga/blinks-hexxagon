@@ -15,7 +15,6 @@ namespace state {
 struct BlinkState {
   bool origin;
   bool target;
-  bool explosion;
   byte player;
   byte target_type;
 };
@@ -35,9 +34,6 @@ byte GetTargetType() { return state_.target_type; }
 void SetPlayer(byte player) { state_.player = player; }
 byte GetPlayer() { return state_.player; }
 
-void SetExplosion(bool explosion) { state_.explosion = explosion; }
-bool GetExplosion() { return state_.explosion; }
-
 void __attribute__((noinline)) StartColorOverride() {
   color_override_timer_.set(200);
 }
@@ -47,7 +43,6 @@ bool GetColorOverride() { return !color_override_timer_.isExpired(); }
 void __attribute__((noinline)) Reset() {
   state_.origin = false;
   state_.target = false;
-  state_.explosion = false;
   state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
   state_.player = 0;
 }
