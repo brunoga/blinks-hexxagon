@@ -10,7 +10,7 @@ namespace animation {
 static Timer timer_;
 
 static bool reverse_ = true;
-static bool animation_started_ = false;
+static bool animation_started_;
 
 static bool reset_timer_if_expired(word ms) {
   if (timer_.isExpired()) {
@@ -22,9 +22,9 @@ static bool reset_timer_if_expired(word ms) {
   return false;
 }
 
-void __attribute__((noinline)) ResetTimer() {
+void ResetTimer() {
   timer_.set(0);
-  reverse_ = true;
+  reverse_ = false;
 }
 
 void Pulse(const Color& base_color, byte start, byte slowdown) {
