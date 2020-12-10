@@ -120,6 +120,32 @@ void consume(const broadcast::Message* message, byte local_absolute_face) {
              message->payload[3]);
 }
 
+static bool should_try_upload(byte face) {
+  if (face == FACE_COUNT) return false;
+
+  blink::state::FaceValue face_value = {.as_byte =
+                                            getLastValueReceivedOnFace(face)};
+  return !isValueReceivedOnFaceExpired(face) && face_value.map_requested &&
+         (map_upload_index_ != map_index_);
+}
+
+static byte ai_connected_face() {
+  if (!should_try_upload(blink::state::GetAIConnectedFace())) {
+    FOREACH_FACE(face) {
+      if (should_try_upload(face)) {
+        blink::state::SetAIConnectedFace(face);
+        break;
+      }
+    }
+
+    upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_SIZE;
+    map_upload_index_ = 0;
+    blink::state::SetAIConnectedFace(FACE_COUNT);
+  }
+
+  return blink::state::GetAIConnectedFace();
+}
+
 void Setup() {
   broadcast::message::handler::Set(
       {MESSAGE_EXTERNAL_PROPAGATE_COORDINATES, consume});
@@ -214,21 +240,10 @@ bool __attribute__((noinline)) ValidState() {
   return (stats_.player[0].blink_count > 0) && (stats_.player_count > 1);
 }
 
-byte Upload(byte face) {
-  // Parse face value. Notge it might be stale but we are checking for that
-  // below (we do this so we can do all checks at once).
-  blink::state::FaceValue face_value = {.as_byte =
-                                            getLastValueReceivedOnFace(face)};
+bool MaybeUploadToAI() {
+  byte face = ai_connected_face();
 
-  if (isValueReceivedOnFaceExpired(face) || !face_value.map_requested ||
-      (map_upload_index_ == map_index_)) {
-    // Either we can not upload or there is nothing to upload. Either way, we
-    // are done.
-    upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_SIZE;
-    map_upload_index_ = 0;
-
-    return GAME_MAP_UPLOAD_DONE;
-  }
+  if (face == FACE_COUNT) return false;
 
   switch (upload_state_) {
     case GAME_MAP_UPLOAD_STATE_SEND_SIZE:
@@ -239,7 +254,8 @@ byte Upload(byte face) {
       }
       break;
     case GAME_MAP_UPLOAD_STATE_UPLOAD:
-      // Now upload the actual map in chunks of GAME_MAP_UPLOAD_MAX_CHUNK_SIZE.
+      // Now upload the actual map in chunks of
+      // GAME_MAP_UPLOAD_MAX_CHUNK_SIZE.
       byte remaining = map_index_ - map_upload_index_;
       byte delta = remaining > GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
                        ? GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
@@ -248,9 +264,10 @@ byte Upload(byte face) {
         // CHunk sent. Increase the map upload index.
         map_upload_index_ += delta;
       }
+      break;
   }
 
-  return GAME_MAP_UPLOAD_UPLOADING;
+  return true;
 }
 
 void Reset() {

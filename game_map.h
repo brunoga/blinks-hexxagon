@@ -61,7 +61,7 @@ const Statistics& GetStatistics();
 
 bool ValidState();
 
-byte Upload(byte face);
+bool MaybeUploadToAI();
 
 // Sets all map data to invalid values.
 void Reset();

@@ -9,6 +9,7 @@
 #include "game_state_play.h"
 #include "game_state_setup.h"
 #include "render_animation.h"
+#include "src/blinks-broadcast/manager.h"
 
 #ifndef BGA_CUSTOM_BLINKLIB
 #error \
@@ -21,52 +22,54 @@ void setup() {
 }
 
 void loop() {
-  // Process any pending game messages.
-  game::message::Process();
+  if (!game::map::MaybeUploadToAI()) {
+    // Process any pending game messages.
+    broadcast::manager::Process();
 
-  // Check escape hatch. Reset to idle state if button is long pressed.
-  if (buttonLongPressed()) {
-    // Ok to ignore result.
-    game::message::SendFlash();
+    // Check escape hatch. Reset to idle state if button is long pressed.
+    if (buttonLongPressed()) {
+      // Ok to ignore result.
+      game::message::SendFlash();
 
-    game::state::Set(GAME_STATE_IDLE);
+      game::state::Set(GAME_STATE_IDLE);
 
-    return;
-  }
-
-  if (game::state::Propagate()) {
-    // Cache current state and if we changed state since the previous
-    // iteration.
-    byte state = game::state::Get();
-    byte specific_state = game::state::GetSpecific();
-    bool state_changed = game::state::Changed(false);
-
-    if (game::state::Changed()) {
-      // State (including specific state) changed. Reset animation timer to
-      // improve synchronization.
-      render::animation::ResetTimer();
+      return;
     }
 
-    // Run our state machine.
-    switch (state) {
-      case GAME_STATE_IDLE:
-        game::state::idle::Handler(state_changed, &state, &specific_state);
-        break;
-      case GAME_STATE_SETUP:
-        game::state::setup::Handler(state_changed, &state, &specific_state);
-        break;
-      case GAME_STATE_PLAY:
-        game::state::play::Handler(state_changed, &state, &specific_state);
-        break;
-      case GAME_STATE_END:
-        game::state::end::Handler(state_changed, &state, &specific_state);
-        break;
-    }
+    if (game::state::Propagate()) {
+      // Cache current state and if we changed state since the previous
+      // iteration.
+      byte state = game::state::Get();
+      byte specific_state = game::state::GetSpecific();
+      bool state_changed = game::state::Changed(false);
 
-    // Switch our state to the computed one. This will be propagated to other
-    // Blinks in case there was a change.
-    game::state::Set(state);
-    game::state::SetSpecific(specific_state);
+      if (game::state::Changed()) {
+        // State (including specific state) changed. Reset animation timer to
+        // improve synchronization.
+        render::animation::ResetTimer();
+      }
+
+      // Run our state machine.
+      switch (state) {
+        case GAME_STATE_IDLE:
+          game::state::idle::Handler(state_changed, &state, &specific_state);
+          break;
+        case GAME_STATE_SETUP:
+          game::state::setup::Handler(state_changed, &state, &specific_state);
+          break;
+        case GAME_STATE_PLAY:
+          game::state::play::Handler(state_changed, &state, &specific_state);
+          break;
+        case GAME_STATE_END:
+          game::state::end::Handler(state_changed, &state, &specific_state);
+          break;
+      }
+
+      // Switch our state to the computed one. This will be propagated to other
+      // Blinks in case there was a change.
+      game::state::Set(state);
+      game::state::SetSpecific(specific_state);
+    }
   }
 
   blink::state::Render(game::state::Get());

@@ -28,8 +28,6 @@ union GameStateChangeData {
 
 void Setup();
 
-void Process();
-
 bool SendGameStateChange(byte payload);
 
 bool SendSelectOrigin(int8_t x, int8_t y);
