@@ -16,6 +16,7 @@ struct BlinkState {
   bool origin;
   bool target;
   byte player;
+  byte ai_connected_face;
   byte target_type;
 };
 static BlinkState state_;
@@ -34,6 +35,14 @@ byte GetTargetType() { return state_.target_type; }
 void SetPlayer(byte player) { state_.player = player; }
 byte GetPlayer() { return state_.player; }
 
+void SetAIConnectedFace(byte ai_connected_face) {
+  state_.ai_connected_face = ai_connected_face + 1;
+}
+byte GetAIConnectedFace() {
+  return state_.ai_connected_face == 0 ? FACE_COUNT
+                                       : state_.ai_connected_face - 1;
+}
+
 void __attribute__((noinline)) StartColorOverride() {
   color_override_timer_.set(200);
 }
@@ -45,6 +54,7 @@ void __attribute__((noinline)) Reset() {
   state_.target = false;
   state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
   state_.player = 0;
+  state_.ai_connected_face = 0;
 }
 
 void Render(byte game_state) {
