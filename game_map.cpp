@@ -130,7 +130,7 @@ static bool should_try_upload(byte face) {
 }
 
 static byte ai_connected_face() {
-  byte current_face = blink::state::GetAIConnectedFace();
+  byte current_face = blink::state::GetMapRequestedFace();
 
   if (!should_try_upload(current_face)) {
     if (current_face != FACE_COUNT) {
@@ -142,15 +142,15 @@ static byte ai_connected_face() {
 
     FOREACH_FACE(face) {
       if (should_try_upload(face)) {
-        blink::state::SetAIConnectedFace(face);
+        blink::state::SetMapRequestedFace(face);
         break;
       }
     }
 
-    blink::state::SetAIConnectedFace(FACE_COUNT);
+    blink::state::SetMapRequestedFace(FACE_COUNT);
   }
 
-  return blink::state::GetAIConnectedFace();
+  return blink::state::GetMapRequestedFace();
 }
 
 void Setup() {

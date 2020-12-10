@@ -34,8 +34,8 @@ byte GetTargetType();
 void SetPlayer(byte player);
 byte GetPlayer();
 
-void SetAIConnectedFace(byte ai_connected_face);
-byte GetAIConnectedFace();
+void SetMapRequestedFace(byte map_requested_face);
+byte GetMapRequestedFace();
 
 void StartColorOverride();
 bool GetColorOverride();
