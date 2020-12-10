@@ -94,11 +94,8 @@ static void select_target(byte* state, byte* specific_state) {
   // one.
   blink::state::SetTarget(false);
 
-  // We pass all checks, but we do nothing until we get a click or auto
-  // selection is enabled.
-  if (!button_clicked && !auto_select_) return;
-
-  auto_select_ = false;
+  // We pass all checks, but we do nothing until we get a click.
+  if (!button_clicked) return;
 
   // Are we a blink that belongs to the current player?
   if (blink::state::GetPlayer() == game::state::GetPlayer() &&
@@ -136,43 +133,7 @@ static void target_selected(byte* state, byte* specific_state) {
     return;
   }
 
-  *specific_state = GAME_STATE_PLAY_CONFIRM_MOVE;
-}
-
-static void confirm_move(byte* state, byte* specific_state) {
-  (void)state;
-
-  if (!util::NoSleepButtonSingleClicked()) return;
-
-  if (blink::state::GetTarget()) {
-    // Button was clicked and we are the selected target. Move confirmed.
-    *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
-
-    return;
-  }
-
-  if (blink::state::GetOrigin()) {
-    // Origin was clicked. Deselect it.
-    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
-
-    return;
-  }
-
-  if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_TARGET) {
-    // Another target was clicked. Select it.
-    auto_select_ = true;
-
-    *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
-
-    return;
-  }
-
-  if (blink::state::GetPlayer() == game::state::GetPlayer()) {
-    // Another origin was clicked. Select it.
-    auto_select_ = true;
-
-    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
-  }
+  *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
 }
 
 static void move_confirmed(byte* state, byte* specific_state) {
@@ -238,9 +199,6 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
       break;
     case GAME_STATE_PLAY_TARGET_SELECTED:
       target_selected(state, specific_state);
-      break;
-    case GAME_STATE_PLAY_CONFIRM_MOVE:
-      confirm_move(state, specific_state);
       break;
     case GAME_STATE_PLAY_MOVE_CONFIRMED:
       move_confirmed(state, specific_state);

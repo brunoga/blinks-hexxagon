@@ -33,10 +33,8 @@ void Render() {
     if (render::animation::Explosion(player_color)) {
       blink::state::SetPlayer(game::state::GetPlayer());
     }
-  } else if ((blink::state::GetTarget() && player == 0) ||
-             blink::state::GetOrigin()) {
-    // We are either the target Blink (before it is effectively taken over) or
-    // the Origin. Render the spinning animation.
+  } else if (blink::state::GetOrigin()) {
+    // We are the Origin. Render the spinning animation.
     render::animation::Spinner(RENDER_CONFIG_PLAY_STATE_SPINNER_COLOR,
                                RENDER_CONFIG_PLAY_STATE_SPINNER_SLOWDOWN);
   } else if ((game::state::GetPlayer() == player) &&
