@@ -130,7 +130,16 @@ static bool should_try_upload(byte face) {
 }
 
 static byte ai_connected_face() {
-  if (!should_try_upload(blink::state::GetAIConnectedFace())) {
+  byte current_face = blink::state::GetAIConnectedFace();
+
+  if (!should_try_upload(current_face)) {
+    if (current_face != FACE_COUNT) {
+      resetPendingDatagramOnFace(current_face);
+    }
+
+    upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_SIZE;
+    map_upload_index_ = 0;
+
     FOREACH_FACE(face) {
       if (should_try_upload(face)) {
         blink::state::SetAIConnectedFace(face);
@@ -138,8 +147,6 @@ static byte ai_connected_face() {
       }
     }
 
-    upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_SIZE;
-    map_upload_index_ = 0;
     blink::state::SetAIConnectedFace(FACE_COUNT);
   }
 
@@ -240,7 +247,7 @@ bool __attribute__((noinline)) ValidState() {
   return (stats_.player[0].blink_count > 0) && (stats_.player_count > 1);
 }
 
-bool MaybeUploadToAI() {
+bool MaybeUpload() {
   byte face = ai_connected_face();
 
   if (face == FACE_COUNT) return false;

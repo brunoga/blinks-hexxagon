@@ -22,7 +22,7 @@ void setup() {
 }
 
 void loop() {
-  if (!game::map::MaybeUploadToAI()) {
+  if (!game::map::MaybeUpload()) {
     // Process any pending game messages.
     broadcast::manager::Process();
 
