@@ -129,7 +129,7 @@ static bool should_try_upload(byte face) {
          (map_upload_index_ != map_index_);
 }
 
-static byte ai_connected_face() {
+static byte map_requested_face() {
   byte current_face = blink::state::GetMapRequestedFace();
 
   if (!should_try_upload(current_face)) {
@@ -248,7 +248,7 @@ bool __attribute__((noinline)) ValidState() {
 }
 
 bool MaybeUpload() {
-  byte face = ai_connected_face();
+  byte face = map_requested_face();
 
   if (face == FACE_COUNT) return false;
 
