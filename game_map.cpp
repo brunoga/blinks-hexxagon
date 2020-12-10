@@ -12,21 +12,28 @@
 // As we can not known beforehand how many Blinks are in the map, we need a
 // timeout to consider that everything cleared up. This is the time since the
 // last mapping message was received.
-#define GAME_MAP_PROPAGATION_TIMEOUT 3000
+#define GAME_MAP_PROPAGATION_TIMEOUT 2000
 
-#define GAME_MAP_UPLOAD_STATE_SEND_SIZE 1
-#define GAME_MAP_UPLOAD_STATE_UPLOAD 2
+#define GAME_MAP_UPLOAD_STATE_SEND_SIZE 0
+#define GAME_MAP_UPLOAD_STATE_UPLOAD 1
+
+#define GAME_MAP_DOWNLOAD_STATE_RECEIVE_SIZE 0
+#define GAME_MAP_DOWNLOAD_STATE_DOWNLOAD 1
 
 #define GAME_MAP_UPLOAD_MAX_CHUNK_SIZE 5
 
 namespace game {
 
+static game::map::Data map_[GAME_MAP_MAX_BLINKS];
+
 namespace map {
 
-static Data map_[GAME_MAP_MAX_BLINKS];
-static byte map_index_;
-static byte map_propagation_index_;
-static byte map_upload_index_;
+static byte index_;
+static byte propagation_index_;
+static byte upload_index_;
+static byte download_index_;
+static byte upload_state_;
+static byte download_state_;
 
 Statistics stats_;
 
@@ -41,21 +48,19 @@ struct MoveData {
 
 static MoveData move_data_;
 
-static byte upload_state_;
-
 static void maybe_propagate() {
-  if (map_index_ != map_propagation_index_) {
+  if (index_ != propagation_index_) {
     if (game::message::SendExternalPropagateCoordinates(
-            (int8_t)map_[map_propagation_index_].x,
-            (int8_t)map_[map_propagation_index_].y,
-            (byte)map_[map_propagation_index_].player)) {
-      map_propagation_index_++;
+            (int8_t)map_[propagation_index_].x,
+            (int8_t)map_[propagation_index_].y,
+            (byte)map_[propagation_index_].player)) {
+      propagation_index_++;
     }
   }
 }
 
 static Data* find_entry_in_map(int8_t x, int8_t y) {
-  for (byte i = 0; i < map_index_; ++i) {
+  for (byte i = 0; i < index_; ++i) {
     if (x == map_[i].x && y == map_[i].y) {
       return &map_[i];
     }
@@ -66,10 +71,10 @@ static Data* find_entry_in_map(int8_t x, int8_t y) {
 
 static void __attribute__((noinline))
 add_to_map(int8_t x, int8_t y, byte player) {
-  map_[map_index_].x = x;
-  map_[map_index_].y = y;
-  map_[map_index_].player = player;
-  map_index_++;
+  map_[index_].x = x;
+  map_[index_].y = y;
+  map_[index_].player = player;
+  index_++;
 }
 
 static void add_local_to_map() {
@@ -80,7 +85,7 @@ static void add_local_to_map() {
 static void __attribute__((noinline))
 update_blinks(position::Coordinates coordinates, byte player,
               bool update_neighbors) {
-  for (byte i = 0; i < map_index_; ++i) {
+  for (byte i = 0; i < index_; ++i) {
     if (((map_[i].x == coordinates.x) && (map_[i].y == coordinates.y)) ||
         (update_neighbors && (map_[i].player != 0) &&
          (position::coordinates::Distance(
@@ -97,7 +102,7 @@ update_blinks(position::Coordinates coordinates, byte player,
 void consume(const broadcast::Message* message, byte local_absolute_face) {
   propagation_timer_.set(GAME_MAP_PROPAGATION_TIMEOUT);
 
-  if (map_index_ == 0) {
+  if (index_ == 0) {
     // We do not have anything on our map, so we need to initialize our
     // local data and add it to the map.
     orientation::Setup(message->payload[0], local_absolute_face);
@@ -120,28 +125,41 @@ void consume(const broadcast::Message* message, byte local_absolute_face) {
              message->payload[3]);
 }
 
-static bool should_try_upload(byte face) {
+static bool should_try_transfer(byte face, bool upload) {
   if (face == FACE_COUNT) return false;
 
-  blink::state::FaceValue face_value = {.as_byte =
-                                            getLastValueReceivedOnFace(face)};
-  return !isValueReceivedOnFaceExpired(face) && face_value.map_requested &&
-         (map_upload_index_ != map_index_);
+  bool result;
+  if (upload) {
+    blink::state::FaceValue face_value = {.as_byte =
+                                              getLastValueReceivedOnFace(face)};
+    result = !isValueReceivedOnFaceExpired(face) && face_value.map_requested &&
+             (upload_index_ != index_);
+  } else {
+    result = !isValueReceivedOnFaceExpired(face) && (index_ != 0) &&
+             (download_index_ != index_);
+  }
+
+  return result;
 }
 
-static byte map_requested_face() {
+static byte map_requested_face(bool upload) {
   byte current_face = blink::state::GetMapRequestedFace();
 
-  if (!should_try_upload(current_face)) {
-    if (current_face != FACE_COUNT) {
-      resetPendingDatagramOnFace(current_face);
+  if (!should_try_transfer(current_face, upload)) {
+    if (upload) {
+      if (current_face != FACE_COUNT) {
+        resetPendingDatagramOnFace(current_face);
+      }
+
+      upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_SIZE;
+      upload_index_ = 0;
+    } else {
+      download_state_ = GAME_MAP_DOWNLOAD_STATE_RECEIVE_SIZE;
+      download_index_ = 0;
     }
 
-    upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_SIZE;
-    map_upload_index_ = 0;
-
     FOREACH_FACE(face) {
-      if (should_try_upload(face)) {
+      if (should_try_transfer(face, upload)) {
         blink::state::SetMapRequestedFace(face);
         break;
       }
@@ -172,7 +190,7 @@ bool GetMapping() { return (!propagation_timer_.isExpired()); }
 void ComputeMapStats() {
   memset(&stats_, 0, sizeof(Statistics));
 
-  for (byte i = 0; i < map_index_; ++i) {
+  for (byte i = 0; i < index_; ++i) {
     const Data& map_data = map_[i];
     // Update number of players.
     if (map_data.player != 0 &&
@@ -184,7 +202,7 @@ void ComputeMapStats() {
     stats_.player[map_data.player].blink_count++;
 
     // Update player can move.
-    for (byte j = 0; j < map_index_; ++j) {
+    for (byte j = 0; j < index_; ++j) {
       if ((map_[j].player == 0) &&
           (position::coordinates::Distance(
                {(int8_t)map_data.x, (int8_t)map_data.y},
@@ -248,14 +266,14 @@ bool __attribute__((noinline)) ValidState() {
 }
 
 bool MaybeUpload() {
-  byte face = map_requested_face();
+  byte face = map_requested_face(/*upload=*/true);
 
   if (face == FACE_COUNT) return false;
 
   switch (upload_state_) {
     case GAME_MAP_UPLOAD_STATE_SEND_SIZE:
       // Upload just started. Send map size.
-      if (sendDatagramOnFace(&map_index_, 1, face)) {
+      if (sendDatagramOnFace(&index_, 1, face)) {
         // Size sent. Switch to actual map upload.
         upload_state_ = GAME_MAP_UPLOAD_STATE_UPLOAD;
       }
@@ -263,13 +281,13 @@ bool MaybeUpload() {
     case GAME_MAP_UPLOAD_STATE_UPLOAD:
       // Now upload the actual map in chunks of
       // GAME_MAP_UPLOAD_MAX_CHUNK_SIZE.
-      byte remaining = map_index_ - map_upload_index_;
+      byte remaining = index_ - upload_index_;
       byte delta = remaining > GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
                        ? GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
                        : remaining;
-      if (sendDatagramOnFace(&(map_[map_upload_index_]), delta, face)) {
+      if (sendDatagramOnFace(&(map_[upload_index_]), delta, face)) {
         // CHunk sent. Increase the map upload index.
-        map_upload_index_ += delta;
+        upload_index_ += delta;
       }
       break;
   }
@@ -277,11 +295,41 @@ bool MaybeUpload() {
   return true;
 }
 
+bool MaybeDownload() {
+  byte face = map_requested_face(/*upload=*/false);
+
+  if (face == FACE_COUNT) return false;
+
+  byte len = getDatagramLengthOnFace(face);
+
+  if (len > 0) {
+    switch (download_state_) {
+      case GAME_MAP_DOWNLOAD_STATE_RECEIVE_SIZE:
+        if (len == 1) {
+          index_ = getDatagramOnFace(face)[0];
+        }
+        break;
+      case GAME_MAP_DOWNLOAD_STATE_DOWNLOAD:
+        if (len <= GAME_MAP_UPLOAD_MAX_CHUNK_SIZE) {
+          memcpy(&map_[download_index_], getDatagramOnFace(face), len);
+          download_index_ += len;
+        }
+        break;
+    }
+
+    markDatagramReadOnFace(face);
+  }
+
+  return true;
+}
+
 void Reset() {
-  map_index_ = 0;
-  map_propagation_index_ = 0;
-  map_upload_index_ = 0;
+  index_ = 0;
+  propagation_index_ = 0;
+  upload_index_ = 0;
+  download_index_ = 0;
   upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_SIZE;
+  download_state_ = GAME_MAP_DOWNLOAD_STATE_RECEIVE_SIZE;
 
   ComputeMapStats();
 }
