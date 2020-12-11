@@ -254,7 +254,11 @@ bool MaybeUpload() {
 
   byte face = blink::state::GetMapRequestedFace();
 
-  if (face == FACE_COUNT || index_ == 0) return false;
+  if (face == FACE_COUNT || index_ == 0 ||
+      game::state::Get() != GAME_STATE_PLAY) {
+    // Only send a map when we are sure we have one.
+    return false;
+  }
 
   switch (upload_state_) {
     case GAME_MAP_UPLOAD_STATE_SEND_METADATA: {
