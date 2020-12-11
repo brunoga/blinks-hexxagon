@@ -137,6 +137,11 @@ static void update_map_requested_face() {
       // We are connected and still transfering the map.
       return;
     }
+
+    // We finished uploading the map or we just disconnected.
+    blink::state::SetMapRequestedFace(FACE_COUNT);
+
+    return;
   }
 
   FOREACH_FACE(face) {
@@ -151,8 +156,6 @@ static void update_map_requested_face() {
       return;
     }
   }
-
-  blink::state::SetMapRequestedFace(FACE_COUNT);
 }
 
 void Setup() {
