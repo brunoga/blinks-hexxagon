@@ -14,6 +14,16 @@ namespace game {
 
 namespace state {
 
+union Data {
+  struct {
+    byte state : 2;
+    byte specific_state : 4;
+    byte next_player : 2;  // Add 1 for actual player number.
+  };
+
+  byte as_byte;
+};
+
 void Set(byte state, bool from_network = false);
 byte Get();
 
@@ -23,6 +33,8 @@ byte GetSpecific();
 void SetPlayer(byte next_player);
 byte GetPlayer();
 void NextPlayer();
+
+byte GetData();
 
 void Reset();
 

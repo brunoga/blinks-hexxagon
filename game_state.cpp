@@ -55,6 +55,12 @@ void NextPlayer() {
   SetPlayer(next_player);
 }
 
+byte GetData() {
+  return Data{state_.current, state_.current_specific,
+              (byte)(state_.player - 1)}
+      .as_byte;
+}
+
 void Reset() {
   state_.current = GAME_STATE_IDLE;
   state_.previous = GAME_STATE_IDLE;
@@ -74,13 +80,7 @@ bool Changed(bool include_specific) {
 bool Propagate() {
   if (!Changed() || state_.from_network) return true;
 
-  game::message::GameStateChangeData data;
-
-  data.state = state_.current;
-  data.specific_state = state_.current_specific;
-  data.next_player = state_.player - 1;
-
-  if (!game::message::SendGameStateChange(data.value)) {
+  if (!game::message::SendGameStateChange()) {
     return false;
   }
 

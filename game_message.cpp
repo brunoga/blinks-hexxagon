@@ -30,8 +30,8 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
 
   switch (message_id) {
     case MESSAGE_GAME_STATE_CHANGE:
-      GameStateChangeData data;
-      data.value = payload[0];
+      game::state::Data data;
+      data.as_byte = payload[0];
 
       game::state::Set(data.state, true);
       game::state::SetSpecific(data.specific_state, true);
@@ -96,7 +96,8 @@ void Setup() {
   broadcast::manager::Setup(rcv_message_handler, fwd_message_handler);
 }
 
-bool SendGameStateChange(byte payload) {
+bool SendGameStateChange() {
+  byte payload = game::state::GetData();
   return sendMessage(MESSAGE_GAME_STATE_CHANGE, &payload, 1);
 }
 

@@ -14,8 +14,9 @@
 // last mapping message was received.
 #define GAME_MAP_PROPAGATION_TIMEOUT 2000
 
-#define GAME_MAP_UPLOAD_STATE_SEND_SIZE 0
+#define GAME_MAP_UPLOAD_STATE_SEND_METADATA 0
 #define GAME_MAP_UPLOAD_STATE_UPLOAD 1
+
 #define GAME_MAP_UPLOAD_MAX_CHUNK_SIZE 5
 
 namespace game {
@@ -127,7 +128,7 @@ static void update_map_requested_face() {
     // We are, did we get disconnected?
     if (isValueReceivedOnFaceExpired(map_requested_face)) {
       upload_index_ = 0;
-      upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_SIZE;
+      upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_METADATA;
 
       // Make sure we will not leave data hanging if disconnected in the middle
       // of a transfer.
@@ -256,13 +257,15 @@ bool MaybeUpload() {
   if (face == FACE_COUNT || index_ == 0) return false;
 
   switch (upload_state_) {
-    case GAME_MAP_UPLOAD_STATE_SEND_SIZE:
+    case GAME_MAP_UPLOAD_STATE_SEND_METADATA: {
       // Upload just started. Send map size.
-      if (sendDatagramOnFace(&index_, 1, face)) {
+      byte payload[2] = {index_, game::state::GetData()};
+      if (sendDatagramOnFace(payload, 2, face)) {
         // Size sent. Switch to actual map upload.
         upload_state_ = GAME_MAP_UPLOAD_STATE_UPLOAD;
       }
       break;
+    }
     case GAME_MAP_UPLOAD_STATE_UPLOAD:
       // Now upload the actual map in chunks of
       // GAME_MAP_UPLOAD_MAX_CHUNK_SIZE.
@@ -284,7 +287,7 @@ void Reset() {
   index_ = 0;
   propagation_index_ = 0;
   upload_index_ = 0;
-  upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_SIZE;
+  upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_METADATA;
 
   ComputeMapStats();
 }

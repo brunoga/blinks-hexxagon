@@ -16,19 +16,9 @@ namespace game {
 
 namespace message {
 
-union GameStateChangeData {
-  struct {
-    byte state : 2;
-    byte specific_state : 4;
-    byte next_player : 2;  // Add 1 for actual player number.
-  };
-
-  byte value;
-};
-
 void Setup();
 
-bool SendGameStateChange(byte payload);
+bool SendGameStateChange();
 
 bool SendSelectOrigin(int8_t x, int8_t y);
 
