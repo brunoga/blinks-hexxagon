@@ -19,6 +19,7 @@
 void setup() {
   game::message::Setup();
   game::map::Setup();
+  blink::state::Reset();
 }
 
 void loop() {

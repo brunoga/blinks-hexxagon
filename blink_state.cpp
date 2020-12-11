@@ -19,8 +19,7 @@ struct BlinkState {
   byte map_requested_face;
   byte target_type;
 };
-static BlinkState state_ = {false, false, 0, FACE_COUNT,
-                            BLINK_STATE_TARGET_TYPE_NONE};
+static BlinkState state_;
 
 static Timer color_override_timer_;
 
