@@ -16,10 +16,6 @@
 
 #define GAME_MAP_UPLOAD_STATE_SEND_SIZE 0
 #define GAME_MAP_UPLOAD_STATE_UPLOAD 1
-
-#define GAME_MAP_DOWNLOAD_STATE_RECEIVE_SIZE 0
-#define GAME_MAP_DOWNLOAD_STATE_DOWNLOAD 1
-
 #define GAME_MAP_UPLOAD_MAX_CHUNK_SIZE 5
 
 namespace game {
@@ -31,9 +27,7 @@ namespace map {
 static byte index_;
 static byte propagation_index_;
 static byte upload_index_;
-static byte download_index_;
 static byte upload_state_;
-static byte download_state_;
 
 Statistics stats_;
 
@@ -125,50 +119,39 @@ void consume(const broadcast::Message* message, byte local_absolute_face) {
              message->payload[3]);
 }
 
-static bool should_try_transfer(byte face, bool upload) {
-  if (face == FACE_COUNT) return false;
+static void update_map_requested_face() {
+  byte map_requested_face = blink::state::GetMapRequestedFace();
 
-  bool result;
-  if (upload) {
+  // Check if we are currently connected.
+  if (map_requested_face != FACE_COUNT) {
+    // We are, did we get disconnected?
+    if (isValueReceivedOnFaceExpired(map_requested_face)) {
+      upload_index_ = 0;
+      upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_SIZE;
+
+      // Make sure we will not leave data hanging if disconnected in the middle
+      // of a transfer.
+      resetPendingDatagramOnFace(map_requested_face);
+    } else if (upload_index_ < index_) {
+      // We are connected and still transfering the map.
+      return;
+    }
+  }
+
+  FOREACH_FACE(face) {
+    // Parse face value so we can check for a map being requested.
     blink::state::FaceValue face_value = {.as_byte =
                                               getLastValueReceivedOnFace(face)};
-    result = !isValueReceivedOnFaceExpired(face) && face_value.map_requested &&
-             (upload_index_ != index_);
-  } else {
-    result = !isValueReceivedOnFaceExpired(face) && (index_ != 0) &&
-             (download_index_ != index_);
+
+    if (!isValueReceivedOnFaceExpired(face) && face_value.map_requested) {
+      // A map is requested in this face.
+      blink::state::SetMapRequestedFace(face);
+
+      return;
+    }
   }
 
-  return result;
-}
-
-static byte map_requested_face(bool upload) {
-  byte current_face = blink::state::GetMapRequestedFace();
-
-  if (!should_try_transfer(current_face, upload)) {
-    if (upload) {
-      if (current_face != FACE_COUNT) {
-        resetPendingDatagramOnFace(current_face);
-      }
-
-      upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_SIZE;
-      upload_index_ = 0;
-    } else {
-      download_state_ = GAME_MAP_DOWNLOAD_STATE_RECEIVE_SIZE;
-      download_index_ = 0;
-    }
-
-    FOREACH_FACE(face) {
-      if (should_try_transfer(face, upload)) {
-        blink::state::SetMapRequestedFace(face);
-        break;
-      }
-    }
-
-    blink::state::SetMapRequestedFace(FACE_COUNT);
-  }
-
-  return blink::state::GetMapRequestedFace();
+  blink::state::SetMapRequestedFace(FACE_COUNT);
 }
 
 void Setup() {
@@ -266,9 +249,11 @@ bool __attribute__((noinline)) ValidState() {
 }
 
 bool MaybeUpload() {
-  byte face = map_requested_face(/*upload=*/true);
+  update_map_requested_face();
 
-  if (face == FACE_COUNT) return false;
+  byte face = blink::state::GetMapRequestedFace();
+
+  if (face == FACE_COUNT || index_ == 0) return false;
 
   switch (upload_state_) {
     case GAME_MAP_UPLOAD_STATE_SEND_SIZE:
@@ -295,41 +280,11 @@ bool MaybeUpload() {
   return true;
 }
 
-bool MaybeDownload() {
-  byte face = map_requested_face(/*upload=*/false);
-
-  if (face == FACE_COUNT) return false;
-
-  byte len = getDatagramLengthOnFace(face);
-
-  if (len > 0) {
-    switch (download_state_) {
-      case GAME_MAP_DOWNLOAD_STATE_RECEIVE_SIZE:
-        if (len == 1) {
-          index_ = getDatagramOnFace(face)[0];
-        }
-        break;
-      case GAME_MAP_DOWNLOAD_STATE_DOWNLOAD:
-        if (len <= GAME_MAP_UPLOAD_MAX_CHUNK_SIZE) {
-          memcpy(&map_[download_index_], getDatagramOnFace(face), len);
-          download_index_ += len;
-        }
-        break;
-    }
-
-    markDatagramReadOnFace(face);
-  }
-
-  return true;
-}
-
 void Reset() {
   index_ = 0;
   propagation_index_ = 0;
   upload_index_ = 0;
-  download_index_ = 0;
   upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_SIZE;
-  download_state_ = GAME_MAP_DOWNLOAD_STATE_RECEIVE_SIZE;
 
   ComputeMapStats();
 }

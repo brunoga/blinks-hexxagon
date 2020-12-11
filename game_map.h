@@ -6,10 +6,7 @@
 #include "game_player.h"
 #include "src/blinks-position/position.h"
 
-#define GAME_MAP_MAX_BLINKS 87
-
-#define GAME_MAP_UPLOAD_UPLOADING 0
-#define GAME_MAP_UPLOAD_DONE 1
+#define GAME_MAP_MAX_BLINKS 85
 
 namespace game {
 
