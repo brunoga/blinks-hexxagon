@@ -277,7 +277,7 @@ bool MaybeUpload() {
                        ? GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
                        : remaining;
       if (sendDatagramOnFace(&(map_[upload_index_]), delta, face)) {
-        // CHunk sent. Increase the map upload index.
+        // Chunk sent. Increase the map upload index.
         upload_index_ += delta;
       }
       break;
