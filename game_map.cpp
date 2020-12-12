@@ -137,7 +137,6 @@ static void update_map_requested_face() {
       blink::state::SetMapRequestedFace(FACE_COUNT);
     }
 
-    // We are connected and still transfering the map.
     return;
   }
 
@@ -153,7 +152,7 @@ static void update_map_requested_face() {
       return;
     }
   }
-}  // namespace map
+}
 
 void Setup() {
   broadcast::message::handler::Set(
@@ -262,7 +261,7 @@ bool MaybeUpload() {
 
   switch (upload_state_) {
     case GAME_MAP_UPLOAD_STATE_SEND_METADATA: {
-      // Upload just started. Send map size.
+      // Upload just started. Send map metadata.
       byte payload[2] = {index_, game::state::GetData()};
       if (sendDatagramOnFace(payload, 2, face)) {
         // Size sent. Switch to actual map upload.
