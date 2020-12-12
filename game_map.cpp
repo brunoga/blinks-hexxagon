@@ -17,7 +17,7 @@
 #define GAME_MAP_UPLOAD_STATE_SEND_METADATA 0
 #define GAME_MAP_UPLOAD_STATE_UPLOAD 1
 
-#define GAME_MAP_UPLOAD_MAX_CHUNK_SIZE 5
+#define GAME_MAP_UPLOAD_MAX_CHUNK_SIZE 3
 
 namespace game {
 
@@ -276,7 +276,7 @@ bool MaybeUpload() {
       byte delta = remaining > GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
                        ? GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
                        : remaining;
-      if (sendDatagramOnFace(&(map_[upload_index_]), delta, face)) {
+      if (sendDatagramOnFace(&(map_[upload_index_]), delta * 2, face)) {
         // Chunk sent. Increase the map upload index.
         upload_index_ += delta;
       }
