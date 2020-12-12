@@ -133,14 +133,11 @@ static void update_map_requested_face() {
       // Make sure we will not leave data hanging if disconnected in the middle
       // of a transfer.
       resetPendingDatagramOnFace(map_requested_face);
-    } else if (upload_index_ < index_) {
-      // We are connected and still transfering the map.
-      return;
+
+      blink::state::SetMapRequestedFace(FACE_COUNT);
     }
 
-    // We finished uploading the map or we just disconnected.
-    blink::state::SetMapRequestedFace(FACE_COUNT);
-
+    // We are connected and still transfering the map.
     return;
   }
 
@@ -156,7 +153,7 @@ static void update_map_requested_face() {
       return;
     }
   }
-}
+}  // namespace map
 
 void Setup() {
   broadcast::message::handler::Set(
@@ -257,8 +254,8 @@ bool MaybeUpload() {
 
   byte face = blink::state::GetMapRequestedFace();
 
-  if (face == FACE_COUNT || index_ == 0 ||
-      game::state::Get() != GAME_STATE_PLAY) {
+  if ((face == FACE_COUNT) || Uploaded() ||
+      (game::state::Get() != GAME_STATE_PLAY)) {
     // Only send a map when we are sure we have one.
     return false;
   }
@@ -289,6 +286,8 @@ bool MaybeUpload() {
 
   return true;
 }
+
+bool Uploaded() { return ((index_ > 0) && (upload_index_ == index_)); }
 
 void Reset() {
   index_ = 0;

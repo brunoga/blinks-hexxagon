@@ -59,6 +59,7 @@ const Statistics& GetStatistics();
 bool ValidState();
 
 bool MaybeUpload();
+bool Uploaded();
 
 // Sets all map data to invalid values.
 void Reset();
