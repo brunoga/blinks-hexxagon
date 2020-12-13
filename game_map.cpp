@@ -205,24 +205,18 @@ void ComputeMapStats() {
   }
 }
 
-static void set_data(int8_t x, int8_t y, position::Coordinates* coordinates,
-                     void (*setter)(bool)) {
-  coordinates->x = x;
-  coordinates->y = y;
-
-  if (x == position::Local().x && y == position::Local().y) setter(true);
+void SetMoveOrigin(position::Coordinates coordinates) {
+  move_data_.origin = coordinates;
 
   move_commited_ = false;
 }
 
-void SetMoveOrigin(int8_t x, int8_t y) {
-  set_data(x, y, &move_data_.origin, blink::state::SetOrigin);
-}
-
 position::Coordinates GetMoveOrigin() { return move_data_.origin; }
 
-void SetMoveTarget(int8_t x, int8_t y) {
-  set_data(x, y, &move_data_.target, blink::state::SetTarget);
+void SetMoveTarget(position::Coordinates coordinates) {
+  move_data_.target = coordinates;
+
+  move_commited_ = false;
 }
 
 position::Coordinates GetMoveTarget() { return move_data_.target; }

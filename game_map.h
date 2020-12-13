@@ -44,10 +44,10 @@ bool GetMapping();
 
 void ComputeMapStats();
 
-void SetMoveOrigin(int8_t x, int8_t y);
+void SetMoveOrigin(position::Coordinates coordinates);
 position::Coordinates GetMoveOrigin();
 
-void SetMoveTarget(int8_t x, int8_t y);
+void SetMoveTarget(position::Coordinates coordinates);
 position::Coordinates GetMoveTarget();
 
 // Computes the player move from origin to destination, updating the game
