@@ -46,9 +46,6 @@ static void select_origin(byte* state, byte* specific_state) {
   // origin).
   blink::state::SetTarget(false);
 
-  // Also reset any potential targets.
-  blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
-
   // This blink belongs to a player, but not the current one. Nothing to do.
   if (blink::state::GetPlayer() != game::state::GetPlayer()) return;
 
@@ -63,8 +60,8 @@ static void select_origin(byte* state, byte* specific_state) {
   auto_select_ = false;
 
   // Ok, we are now the origin.
-  game::map::SetMoveOrigin(position::Local().x, position::Local().y);
-
+  game::map::SetMoveOrigin(position::Local());
+  blink::state::SetOrigin(true);
   render::animation::ResetTimer();
 
   // Indicate that an origin was selected.
@@ -94,6 +91,11 @@ static void select_target(byte* state, byte* specific_state) {
   // one.
   blink::state::SetTarget(false);
 
+  if (blink::state::GetPlayer() == 0 &&
+      position::Distance(game::map::GetMoveOrigin()) <= 2) {
+    blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_TARGET);
+  }
+
   // We pass all checks, but we do nothing until we get a click.
   if (!button_clicked) return;
 
@@ -115,9 +117,8 @@ static void select_target(byte* state, byte* specific_state) {
   if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE) return;
 
   // We are a valid target.
-  game::map::SetMoveTarget(position::Local().x, position::Local().y);
-
-  render::animation::ResetTimer();
+  game::map::SetMoveTarget(position::Local());
+  blink::state::SetTarget(true);
 
   *specific_state = GAME_STATE_PLAY_TARGET_SELECTED;
 }
@@ -148,10 +149,7 @@ static void move_confirmed(byte* state, byte* specific_state) {
   }
 
   // Reset origin so the spinning animation stops.
-  blink::state::SetOrigin(false);
-
-  // Clear target type for everybody.
-  blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
+  // blink::state::SetOrigin(false);
 
   if (!blink::state::GetTarget()) return;
 
@@ -186,6 +184,8 @@ void Handler(bool state_changed, byte* state, byte* specific_state) {
   if (state_changed) {
     *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
   }
+
+  blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
 
   switch (*specific_state) {
     case GAME_STATE_PLAY_SELECT_ORIGIN:
