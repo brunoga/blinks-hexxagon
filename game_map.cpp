@@ -5,6 +5,7 @@
 #include "blink_state.h"
 #include "game_message.h"
 #include "game_state.h"
+#include "game_state_play.h"
 #include "src/blinks-broadcast/handler.h"
 #include "src/blinks-broadcast/manager.h"
 #include "src/blinks-orientation/orientation.h"
@@ -12,12 +13,13 @@
 // As we can not known beforehand how many Blinks are in the map, we need a
 // timeout to consider that everything cleared up. This is the time since the
 // last mapping message was received.
-#define GAME_MAP_PROPAGATION_TIMEOUT 2000
+#define GAME_MAP_PROPAGATION_TIMEOUT 4000
 
 #define GAME_MAP_UPLOAD_STATE_SEND_METADATA 0
 #define GAME_MAP_UPLOAD_STATE_UPLOAD 1
 
-#define GAME_MAP_UPLOAD_MAX_CHUNK_SIZE 3
+#define GAME_MAP_UPLOAD_METADATA_SIZE 3
+#define GAME_MAP_UPLOAD_MAX_CHUNK_SIZE 3  // 2 byte entries.
 
 namespace game {
 
@@ -248,7 +250,8 @@ bool MaybeUpload() {
   byte face = blink::state::GetMapRequestedFace();
 
   if ((face == FACE_COUNT) || Uploaded() ||
-      (game::state::Get() != GAME_STATE_PLAY)) {
+      (game::state::Get() != GAME_STATE_PLAY) ||
+      (game::state::GetSpecific() != GAME_STATE_PLAY_SELECT_ORIGIN)) {
     // Only send a map when we are sure we have one.
     return false;
   }
@@ -256,8 +259,9 @@ bool MaybeUpload() {
   switch (upload_state_) {
     case GAME_MAP_UPLOAD_STATE_SEND_METADATA: {
       // Upload just started. Send map metadata.
-      byte payload[2] = {index_, game::state::GetData()};
-      if (sendDatagramOnFace(payload, 2, face)) {
+      byte payload[GAME_MAP_UPLOAD_METADATA_SIZE] = {MESSAGE_MAP_UPLOAD, index_,
+                                                     game::state::GetData()};
+      if (sendDatagramOnFace(payload, GAME_MAP_UPLOAD_METADATA_SIZE, face)) {
         // Size sent. Switch to actual map upload.
         upload_state_ = GAME_MAP_UPLOAD_STATE_UPLOAD;
       }
