@@ -19,7 +19,7 @@ static State state_;
 
 namespace state {
 
-void Set(byte state, bool from_network) {
+void __attribute__((noinline)) Set(byte state, bool from_network) {
   state_.previous = state_.current;
   state_.current = state;
 
@@ -28,7 +28,8 @@ void Set(byte state, bool from_network) {
 
 byte __attribute__((noinline)) Get() { return state_.current; }
 
-void SetSpecific(byte specific_state, bool from_network) {
+void __attribute__((noinline))
+SetSpecific(byte specific_state, bool from_network) {
   state_.previous_specific = state_.current_specific;
   state_.current_specific = specific_state;
 
@@ -39,7 +40,7 @@ byte GetSpecific() { return state_.current_specific; }
 
 void SetPlayer(byte player) { state_.player = player; }
 
-byte __attribute__((noinline)) GetPlayer() { return state_.player; }
+byte GetPlayer() { return state_.player; }
 
 void NextPlayer() {
   byte current_player = GetPlayer();
@@ -61,7 +62,7 @@ byte GetData() {
       .as_byte;
 }
 
-void Reset() {
+void __attribute__((noinline)) Reset() {
   state_.current = GAME_STATE_IDLE;
   state_.previous = GAME_STATE_IDLE;
   state_.current_specific = 0;
