@@ -46,7 +46,7 @@ void __attribute__((noinline)) StartColorOverride() {
 
 bool GetColorOverride() { return !color_override_timer_.isExpired(); }
 
-void __attribute__((noinline)) Reset() {
+void Reset() {
   state_.origin = false;
   state_.target = false;
   state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
