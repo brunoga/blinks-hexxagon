@@ -148,9 +148,6 @@ static void move_confirmed(byte* state, byte* specific_state) {
     blink::state::Reset();
   }
 
-  // Reset origin so the spinning animation stops.
-  // blink::state::SetOrigin(false);
-
   if (!blink::state::GetTarget()) return;
 
   // We are the target, so we are now owned by the current player.
