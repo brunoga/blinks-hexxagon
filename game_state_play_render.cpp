@@ -28,36 +28,46 @@ void Render() {
   // animations only render an overlay.
   setColor(player_color);
 
-  if (player == 0) {
-    if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE) {
-      setColor(dim(player_color, RENDER_CONFIG_PLAY_STATE_COLOR_DIM));
+  if ((blink::state::GetOrigin() &&
+       (specific_state < GAME_STATE_PLAY_TARGET_SELECTED)) ||
+      (blink::state::GetTarget() &&
+       (specific_state == GAME_STATE_PLAY_MOVE_CONFIRMED))) {
+    // We are the origin and and a target was not selected yet or we are a
+    // target and the move is being confirmed. Render spinning animation.
+    render::animation::Spinner(RENDER_CONFIG_PLAY_STATE_SPINNER_COLOR,
+                               RENDER_CONFIG_PLAY_STATE_SPINNER_SLOWDOWN);
+    return;
+  }
+
+  if (player == game_player ||
+      (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_TARGET)) {
+    // We are the current player or we are a possibloe target.
+    if ((specific_state < GAME_STATE_PLAY_MOVE_CONFIRMED) &&
+        game::map::GetStatistics().local_blink_empty_space_in_range) {
+      // Move has not been confirmed yet and the Blink has a space in range to
+      // move to (or is a possible target). Render pulse animation.
+      render::animation::Pulse(player_color,
+                               RENDER_CONFIG_PLAY_STATE_PULSE_START_DIM,
+                               RENDER_CONFIG_PLAY_STATE_PULSE_SLOWDOWN);
+      return;
     }
-  } else {
-    if (player == game_player) {
-      if (blink::state::GetOrigin() &&
-          specific_state < GAME_STATE_PLAY_TARGET_SELECTED) {
-        // We are the Origin. Render the spinning animation.
-        render::animation::Spinner(RENDER_CONFIG_PLAY_STATE_SPINNER_COLOR,
-                                   RENDER_CONFIG_PLAY_STATE_SPINNER_SLOWDOWN);
-      } else if ((specific_state < GAME_STATE_PLAY_MOVE_CONFIRMED) &&
-                 game::map::GetStatistics().local_blink_empty_space_in_range) {
-        // This Blink belongs to the current player and did not match any of the
-        // above conditions. Render a pulsing animation if we are not confirming
-        // the move yet.
-        render::animation::Pulse(player_color,
-                                 RENDER_CONFIG_PLAY_STATE_PULSE_START_DIM,
-                                 RENDER_CONFIG_PLAY_STATE_PULSE_SLOWDOWN);
+  } else if (player != 0) {
+    // We are an enemy player Blink.
+    if ((specific_state == GAME_STATE_PLAY_MOVE_CONFIRMED) &&
+        position::Distance(game::map::GetMoveTarget()) == 1) {
+      // Move is being confirmed and we are neighbors of the target. Render
+      // explosion animation.
+      if (render::animation::Explosion(player_color)) {
+        blink::state::SetPlayer(game_player);
       }
-    } else {
-      if ((specific_state == GAME_STATE_PLAY_MOVE_CONFIRMED) &&
-          position::Distance(game::map::GetMoveTarget()) == 1) {
-        // Render takeover (explosion) animation.
-        if (render::animation::Explosion(player_color)) {
-          blink::state::SetPlayer(game_player);
-        }
-      }
+
+      return;
     }
   }
+
+  // We did not match anything above, which means we are a locked player Blink,
+  // an unaffected enemy Blink or a non-target empty Blink.
+  setColor(dim(player_color, RENDER_CONFIG_PLAY_STATE_COLOR_DIM));
 }
 
 }  // namespace play
