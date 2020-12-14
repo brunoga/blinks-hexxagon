@@ -22,6 +22,7 @@ void Render() {
   Color player_color = game::player::GetColor(player);
 
   byte game_player = game::state::GetPlayer();
+  byte specific_state = game::state::GetSpecific();
 
   // Set initial color for this Blink. This is required as some of the render
   // animations only render an overlay.
@@ -34,12 +35,11 @@ void Render() {
   } else {
     if (player == game_player) {
       if (blink::state::GetOrigin() &&
-          game::state::GetSpecific() < GAME_STATE_PLAY_TARGET_SELECTED) {
+          specific_state < GAME_STATE_PLAY_TARGET_SELECTED) {
         // We are the Origin. Render the spinning animation.
         render::animation::Spinner(RENDER_CONFIG_PLAY_STATE_SPINNER_COLOR,
                                    RENDER_CONFIG_PLAY_STATE_SPINNER_SLOWDOWN);
-      } else if ((game::state::GetSpecific() <
-                  GAME_STATE_PLAY_MOVE_CONFIRMED) &&
+      } else if ((specific_state < GAME_STATE_PLAY_MOVE_CONFIRMED) &&
                  game::map::GetStatistics().local_blink_empty_space_in_range) {
         // This Blink belongs to the current player and did not match any of the
         // above conditions. Render a pulsing animation if we are not confirming
@@ -49,7 +49,7 @@ void Render() {
                                  RENDER_CONFIG_PLAY_STATE_PULSE_SLOWDOWN);
       }
     } else {
-      if ((game::state::GetSpecific() == GAME_STATE_PLAY_MOVE_CONFIRMED) &&
+      if ((specific_state == GAME_STATE_PLAY_MOVE_CONFIRMED) &&
           position::Distance(game::map::GetMoveTarget()) == 1) {
         // Render takeover (explosion) animation.
         if (render::animation::Explosion(player_color)) {
