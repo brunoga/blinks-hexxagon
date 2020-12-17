@@ -43,7 +43,7 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
       if ((int8_t)payload[0] == position::Local().x &&
           (int8_t)payload[1] == position::Local().y) {
         blink::state::SetOrigin(true);
-        game::state::SetSpecific(GAME_STATE_PLAY_SELECT_TARGET, false);
+        game::state::SetSpecific(GAME_STATE_PLAY_SELECT_TARGET);
         render::animation::ResetTimer();
       }
       break;
@@ -52,7 +52,8 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
       if ((int8_t)payload[0] == position::Local().x &&
           (int8_t)payload[1] == position::Local().y) {
         blink::state::SetTarget(true);
-        game::state::SetSpecific(GAME_STATE_PLAY_MOVE_CONFIRMED, false);
+        game::state::SetSpecific(GAME_STATE_PLAY_MOVE_CONFIRMED);
+        render::animation::ResetTimer();
       }
       break;
     case MESSAGE_FLASH:
