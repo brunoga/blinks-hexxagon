@@ -223,7 +223,7 @@ void SetMoveTarget(position::Coordinates coordinates) {
 
 position::Coordinates GetMoveTarget() { return move_data_.target; }
 
-void __attribute__((noinline)) CommitMove() {
+void CommitMove() {
   if (move_commited_) return;
 
   if (position::coordinates::Distance(move_data_.origin, move_data_.target) >
@@ -240,7 +240,7 @@ void __attribute__((noinline)) CommitMove() {
 
 const Statistics& GetStatistics() { return stats_; }
 
-bool __attribute__((noinline)) ValidState() {
+bool ValidState() {
   return (stats_.player[0].blink_count > 0) && (stats_.player_count > 1);
 }
 
