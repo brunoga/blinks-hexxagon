@@ -10,16 +10,16 @@
 
 namespace blink {
 
-namespace state {
-
-struct BlinkState {
+struct State {
   bool origin;
   bool target;
   byte player;
   byte map_requested_face;
   byte target_type;
 };
-static BlinkState state_;
+static State state_;
+
+namespace state {
 
 static Timer color_override_timer_;
 
