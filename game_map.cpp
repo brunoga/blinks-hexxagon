@@ -19,7 +19,10 @@
 #define GAME_MAP_UPLOAD_STATE_UPLOAD 1
 
 #define GAME_MAP_UPLOAD_METADATA_SIZE 3
-#define GAME_MAP_UPLOAD_MAX_CHUNK_SIZE 3  // 2 byte entries.
+
+// 2 byte entries (4 bytes total). Chosen to be smaller than the maximum size of
+// datagram we use otherwise.
+#define GAME_MAP_UPLOAD_MAX_CHUNK_SIZE 2
 
 namespace game {
 
