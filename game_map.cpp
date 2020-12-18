@@ -49,14 +49,16 @@ struct MoveData {
 static MoveData move_data_;
 
 static void maybe_propagate() {
-  if (index_ != propagation_index_) {
-    if (game::message::SendExternalPropagateCoordinates(
-            (int8_t)map_[propagation_index_].x,
-            (int8_t)map_[propagation_index_].y,
-            (byte)map_[propagation_index_].player)) {
-      propagation_index_++;
-    }
+  if (index_ <= propagation_index_) return;
+
+  if (!game::message::SendExternalPropagateCoordinates(
+          (int8_t)map_[propagation_index_].x,
+          (int8_t)map_[propagation_index_].y,
+          (byte)map_[propagation_index_].player)) {
+    return;
   }
+
+  propagation_index_++;
 }
 
 static Data* find_entry_in_map(int8_t x, int8_t y) {
@@ -86,7 +88,8 @@ static void __attribute__((noinline))
 update_blinks(position::Coordinates coordinates, byte player,
               bool update_neighbors) {
   for (byte i = 0; i < index_; ++i) {
-    if (((map_[i].x == coordinates.x) && (map_[i].y == coordinates.y)) ||
+    if ((position::coordinates::Distance({(int8_t)map_[i].x, (int8_t)map_[i].y},
+                                         coordinates) == 0) ||
         (update_neighbors && (map_[i].player != 0) &&
          (position::coordinates::Distance(
               coordinates, {(int8_t)map_[i].x, (int8_t)map_[i].y}) == 1))) {
@@ -167,10 +170,10 @@ void Setup() {
 void Process() { maybe_propagate(); }
 
 void __attribute__((noinline)) StartMapping() {
+  propagation_timer_.set(GAME_MAP_PROPAGATION_TIMEOUT);
+
   // We are the mapping origin. Add ourselves to the map.
   add_local_to_map();
-
-  propagation_timer_.set(GAME_MAP_PROPAGATION_TIMEOUT);
 }
 
 bool GetMapping() { return (!propagation_timer_.isExpired()); }
