@@ -39,9 +39,8 @@ void Render() {
     return;
   }
 
-  if (player == game_player ||
-      (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_TARGET)) {
-    // We are the current player or we are a possibloe target.
+  if (player == game_player) {
+    // We are the current player.
     if ((specific_state < GAME_STATE_PLAY_MOVE_CONFIRMED) &&
         game::map::GetStatistics().local_blink_empty_space_in_range) {
       // Move has not been confirmed yet and the Blink has a space in range to
@@ -67,7 +66,9 @@ void Render() {
 
   // We did not match anything above, which means we are a locked player Blink,
   // an unaffected enemy Blink or a non-target empty Blink.
-  setColor(dim(player_color, RENDER_CONFIG_PLAY_STATE_COLOR_DIM));
+  if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE) {
+    setColor(dim(player_color, RENDER_CONFIG_PLAY_STATE_COLOR_DIM));
+  }
 }
 
 }  // namespace play
