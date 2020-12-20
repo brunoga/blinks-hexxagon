@@ -44,6 +44,13 @@ void Spinner(const Color& spinner_color, byte slowdown) {
 
   byte f = (FACE_COUNT - 1) - timer_.getRemaining() / slowdown;
 
+  if (f >= FACE_COUNT) {
+    // When tyransitioning from the pulse animation to the spinner one, we might
+    // have a remaining value in our timer that it is bigger thna we expected so
+    // we need to add this check here to prevent writting to arbitrary memory.
+    return;
+  }
+
   setColorOnFace(spinner_color, f);
 }
 

@@ -62,7 +62,6 @@ static void select_origin(byte* state, byte* specific_state) {
   // Ok, we are now the origin.
   game::map::SetMoveOrigin(position::Local());
   blink::state::SetOrigin(true);
-  render::animation::ResetTimer();
 
   // Indicate that an origin was selected.
   *specific_state = GAME_STATE_PLAY_ORIGIN_SELECTED;
@@ -119,7 +118,6 @@ static void select_target(byte* state, byte* specific_state) {
   // We are a valid target.
   game::map::SetMoveTarget(position::Local());
   blink::state::SetTarget(true);
-  render::animation::ResetTimer();
 
   *specific_state = GAME_STATE_PLAY_TARGET_SELECTED;
 }
