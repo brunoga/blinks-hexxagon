@@ -2,6 +2,7 @@
 
 #include "blink_state.h"
 #include "game_map.h"
+#include "game_map_upload.h"
 #include "game_message.h"
 #include "game_state.h"
 #include "game_state_end.h"
@@ -23,7 +24,7 @@ void setup() {
 }
 
 void loop() {
-  if (!game::map::MaybeUpload()) {
+  if (!game::map::upload::Process()) {
     // Process any pending game messages.
     broadcast::manager::Process();
 

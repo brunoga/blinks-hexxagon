@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "blink_state.h"
+#include "game_map_upload.h"
 #include "game_message.h"
 #include "game_state.h"
 #include "game_state_play.h"
@@ -15,15 +16,6 @@
 // last mapping message was received.
 #define GAME_MAP_PROPAGATION_TIMEOUT 4000
 
-#define GAME_MAP_UPLOAD_STATE_SEND_METADATA 0
-#define GAME_MAP_UPLOAD_STATE_UPLOAD 1
-
-#define GAME_MAP_UPLOAD_METADATA_SIZE 3
-
-// 2 byte entries (4 bytes total). Chosen to be smaller than the maximum size of
-// datagram we use otherwise.
-#define GAME_MAP_UPLOAD_MAX_CHUNK_SIZE 2
-
 namespace game {
 
 static game::map::Data map_[GAME_MAP_MAX_BLINKS];
@@ -32,8 +24,6 @@ namespace map {
 
 static byte index_;
 static byte propagation_index_;
-static byte upload_index_;
-static byte upload_state_;
 
 Statistics stats_;
 
@@ -128,40 +118,6 @@ void consume(const broadcast::Message* message, byte local_absolute_face) {
              message->payload[3]);
 }
 
-static void update_map_requested_face() {
-  byte map_requested_face = blink::state::GetMapRequestedFace();
-
-  // Check if we are currently connected.
-  if (map_requested_face != FACE_COUNT) {
-    // We are, did we get disconnected?
-    if (isValueReceivedOnFaceExpired(map_requested_face)) {
-      upload_index_ = 0;
-      upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_METADATA;
-
-      // Make sure we will not leave data hanging if disconnected in the middle
-      // of a transfer.
-      resetPendingDatagramOnFace(map_requested_face);
-
-      blink::state::SetMapRequestedFace(FACE_COUNT);
-    }
-
-    return;
-  }
-
-  FOREACH_FACE(face) {
-    // Parse face value so we can check for a map being requested.
-    blink::state::FaceValue face_value = {.as_byte =
-                                              getLastValueReceivedOnFace(face)};
-
-    if (!isValueReceivedOnFaceExpired(face) && face_value.map_requested) {
-      // A map is requested in this face.
-      blink::state::SetMapRequestedFace(face);
-
-      return;
-    }
-  }
-}
-
 void Setup() {
   broadcast::message::handler::Set(
       {MESSAGE_EXTERNAL_PROPAGATE_COORDINATES, consume});
@@ -213,6 +169,10 @@ void ComputeMapStats() {
   }
 }
 
+const Data* Get() { return map_; }
+
+byte GetSize() { return index_; }
+
 void SetMoveOrigin(position::Coordinates coordinates) {
   move_data_.origin = coordinates;
 
@@ -250,53 +210,12 @@ bool ValidState() {
   return (stats_.player[0].blink_count > 0) && (stats_.player_count > 1);
 }
 
-bool MaybeUpload() {
-  update_map_requested_face();
-
-  byte face = blink::state::GetMapRequestedFace();
-
-  if ((face == FACE_COUNT) || Uploaded() ||
-      (game::state::Get() != GAME_STATE_PLAY) ||
-      (game::state::GetSpecific() != GAME_STATE_PLAY_SELECT_ORIGIN)) {
-    // Only send a map when we are sure we have one.
-    return false;
-  }
-
-  switch (upload_state_) {
-    case GAME_MAP_UPLOAD_STATE_SEND_METADATA: {
-      // Upload just started. Send map metadata.
-      byte payload[GAME_MAP_UPLOAD_METADATA_SIZE] = {MESSAGE_MAP_UPLOAD, index_,
-                                                     game::state::GetData()};
-      if (sendDatagramOnFace(payload, GAME_MAP_UPLOAD_METADATA_SIZE, face)) {
-        // Size sent. Switch to actual map upload.
-        upload_state_ = GAME_MAP_UPLOAD_STATE_UPLOAD;
-      }
-      break;
-    }
-    case GAME_MAP_UPLOAD_STATE_UPLOAD:
-      // Now upload the actual map in chunks of
-      // GAME_MAP_UPLOAD_MAX_CHUNK_SIZE.
-      byte remaining = index_ - upload_index_;
-      byte delta = remaining > GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
-                       ? GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
-                       : remaining;
-      if (sendDatagramOnFace(&(map_[upload_index_]), delta * 2, face)) {
-        // Chunk sent. Increase the map upload index.
-        upload_index_ += delta;
-      }
-      break;
-  }
-
-  return true;
-}
-
-bool Uploaded() { return ((index_ > 0) && (upload_index_ == index_)); }
-
 void Reset() {
   index_ = 0;
   propagation_index_ = 0;
-  upload_index_ = 0;
-  upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_METADATA;
+
+  // Also reset map upload.
+  game::map::upload::Reset();
 
   ComputeMapStats();
 }

@@ -44,6 +44,9 @@ bool GetMapping();
 
 void ComputeMapStats();
 
+const Data* Get();
+byte GetSize();
+
 void SetMoveOrigin(position::Coordinates coordinates);
 position::Coordinates GetMoveOrigin();
 
@@ -57,9 +60,6 @@ void CommitMove();
 const Statistics& GetStatistics();
 
 bool ValidState();
-
-bool MaybeUpload();
-bool Uploaded();
 
 // Sets all map data to invalid values.
 void Reset();
