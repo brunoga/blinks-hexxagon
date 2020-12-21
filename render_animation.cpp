@@ -54,7 +54,7 @@ void Spinner(const Color& spinner_color, byte slowdown) {
   setColorOnFace(spinner_color, f);
 }
 
-bool Explosion(const Color& base_color) {
+bool Explosion(Color base_color) {
   if (reset_timer_if_expired(RENDER_ANIMATION_EXPLOSION_MS)) {
     if (animation_started_) {
       animation_started_ = false;

@@ -12,7 +12,7 @@ void ResetTimer();
 void Pulse(const Color& base_color, byte start, byte slowdown);
 void Spinner(const Color& spinner_color, byte slowdown);
 
-bool Explosion(const Color& base_color);
+bool Explosion(Color base_color);
 
 }  // namespace animation
 
