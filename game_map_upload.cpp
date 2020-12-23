@@ -23,8 +23,8 @@ namespace map {
 
 namespace upload {
 
-static byte upload_index_;
-static byte upload_state_;
+static byte index_;
+static byte state_;
 
 static void update_map_requested_face() {
   byte map_requested_face = blink::state::GetMapRequestedFace();
@@ -74,27 +74,27 @@ bool Process() {
   const game::map::Data* map_data = game::map::Get();
   byte map_size = game::map::GetSize();
 
-  switch (upload_state_) {
+  switch (state_) {
     case GAME_MAP_UPLOAD_STATE_SEND_METADATA: {
       // Upload just started. Send map metadata.
       byte payload[GAME_MAP_UPLOAD_METADATA_SIZE] = {
           MESSAGE_MAP_UPLOAD, map_size, game::state::GetData()};
       if (sendDatagramOnFace(payload, GAME_MAP_UPLOAD_METADATA_SIZE, face)) {
         // Size sent. Switch to actual map upload.
-        upload_state_ = GAME_MAP_UPLOAD_STATE_UPLOAD;
+        state_ = GAME_MAP_UPLOAD_STATE_UPLOAD;
       }
       break;
     }
     case GAME_MAP_UPLOAD_STATE_UPLOAD:
       // Now upload the actual map in chunks of
       // GAME_MAP_UPLOAD_MAX_CHUNK_SIZE.
-      byte remaining = map_size - upload_index_;
+      byte remaining = map_size - index_;
       byte delta = remaining > GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
                        ? GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
                        : remaining;
-      if (sendDatagramOnFace(&(map_data[upload_index_]), delta * 2, face)) {
+      if (sendDatagramOnFace(&(map_data[index_]), delta * 2, face)) {
         // Chunk sent. Increase the map upload index.
-        upload_index_ += delta;
+        index_ += delta;
       }
       break;
   }
@@ -105,12 +105,12 @@ bool Process() {
 bool Uploaded() {
   byte map_size = game::map::GetSize();
 
-  return ((map_size > 0) && (upload_index_ == map_size));
+  return ((map_size > 0) && (index_ == map_size));
 }
 
 void Reset() {
-  upload_state_ = GAME_MAP_UPLOAD_STATE_SEND_METADATA;
-  upload_index_ = 0;
+  state_ = GAME_MAP_UPLOAD_STATE_SEND_METADATA;
+  index_ = 0;
 }
 
 }  // namespace upload
