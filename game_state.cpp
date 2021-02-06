@@ -71,7 +71,7 @@ void __attribute__((noinline)) Reset() {
   state_.from_network = false;
 }
 
-bool Changed(bool include_specific) {
+bool __attribute__((noinline)) Changed(bool include_specific) {
   return include_specific
              ? state_.current != state_.previous ||
                    state_.current_specific != state_.previous_specific
@@ -79,9 +79,8 @@ bool Changed(bool include_specific) {
 }
 
 bool Propagate() {
-  if (!Changed() || state_.from_network) return true;
-
-  if (!game::message::SendGameStateChange()) {
+  if (!state_.from_network && Changed() &&
+      !game::message::SendGameStateChange()) {
     return false;
   }
 
