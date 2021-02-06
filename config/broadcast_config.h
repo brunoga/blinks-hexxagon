@@ -4,7 +4,13 @@
 // This is the maximum payload we will need.
 #define BROADCAST_MESSAGE_PAYLOAD_BYTES 4
 
+// Disable message replies. Saves considerable space.
 #define BROADCAST_DISABLE_REPLIES
+
+// Enable message handler support. Required by the mapping code.
 #define BROADCAST_ENABLE_MESSAGE_HANDLER
+
+// Enable tracking of connection state.
+#define BROADCAST_TRACK_FACE_CONNECTION_STATE
 
 #endif
