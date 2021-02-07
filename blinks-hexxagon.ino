@@ -38,8 +38,7 @@ void loop() {
     }
 
     if (game::state::Propagate()) {
-      // Cache current state and if we changed state since the previous
-      // iteration.
+      // Cache current state.
       byte state = game::state::Get();
 
       if (game::state::Changed()) {
