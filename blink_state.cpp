@@ -21,7 +21,8 @@ struct State {
   byte map_requested_face;
   byte target_type;
 };
-static State state_;
+static State state_ = {false, false, 0, FACE_COUNT,
+                       BLINK_STATE_TARGET_TYPE_NONE};
 
 namespace state {
 
@@ -50,7 +51,7 @@ void __attribute__((noinline)) StartColorOverride() {
 
 bool GetColorOverride() { return !color_override_timer_.isExpired(); }
 
-void Reset() {
+void __attribute__((noinline)) Reset() {
   state_.origin = false;
   state_.target = false;
   state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
