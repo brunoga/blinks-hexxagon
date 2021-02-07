@@ -24,7 +24,7 @@ void __attribute__((noinline)) Set(byte state, bool from_network) {
   state_.from_network = from_network;
 }
 
-byte __attribute__((noinline)) Get() { return state_.current; }
+byte Get() { return state_.current; }
 
 void SetPlayer(byte player) { state_.player = player; }
 

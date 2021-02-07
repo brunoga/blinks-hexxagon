@@ -23,6 +23,9 @@ void setup() {
 }
 
 void loop() {
+  // Cache our current game state.
+  byte state = game::state::Get();
+
   if (!game::map::upload::Process()) {
     // Process any pending game messages.
     broadcast::manager::Process();
@@ -38,10 +41,6 @@ void loop() {
     }
 
     if (game::state::Propagate()) {
-      // Cache current state and if we changed state since the previous
-      // iteration.
-      byte state = game::state::Get();
-
       if (game::state::Changed()) {
         // State changed. Reset animation timer to improve synchronization.
         render::animation::ResetTimer();
@@ -64,7 +63,7 @@ void loop() {
     }
   }
 
-  blink::state::Render(game::state::Get());
+  blink::state::Render(state);
 
   // Consume any pending woken state. The rationale is that we already went
   // through our loop and if the state is still set here we want to consume as
