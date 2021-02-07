@@ -8,6 +8,10 @@
 #include "game_state_play_render.h"
 #include "game_state_setup_render.h"
 
+#if __has_include(<hexxagon_config.h>)
+#include <hexxagon_config.h>
+#endif
+
 namespace blink {
 
 struct State {
