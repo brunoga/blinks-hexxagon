@@ -75,11 +75,13 @@ void Render(byte game_state) {
     }
   }
 
+#ifdef HEXXAGON_ENABLE_PENDING_FACE_DEBUG
   FOREACH_FACE(face) {
     if (isDatagramPendingOnFace(face)) {
       setColorOnFace(OFF, face);
     }
   }
+#endif  // HEXXAGON_ENABLE_PENDING_FACE_DEBUG
 }
 
 }  // namespace state
