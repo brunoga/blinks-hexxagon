@@ -44,9 +44,7 @@ void NextPlayer() {
   SetPlayer(next_player);
 }
 
-byte GetData() {
-  return Data{0, state_.current, (byte)(state_.player - 1)}.as_byte;
-}
+byte GetData() { return Data{0, state_.current, state_.player}.as_byte; }
 
 void __attribute__((noinline)) Reset() {
   state_.current = GAME_STATE_IDLE;

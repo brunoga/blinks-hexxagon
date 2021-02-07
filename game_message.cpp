@@ -33,8 +33,7 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
       game::state::Data data = {.as_byte = payload[0]};
 
       game::state::Set(data.state, true);
-      game::state::SetPlayer(data.next_player +
-                             1);  // TODO(bga): This limits us to 4 players.
+      game::state::SetPlayer(data.next_player);
       break;
     }
     case MESSAGE_SELECT_ORIGIN:

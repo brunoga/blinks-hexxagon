@@ -30,9 +30,9 @@ namespace state {
 
 union Data {
   struct {
-    byte unused : 2;  // TODO(bga): May be used to add more players.
+    byte unused : 1;
     byte state : 4;
-    byte next_player : 2;  // Add 1 for actual player number.
+    byte next_player : 3;
   };
 
   byte as_byte;
