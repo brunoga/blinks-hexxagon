@@ -14,9 +14,7 @@ namespace state {
 
 namespace setup {
 
-static void players(byte* state, byte* specific_state) {
-  (void)state;
-
+static void players(byte* state) {
   // Make sure map is empty.
   //
   // TODO(bga): There might be a race condition between the state change message
@@ -39,24 +37,22 @@ static void players(byte* state, byte* specific_state) {
 
     game::map::StartMapping();
 
-    *specific_state = GAME_STATE_SETUP_MAP;
+    *state = GAME_STATE_SETUP_MAP;
   } else if (util::NoSleepButtonSingleClicked()) {
     // Blink was clicked. Switch it to next player.
     blink::state::SetPlayer(game::player::GetNext(blink::state::GetPlayer()));
   }
 }
 
-static void map(byte* state, byte* specific_state) {
-  (void)state;
-
+static void map(byte* state) {
   game::map::Process();
 
   if (game::map::GetMapping() || !blink::state::GetOrigin()) return;
 
-  *specific_state = GAME_STATE_SETUP_VALIDATE;
+  *state = GAME_STATE_SETUP_VALIDATE;
 }
 
-static void validate(byte* state, byte* specific_state) {
+static void validate(byte* state) {
   game::map::ComputeMapStats();
 
   if (!blink::state::GetOrigin()) return;
@@ -68,29 +64,28 @@ static void validate(byte* state, byte* specific_state) {
       game::state::NextPlayer();
 
       *state = GAME_STATE_PLAY;
-      *specific_state = 0;
     } else {
-      *specific_state = GAME_STATE_SETUP_SELECT_PLAYERS;
+      *state = GAME_STATE_SETUP_SELECT_PLAYERS;
     }
 
     blink::state::SetOrigin(false);
   }
 }
 
-void Handler(bool state_changed, byte* state, byte* specific_state) {
-  if (state_changed) {
-    *specific_state = GAME_STATE_SETUP_SELECT_PLAYERS;
+void Handler(byte* state) {
+  if (*state == GAME_STATE_SETUP) {
+    *state = GAME_STATE_SETUP_SELECT_PLAYERS;
   }
 
-  switch (*specific_state) {
+  switch (*state) {
     case GAME_STATE_SETUP_SELECT_PLAYERS:
-      players(state, specific_state);
+      players(state);
       break;
     case GAME_STATE_SETUP_MAP:
-      map(state, specific_state);
+      map(state);
       break;
     case GAME_STATE_SETUP_VALIDATE:
-      validate(state, specific_state);
+      validate(state);
       break;
   }
 }

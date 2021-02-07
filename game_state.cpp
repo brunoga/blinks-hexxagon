@@ -10,8 +10,6 @@ namespace game {
 struct State {
   byte current;
   byte previous;
-  byte current_specific;
-  byte previous_specific;
   byte player;
   bool from_network;
 };
@@ -27,16 +25,6 @@ void __attribute__((noinline)) Set(byte state, bool from_network) {
 }
 
 byte __attribute__((noinline)) Get() { return state_.current; }
-
-void __attribute__((noinline))
-SetSpecific(byte specific_state, bool from_network) {
-  state_.previous_specific = state_.current_specific;
-  state_.current_specific = specific_state;
-
-  state_.from_network = from_network;
-}
-
-byte GetSpecific() { return state_.current_specific; }
 
 void SetPlayer(byte player) { state_.player = player; }
 
@@ -57,25 +45,18 @@ void NextPlayer() {
 }
 
 byte GetData() {
-  return Data{state_.current, state_.current_specific,
-              (byte)(state_.player - 1)}
-      .as_byte;
+  return Data{0, state_.current, (byte)(state_.player - 1)}.as_byte;
 }
 
 void __attribute__((noinline)) Reset() {
   state_.current = GAME_STATE_IDLE;
   state_.previous = GAME_STATE_IDLE;
-  state_.current_specific = 0;
-  state_.previous_specific = 0;
   state_.player = 0;
   state_.from_network = false;
 }
 
-bool __attribute__((noinline)) Changed(bool include_specific) {
-  return include_specific
-             ? state_.current != state_.previous ||
-                   state_.current_specific != state_.previous_specific
-             : state_.current != state_.previous;
+bool __attribute__((noinline)) Changed() {
+  return state_.current != state_.previous;
 }
 
 bool Propagate() {

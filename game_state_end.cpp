@@ -13,25 +13,21 @@ namespace state {
 
 namespace end {
 
-void Handler(bool state_changed, byte* state, byte* specific_state) {
-  (void)specific_state;
-
-  if (state_changed) {
-    byte max_count = 0;
-    byte winner_player = 0;
-    for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
-      byte player_count = game::map::GetStatistics().player[i].blink_count;
-      if (player_count > max_count) {
-        max_count = player_count;
-        winner_player = i;
-      } else if (player_count == max_count) {
-        winner_player = 0;
-      }
+void Handler(byte* state) {
+  byte max_count = 0;
+  byte winner_player = 0;
+  for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
+    byte player_count = game::map::GetStatistics().player[i].blink_count;
+    if (player_count > max_count) {
+      max_count = player_count;
+      winner_player = i;
+    } else if (player_count == max_count) {
+      winner_player = 0;
     }
-
-    // Switch to the winner player.
-    blink::state::SetPlayer(winner_player);
   }
+
+  // Switch to the winner player.
+  blink::state::SetPlayer(winner_player);
 
   if (util::NoSleepButtonSingleClicked()) {
     // Ok to ignore result.

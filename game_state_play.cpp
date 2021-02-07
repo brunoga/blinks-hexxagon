@@ -33,7 +33,7 @@ static bool has_enemy_neighbor() {
   return false;
 }
 
-static void select_origin(byte* state, byte* specific_state) {
+static void select_origin(byte* state) {
   (void)state;
 
   bool button_clicked = util::NoSleepButtonSingleClicked();
@@ -64,10 +64,10 @@ static void select_origin(byte* state, byte* specific_state) {
   blink::state::SetOrigin(true);
 
   // Indicate that an origin was selected.
-  *specific_state = GAME_STATE_PLAY_ORIGIN_SELECTED;
+  *state = GAME_STATE_PLAY_ORIGIN_SELECTED;
 }
 
-static void origin_selected(byte* state, byte* specific_state) {
+static void origin_selected(byte* state) {
   (void)state;
 
   // Only the origin blink has anything to do here.
@@ -78,10 +78,10 @@ static void origin_selected(byte* state, byte* specific_state) {
     return;
   }
 
-  *specific_state = GAME_STATE_PLAY_SELECT_TARGET;
+  *state = GAME_STATE_PLAY_SELECT_TARGET;
 }
 
-static void select_target(byte* state, byte* specific_state) {
+static void select_target(byte* state) {
   (void)state;
 
   bool button_clicked = util::NoSleepButtonSingleClicked();
@@ -108,7 +108,7 @@ static void select_target(byte* state, byte* specific_state) {
     }
 
     // Change our state accordingly.
-    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
+    *state = GAME_STATE_PLAY_SELECT_ORIGIN;
 
     return;
   }
@@ -119,10 +119,10 @@ static void select_target(byte* state, byte* specific_state) {
   game::map::SetMoveTarget(position::Local());
   blink::state::SetTarget(true);
 
-  *specific_state = GAME_STATE_PLAY_TARGET_SELECTED;
+  *state = GAME_STATE_PLAY_TARGET_SELECTED;
 }
 
-static void target_selected(byte* state, byte* specific_state) {
+static void target_selected(byte* state) {
   (void)state;
 
   // Only the target blink has anything to do here.
@@ -133,10 +133,10 @@ static void target_selected(byte* state, byte* specific_state) {
     return;
   }
 
-  *specific_state = GAME_STATE_PLAY_MOVE_CONFIRMED;
+  *state = GAME_STATE_PLAY_MOVE_CONFIRMED;
 }
 
-static void move_confirmed(byte* state, byte* specific_state) {
+static void move_confirmed(byte* state) {
   (void)state;
 
   if (blink::state::GetOrigin() &&
@@ -154,10 +154,10 @@ static void move_confirmed(byte* state, byte* specific_state) {
 
   if (has_enemy_neighbor()) return;
 
-  *specific_state = GAME_STATE_PLAY_RESOLVE_MOVE;
+  *state = GAME_STATE_PLAY_RESOLVE_MOVE;
 }
 
-static void resolve_move(byte* state, byte* specific_state) {
+static void resolve_move(byte* state) {
   game::map::CommitMove();
 
   if (!blink::state::GetTarget()) return;
@@ -168,7 +168,7 @@ static void resolve_move(byte* state, byte* specific_state) {
       // Move to next turn.
       game::state::NextPlayer();
 
-      *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
+      *state = GAME_STATE_PLAY_SELECT_ORIGIN;
     } else {
       // Game over.
       *state = GAME_STATE_END;
@@ -176,31 +176,31 @@ static void resolve_move(byte* state, byte* specific_state) {
   }
 }
 
-void Handler(bool state_changed, byte* state, byte* specific_state) {
-  if (state_changed) {
-    *specific_state = GAME_STATE_PLAY_SELECT_ORIGIN;
+void Handler(byte* state) {
+  if (*state == GAME_STATE_PLAY) {
+    *state = GAME_STATE_PLAY_SELECT_ORIGIN;
   }
 
   blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
 
-  switch (*specific_state) {
+  switch (*state) {
     case GAME_STATE_PLAY_SELECT_ORIGIN:
-      select_origin(state, specific_state);
+      select_origin(state);
       break;
     case GAME_STATE_PLAY_ORIGIN_SELECTED:
-      origin_selected(state, specific_state);
+      origin_selected(state);
       break;
     case GAME_STATE_PLAY_SELECT_TARGET:
-      select_target(state, specific_state);
+      select_target(state);
       break;
     case GAME_STATE_PLAY_TARGET_SELECTED:
-      target_selected(state, specific_state);
+      target_selected(state);
       break;
     case GAME_STATE_PLAY_MOVE_CONFIRMED:
-      move_confirmed(state, specific_state);
+      move_confirmed(state);
       break;
     case GAME_STATE_PLAY_RESOLVE_MOVE:
-      resolve_move(state, specific_state);
+      resolve_move(state);
       break;
   }
 }

@@ -11,15 +11,11 @@ namespace state {
 
 namespace idle {
 
-void Handler(bool state_changed, byte* state, byte* specific_state) {
-  (void)specific_state;
-
-  if (state_changed) {
-    // We just changed to this state. Reset global (game) and local (Blink)
-    // states.
-    game::state::Reset();
-    blink::state::Reset();
-  }
+void Handler(byte* state) {
+  // To simplify logic we juts keep reseting the global (game) and local (Blink)
+  // states every loop iteration here. This is kinda harmless.
+  game::state::Reset();
+  blink::state::Reset();
 
   if (!util::NoSleepButtonSingleClicked()) return;
 

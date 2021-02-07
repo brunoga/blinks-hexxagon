@@ -9,7 +9,8 @@ namespace state {
 
 namespace end {
 
-void Handler(bool state_changed, byte* state, byte* specific_state);
+// End state handler. Just let everybody knows who won.
+void Handler(byte* state);
 
 }  // namespace end
 

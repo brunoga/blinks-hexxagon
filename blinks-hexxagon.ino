@@ -42,35 +42,26 @@ void loop() {
       // Cache current state and if we changed state since the previous
       // iteration.
       byte state = game::state::Get();
-      byte specific_state = game::state::GetSpecific();
-      bool state_changed = game::state::Changed(false);
 
       if (game::state::Changed()) {
-        // State (including specific state) changed. Reset animation timer to
-        // improve synchronization.
+        // State changed. Reset animation timer to improve synchronization.
         render::animation::ResetTimer();
       }
 
       // Run our state machine.
-      switch (state) {
-        case GAME_STATE_IDLE:
-          game::state::idle::Handler(state_changed, &state, &specific_state);
-          break;
-        case GAME_STATE_SETUP:
-          game::state::setup::Handler(state_changed, &state, &specific_state);
-          break;
-        case GAME_STATE_PLAY:
-          game::state::play::Handler(state_changed, &state, &specific_state);
-          break;
-        case GAME_STATE_END:
-          game::state::end::Handler(state_changed, &state, &specific_state);
-          break;
+      if (state < GAME_STATE_SETUP) {
+        game::state::idle::Handler(&state);
+      } else if (state < GAME_STATE_PLAY) {
+        game::state::setup::Handler(&state);
+      } else if (state < GAME_STATE_END) {
+        game::state::play::Handler(&state);
+      } else {
+        game::state::end::Handler(&state);
       }
 
       // Switch our state to the computed one. This will be propagated to other
       // Blinks in case there was a change.
       game::state::Set(state);
-      game::state::SetSpecific(specific_state);
     }
   }
 

@@ -65,8 +65,7 @@ bool Process() {
   byte face = blink::state::GetMapRequestedFace();
 
   if ((face == FACE_COUNT) || Uploaded() ||
-      (game::state::Get() != GAME_STATE_PLAY) ||
-      (game::state::GetSpecific() != GAME_STATE_PLAY_SELECT_ORIGIN)) {
+      (game::state::Get() != GAME_STATE_PLAY_SELECT_ORIGIN)) {
     // Only send a map when we are sure we have one.
     return false;
   }

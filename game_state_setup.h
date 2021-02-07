@@ -3,19 +3,14 @@
 
 #include <blinklib.h>
 
-// Play specific states.
-#define GAME_STATE_SETUP_SELECT_PLAYERS 0
-#define GAME_STATE_SETUP_MAP 1
-#define GAME_STATE_SETUP_VALIDATE 2
-
 namespace game {
 
 namespace state {
 
 namespace setup {
 
-// Setup state handler. Handles initial game configuration.
-void Handler(bool state_changed, byte* state, byte* specific_state);
+// Setup state handler. Handles game configuration and mapping the board.
+void Handler(byte* state);
 
 }  // namespace setup
 

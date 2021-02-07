@@ -22,16 +22,16 @@ void Render() {
   Color player_color = game::player::GetColor(player);
 
   byte game_player = game::state::GetPlayer();
-  byte specific_state = game::state::GetSpecific();
+  byte state = game::state::Get();
 
   // Set initial color for this Blink. This is required as some of the render
   // animations only render an overlay.
   setColor(player_color);
 
   if ((blink::state::GetOrigin() &&
-       (specific_state < GAME_STATE_PLAY_TARGET_SELECTED)) ||
+       (state < GAME_STATE_PLAY_TARGET_SELECTED)) ||
       (blink::state::GetTarget() &&
-       (specific_state == GAME_STATE_PLAY_MOVE_CONFIRMED))) {
+       (state == GAME_STATE_PLAY_MOVE_CONFIRMED))) {
     // We are the origin and and a target was not selected yet or we are a
     // target and the move is being confirmed. Render spinning animation.
     render::animation::Spinner(RENDER_CONFIG_PLAY_STATE_SPINNER_COLOR,
@@ -41,7 +41,7 @@ void Render() {
 
   if (player == game_player) {
     // We are the current player.
-    if ((specific_state < GAME_STATE_PLAY_MOVE_CONFIRMED) &&
+    if ((state < GAME_STATE_PLAY_MOVE_CONFIRMED) &&
         game::map::GetStatistics().local_blink_empty_space_in_range) {
       // Move has not been confirmed yet and the Blink has a space in range to
       // move to (or is a possible target). Render pulse animation.
@@ -52,7 +52,7 @@ void Render() {
     }
   } else if (player != 0) {
     // We are an enemy player Blink.
-    if ((specific_state == GAME_STATE_PLAY_MOVE_CONFIRMED) &&
+    if ((state == GAME_STATE_PLAY_MOVE_CONFIRMED) &&
         position::Distance(game::map::GetMoveTarget()) == 1) {
       // Move is being confirmed and we are neighbors of the target. Render
       // explosion animation.

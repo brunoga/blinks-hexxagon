@@ -62,24 +62,23 @@ void Render(byte game_state) {
 
   if (GetColorOverride()) {
     setColor(WHITE);
-
-    return;
+  } else {
+    // Now render the state specific colors/animations.
+    if (game_state < GAME_STATE_SETUP) {
+      game::state::idle::Render();
+    } else if (game_state < GAME_STATE_PLAY) {
+      game::state::setup::Render();
+    } else if (game_state < GAME_STATE_END) {
+      game::state::play::Render();
+    } else {
+      game::state::end::Render();
+    }
   }
 
-  // Now render the state specific colors/animations.
-  switch (game_state) {
-    case GAME_STATE_IDLE:
-      game::state::idle::Render();
-      break;
-    case GAME_STATE_SETUP:
-      game::state::setup::Render();
-      break;
-    case GAME_STATE_PLAY:
-      game::state::play::Render();
-      break;
-    case GAME_STATE_END:
-      game::state::end::Render();
-      break;
+  FOREACH_FACE(face) {
+    if (isDatagramPendingOnFace(face)) {
+      setColorOnFace(OFF, face);
+    }
   }
 }
 

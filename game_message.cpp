@@ -33,7 +33,6 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
       game::state::Data data = {.as_byte = payload[0]};
 
       game::state::Set(data.state, true);
-      game::state::SetSpecific(data.specific_state, true);
       game::state::SetPlayer(data.next_player +
                              1);  // TODO(bga): This limits us to 4 players.
       break;
@@ -42,14 +41,12 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
       game::map::SetMoveOrigin(*((position::Coordinates*)payload));
       if (position::Distance({(int8_t)payload[0], (int8_t)payload[1]}) == 0) {
         blink::state::SetOrigin(true);
-        game::state::SetSpecific(GAME_STATE_PLAY_SELECT_TARGET);
       }
       break;
     case MESSAGE_SELECT_TARGET:
       game::map::SetMoveTarget(*((position::Coordinates*)payload));
       if (position::Distance({(int8_t)payload[0], (int8_t)payload[1]}) == 0) {
         blink::state::SetTarget(true);
-        game::state::SetSpecific(GAME_STATE_PLAY_MOVE_CONFIRMED);
       }
       break;
     case MESSAGE_FLASH:

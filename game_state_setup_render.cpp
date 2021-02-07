@@ -13,7 +13,7 @@ namespace state {
 namespace setup {
 
 void Render() {
-  if (game::state::GetSpecific() != GAME_STATE_SETUP_MAP) {
+  if (game::state::Get() != GAME_STATE_SETUP_MAP) {
     Color player_color = game::player::GetColor(blink::state::GetPlayer());
 
     setColor(dim(player_color, RENDER_CONFIG_SETUP_STATE_COLOR_DIM));
