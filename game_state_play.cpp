@@ -17,16 +17,12 @@ namespace play {
 static bool auto_select_ = false;
 
 // Returns true if there is any Blink around us that belongs to another player.
-static bool has_enemy_neighbor() {
+static bool has_enemy_neighbor(
+    const blink::state::face::ValueHandler& face_value_handler) {
   FOREACH_FACE(face) {
-    if (!isValueReceivedOnFaceExpired(face)) {
-      blink::state::FaceValue face_value = {
-          .as_byte = getLastValueReceivedOnFace(face)};
-
-      if ((face_value.player != 0) &&
-          (face_value.player != blink::state::GetPlayer())) {
-        return true;
-      }
+    byte player = face_value_handler.GetPlayerAtFace(face);
+    if ((player != 0) && (player != blink::state::GetPlayer())) {
+      return true;
     }
   }
 
@@ -136,7 +132,8 @@ static void target_selected(byte* state) {
   *state = GAME_STATE_PLAY_MOVE_CONFIRMED;
 }
 
-static void move_confirmed(byte* state) {
+static void move_confirmed(
+    byte* state, const blink::state::face::ValueHandler& face_value_handler) {
   (void)state;
 
   if (blink::state::GetOrigin() &&
@@ -152,7 +149,7 @@ static void move_confirmed(byte* state) {
   // We are the target, so we are now owned by the current player.
   blink::state::SetPlayer(game::state::GetPlayer());
 
-  if (has_enemy_neighbor()) return;
+  if (has_enemy_neighbor(face_value_handler)) return;
 
   *state = GAME_STATE_PLAY_RESOLVE_MOVE;
 }
@@ -162,21 +159,19 @@ static void resolve_move(byte* state) {
 
   if (!blink::state::GetTarget()) return;
 
-  bool valid;
-  if (util::CheckValidateStateAndReport(&valid)) {
-    if (valid) {
-      // Move to next turn.
-      game::state::NextPlayer();
+  if (util::CheckValidateStateAndReport()) {
+    // Move to next turn.
+    game::state::NextPlayer();
 
-      *state = GAME_STATE_PLAY_SELECT_ORIGIN;
-    } else {
-      // Game over.
-      *state = GAME_STATE_END;
-    }
+    *state = GAME_STATE_PLAY_SELECT_ORIGIN;
+  } else {
+    // Game over.
+    *state = GAME_STATE_END;
   }
 }
 
-void Handler(byte* state) {
+void Handler(byte* state,
+             const blink::state::face::ValueHandler& face_value_handler) {
   if (*state == GAME_STATE_PLAY) {
     *state = GAME_STATE_PLAY_SELECT_ORIGIN;
   }
@@ -197,7 +192,7 @@ void Handler(byte* state) {
       target_selected(state);
       break;
     case GAME_STATE_PLAY_MOVE_CONFIRMED:
-      move_confirmed(state);
+      move_confirmed(state, face_value_handler);
       break;
     case GAME_STATE_PLAY_RESOLVE_MOVE:
       resolve_move(state);

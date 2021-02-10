@@ -46,16 +46,14 @@ void NextPlayer() {
 
 byte GetData() { return Data{0, state_.current, state_.player}.as_byte; }
 
-void __attribute__((noinline)) Reset() {
+void Reset() {
   state_.current = GAME_STATE_IDLE;
   state_.previous = GAME_STATE_IDLE;
   state_.player = 0;
   state_.from_network = false;
 }
 
-bool __attribute__((noinline)) Changed() {
-  return state_.current != state_.previous;
-}
+bool Changed() { return state_.current != state_.previous; }
 
 bool Propagate() {
   if (!state_.from_network && Changed() &&

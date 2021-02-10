@@ -5,6 +5,7 @@
 
 #include "game_player.h"
 
+// Idle specific state.
 #define GAME_STATE_IDLE 0
 
 // Setup specific states.
@@ -22,6 +23,7 @@
 #define GAME_STATE_PLAY_MOVE_CONFIRMED 10
 #define GAME_STATE_PLAY_RESOLVE_MOVE 11
 
+// End specific state.
 #define GAME_STATE_END 12
 
 namespace game {

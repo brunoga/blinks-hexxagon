@@ -1,6 +1,7 @@
 #include <blinklib.h>
 
 #include "blink_state.h"
+#include "blink_state_face.h"
 #include "game_map.h"
 #include "game_map_upload.h"
 #include "game_message.h"
@@ -23,16 +24,16 @@ void setup() {
 }
 
 void loop() {
-  if (!game::map::upload::Process()) {
+  blink::state::face::ValueHandler face_value_handler;
+
+  if (!game::map::upload::Process(face_value_handler)) {
     // Process any pending game messages.
     broadcast::manager::Process();
 
     // Check escape hatch. Reset to idle state if button is long pressed.
     if (buttonLongPressed()) {
-      // Ok to ignore result.
-      game::message::SendFlash();
-
-      game::state::Set(GAME_STATE_IDLE);
+      blink::state::StartColorOverride();
+      face_value_handler.ResetGame();
 
       return;
     }
@@ -52,9 +53,9 @@ void loop() {
       } else if (state < GAME_STATE_PLAY) {
         game::state::setup::Handler(&state);
       } else if (state < GAME_STATE_END) {
-        game::state::play::Handler(&state);
+        game::state::play::Handler(&state, face_value_handler);
       } else {
-        game::state::end::Handler(&state);
+        game::state::end::Handler(&state, &face_value_handler);
       }
 
       // Switch our state to the computed one. This will be propagated to other

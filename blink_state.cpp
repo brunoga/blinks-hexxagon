@@ -34,22 +34,24 @@ bool __attribute__((noinline)) GetOrigin() { return state_.origin; }
 void SetTarget(bool target) { state_.target = target; }
 bool __attribute__((noinline)) GetTarget() { return state_.target; }
 
-void SetTargetType(byte target_type) { state_.target_type = target_type; }
+void __attribute__((noinline)) SetTargetType(byte target_type) {
+  state_.target_type = target_type;
+}
 byte GetTargetType() { return state_.target_type; }
 
 void SetPlayer(byte player) { state_.player = player; }
-byte __attribute__((noinline)) GetPlayer() { return state_.player; }
+byte GetPlayer() { return state_.player; }
 
 void SetMapRequestedFace(byte map_requested_face) {
   state_.map_requested_face = map_requested_face;
 }
 byte GetMapRequestedFace() { return state_.map_requested_face; }
 
-void __attribute__((noinline)) StartColorOverride() {
-  color_override_timer_.set(200);
-}
+void StartColorOverride() { color_override_timer_.set(200); }
 
-bool GetColorOverride() { return !color_override_timer_.isExpired(); }
+bool __attribute__((noinline)) GetColorOverride() {
+  return !color_override_timer_.isExpired();
+}
 
 void __attribute__((noinline)) Reset() {
   state_.origin = false;
@@ -60,11 +62,6 @@ void __attribute__((noinline)) Reset() {
 }
 
 void Render(byte game_state) {
-  // "Render" our face value.
-  FaceValue face_value = {0, false, GetPlayer()};
-
-  setValueSentOnAllFaces(face_value.as_byte);
-
   if (GetColorOverride()) {
     setColor(WHITE);
   } else {

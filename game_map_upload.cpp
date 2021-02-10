@@ -26,13 +26,14 @@ namespace upload {
 static byte index_;
 static byte state_;
 
-static void update_map_requested_face() {
+static byte update_map_requested_face(
+    const blink::state::face::ValueHandler& face_value_handler) {
   byte map_requested_face = blink::state::GetMapRequestedFace();
 
   // Check if we are currently connected.
   if (map_requested_face != FACE_COUNT) {
     // We are, did we get disconnected?
-    if (isValueReceivedOnFaceExpired(map_requested_face)) {
+    if (face_value_handler.FaceDisconnected(map_requested_face)) {
       Reset();
 
       // Make sure we will not leave data hanging if disconnected in the middle
@@ -40,29 +41,16 @@ static void update_map_requested_face() {
       resetPendingDatagramOnFace(map_requested_face);
 
       blink::state::SetMapRequestedFace(FACE_COUNT);
-    }
 
-    return;
-  }
-
-  FOREACH_FACE(face) {
-    // Parse face value so we can check for a map being requested.
-    blink::state::FaceValue face_value = {.as_byte =
-                                              getLastValueReceivedOnFace(face)};
-
-    if (!isValueReceivedOnFaceExpired(face) && face_value.map_requested) {
-      // A map is requested in this face.
-      blink::state::SetMapRequestedFace(face);
-
-      return;
+      map_requested_face = FACE_COUNT;
     }
   }
+
+  return map_requested_face;
 }
 
-bool Process() {
-  update_map_requested_face();
-
-  byte face = blink::state::GetMapRequestedFace();
+bool Process(const blink::state::face::ValueHandler& face_value_handler) {
+  byte face = update_map_requested_face(face_value_handler);
 
   if ((face == FACE_COUNT) || Uploaded() ||
       (game::state::Get() != GAME_STATE_PLAY_SELECT_ORIGIN)) {

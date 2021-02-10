@@ -5,7 +5,7 @@ namespace util {
 
 bool NoSleepButtonSingleClicked();
 
-bool CheckValidateStateAndReport(bool* valid);
+bool CheckValidateStateAndReport();
 
 }  // namespace util
 

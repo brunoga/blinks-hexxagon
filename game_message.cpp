@@ -48,9 +48,6 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
         blink::state::SetTarget(true);
       }
       break;
-    case MESSAGE_FLASH:
-      blink::state::StartColorOverride();
-      break;
   }
 }
 
@@ -82,9 +79,7 @@ static bool sendMessage(byte message_id, const byte* payload,
   broadcast::Message message;
   message.header.id = message_id;
 
-  if (payload != nullptr) {
-    memcpy(message.payload, payload, payload_size);
-  }
+  memcpy(message.payload, payload, payload_size);
 
   return broadcast::manager::Send(&message);
 }
@@ -111,16 +106,6 @@ bool SendSelectTarget(int8_t x, int8_t y) {
 bool SendExternalPropagateCoordinates(int8_t x, int8_t y, byte player) {
   byte payload[4] = {FACE_COUNT, (byte)x, (byte)y, player};
   return sendMessage(MESSAGE_EXTERNAL_PROPAGATE_COORDINATES, payload, 4);
-}
-
-bool SendFlash() {
-  if (sendMessage(MESSAGE_FLASH, nullptr, 0)) {
-    blink::state::StartColorOverride();
-
-    return true;
-  }
-
-  return false;
 }
 
 }  // namespace message

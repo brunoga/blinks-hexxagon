@@ -57,19 +57,16 @@ static void validate(byte* state) {
 
   if (!blink::state::GetOrigin()) return;
 
-  bool valid;
-  if (util::CheckValidateStateAndReport(&valid)) {
-    if (valid) {
-      // Game state is good. Switch to first available player.
-      game::state::NextPlayer();
+  if (util::CheckValidateStateAndReport()) {
+    // Game state is good. Switch to first available player.
+    game::state::NextPlayer();
 
-      *state = GAME_STATE_PLAY;
-    } else {
-      *state = GAME_STATE_SETUP_SELECT_PLAYERS;
-    }
-
-    blink::state::SetOrigin(false);
+    *state = GAME_STATE_PLAY;
+  } else {
+    *state = GAME_STATE_SETUP_SELECT_PLAYERS;
   }
+
+  blink::state::SetOrigin(false);
 }
 
 void Handler(byte* state) {

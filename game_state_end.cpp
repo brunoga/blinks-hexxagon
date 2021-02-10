@@ -6,14 +6,14 @@
 #include "game_player.h"
 #include "game_state.h"
 #include "util.h"
-
 namespace game {
 
 namespace state {
 
 namespace end {
 
-void Handler(byte* state) {
+void Handler(byte* state,
+             blink::state::face::ValueHandler* face_value_handler) {
   byte max_count = 0;
   byte winner_player = 0;
   for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
@@ -30,11 +30,8 @@ void Handler(byte* state) {
   blink::state::SetPlayer(winner_player);
 
   if (util::NoSleepButtonSingleClicked()) {
-    // Ok to ignore result.
-    game::message::SendFlash();
-
     *state = GAME_STATE_IDLE;
-
+    face_value_handler->ResetGame();
     return;
   }
 }

@@ -2,8 +2,8 @@
 
 #include <blinklib.h>
 
+#include "blink_state.h"
 #include "game_map.h"
-#include "game_message.h"
 
 namespace util {
 
@@ -11,8 +11,14 @@ bool NoSleepButtonSingleClicked() {
   return buttonSingleClicked() && !hasWoken();
 }
 
-bool CheckValidateStateAndReport(bool* valid) {
-  return ((*valid = game::map::ValidState()) || game::message::SendFlash());
+bool CheckValidateStateAndReport() {
+  if (!game::map::ValidState()) {
+    blink::state::StartColorOverride();
+
+    return false;
+  }
+
+  return true;
 }
 
 }  // namespace util
