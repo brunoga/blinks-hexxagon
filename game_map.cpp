@@ -14,7 +14,7 @@
 // As we can not known beforehand how many Blinks are in the map, we need a
 // timeout to consider that everything cleared up. This is the time since the
 // last mapping message was received.
-#define GAME_MAP_PROPAGATION_TIMEOUT 4000
+#define GAME_MAP_PROPAGATION_TIMEOUT 2000
 
 namespace game {
 
