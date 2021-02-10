@@ -30,6 +30,14 @@ void loop() {
     // Process any pending game messages.
     broadcast::manager::Process();
 
+    // Cache current state.
+    byte state = game::state::Get();
+
+    if (game::state::Changed()) {
+      // State changed. Reset animation timer to improve synchronization.
+      render::animation::ResetTimer();
+    }
+
     // Check escape hatch. Reset to idle state if button is long pressed.
     if (buttonLongPressed()) {
       blink::state::StartColorOverride();
@@ -38,15 +46,18 @@ void loop() {
       return;
     }
 
-    if (game::state::Propagate()) {
-      // Cache current state.
-      byte state = game::state::Get();
+    if (state > GAME_STATE_SETUP_SELECT_PLAYERS && state < GAME_STATE_END) {
+      FOREACH_FACE(face) {
+        if (face_value_handler.FaceDisconnected(face)) {
+          blink::state::StartColorOverride();
+          face_value_handler.ResetGame();
 
-      if (game::state::Changed()) {
-        // State changed. Reset animation timer to improve synchronization.
-        render::animation::ResetTimer();
+          return;
+        }
       }
+    }
 
+    if (game::state::Propagate()) {
       // Run our state machine.
       if (state < GAME_STATE_SETUP) {
         game::state::idle::Handler(&state);

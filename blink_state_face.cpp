@@ -40,11 +40,9 @@ ValueHandler::ValueHandler() {
 }
 
 ValueHandler::~ValueHandler() {
-  FOREACH_FACE(face) {
-    Value output_value = {0, blink::state::GetColorOverride(), reset_state_,
-                          false, blink::state::GetPlayer()};
-    setValueSentOnFace(output_value.as_byte, face);
-  }
+  Value output_value = {0, blink::state::GetColorOverride(), reset_state_,
+                        false, blink::state::GetPlayer()};
+  setValueSentOnAllFaces(output_value.as_byte);
 }
 
 byte ValueHandler::GetPlayerAtFace(byte face) const {
