@@ -1,6 +1,7 @@
 
 #include "game_state.h"
 
+#include "blink_state.h"
 #include "game_map.h"
 #include "game_message.h"
 #include "game_player.h"
@@ -33,12 +34,30 @@ byte GetPlayer() { return state_.player; }
 void NextPlayer() {
   byte current_player = GetPlayer();
 
+  // TODO(bga): Note the loop below might stall if this function is ever called
+  // when there are no players that can move at all. This is never the case
+  // currently and as not doing a specific check for this here saves 20 bytes,
+  // we will leave it at that.
+
+  // Start with the current player.
   byte next_player = game::player::GetNext(current_player);
-  while (((game::map::GetStatistics().player[next_player].blink_count == 0) ||
-          (next_player == 0) ||
-          !game::map::GetStatistics().player[next_player].can_move) &&
-         (next_player != current_player)) {
-    next_player = game::player::GetNext(next_player);
+
+  for (;;) {
+    const auto& player_stats = game::map::GetStatistics().player[next_player];
+    if ((player_stats.blink_count != 0) && (next_player != 0) &&
+        player_stats.can_move) {
+      // This player can move, return it.
+      break;
+    } else {
+      // Thisn player can not move.
+      if ((player_stats.blink_count != 0) && (next_player != 0)) {
+        // And it was because there was no place for it to move. Send flash.
+        blink::state::StartColorOverride();
+      }
+
+      // Try next player.
+      next_player = game::player::GetNext(next_player);
+    }
   }
 
   SetPlayer(next_player);

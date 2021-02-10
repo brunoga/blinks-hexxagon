@@ -13,9 +13,7 @@ byte __attribute__((noinline)) GetNext(byte current_player) {
   return next_player > GAME_PLAYER_MAX_PLAYERS ? 0 : next_player;
 }
 
-Color __attribute__((noinline)) GetColor(byte player) {
-  return colors_[player];
-}
+Color GetColor(byte player) { return colors_[player]; }
 
 }  // namespace player
 

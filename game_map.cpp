@@ -74,9 +74,8 @@ static void add_local_to_map() {
              blink::state::GetPlayer());
 }
 
-static void __attribute__((noinline))
-update_blinks(position::Coordinates coordinates, byte player,
-              bool update_neighbors) {
+static void update_blinks(position::Coordinates coordinates, byte player,
+                          bool update_neighbors) {
   for (byte i = 0; i < index_; ++i) {
     if ((position::coordinates::Distance({(int8_t)map_[i].x, (int8_t)map_[i].y},
                                          coordinates) == 0) ||
@@ -125,7 +124,7 @@ void Setup() {
 
 void Process() { maybe_propagate(); }
 
-void __attribute__((noinline)) StartMapping() {
+void StartMapping() {
   propagation_timer_.set(GAME_MAP_PROPAGATION_TIMEOUT);
 
   // We are the mapping origin. Add ourselves to the map.
