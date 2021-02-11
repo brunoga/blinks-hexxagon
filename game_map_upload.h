@@ -11,10 +11,6 @@ namespace upload {
 
 bool Process(const blink::state::face::ValueHandler& face_value_handler);
 
-bool Uploaded();
-
-void Reset();
-
 }  // namespace upload
 
 }  // namespace map

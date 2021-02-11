@@ -35,14 +35,14 @@ bool Process(const blink::state::face::ValueHandler& face_value_handler) {
     previous_map_requested_face_ = current_map_requested_face;
   }
 
-  if ((current_map_requested_face == FACE_COUNT) || Uploaded() ||
+  byte map_size = game::map::GetSize();
+
+  if ((current_map_requested_face == FACE_COUNT) || (index_ == map_size) ||
       (game::state::Get() != GAME_STATE_PLAY_SELECT_ORIGIN)) {
-    // Only send a map when we are sure we have one.
     return false;
   }
 
   const game::map::Data* map_data = game::map::Get();
-  byte map_size = game::map::GetSize();
 
   switch (state_) {
     case GAME_MAP_UPLOAD_STATE_SEND_METADATA: {
@@ -72,17 +72,6 @@ bool Process(const blink::state::face::ValueHandler& face_value_handler) {
   }
 
   return true;
-}
-
-bool Uploaded() {
-  byte map_size = game::map::GetSize();
-
-  return ((map_size > 0) && (index_ == map_size));
-}
-
-void Reset() {
-  state_ = GAME_MAP_UPLOAD_STATE_SEND_METADATA;
-  index_ = 0;
 }
 
 }  // namespace upload

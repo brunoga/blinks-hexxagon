@@ -213,9 +213,6 @@ void Reset() {
   index_ = 0;
   propagation_index_ = 0;
 
-  // Also reset map upload.
-  game::map::upload::Reset();
-
   ComputeMapStats();
 }
 
