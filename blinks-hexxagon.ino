@@ -40,7 +40,6 @@ void loop() {
 
     // Check escape hatch. Reset to idle state if button is long pressed.
     if (buttonLongPressed()) {
-      blink::state::StartColorOverride();
       face_value_handler.ResetGame();
 
       return;
@@ -49,7 +48,6 @@ void loop() {
     if (state > GAME_STATE_SETUP_SELECT_PLAYERS && state < GAME_STATE_END) {
       FOREACH_FACE(face) {
         if (face_value_handler.FaceDisconnected(face)) {
-          blink::state::StartColorOverride();
           face_value_handler.ResetGame();
 
           return;
@@ -69,7 +67,7 @@ void loop() {
         game::state::end::Handler(&state, &face_value_handler);
       }
 
-      // Switch our state to the computed one. This will be propagated to other
+      // Switch our state to the computed one.This will be propagated to other
       // Blinks in case there was a change.
       game::state::Set(state);
     }

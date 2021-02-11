@@ -9,26 +9,22 @@ namespace state {
 
 namespace face {
 
-ValueHandler::ValueHandler() {
+ValueHandler::ValueHandler() : map_requested_face_(FACE_COUNT) {
   // Cache the previously connected faces and zero-out the currently connected
   // ones.
   previously_connected_faces_ = currently_connected_faces_;
   currently_connected_faces_ = 0;
 
-  map_requested_face_ = FACE_COUNT;
-
   FOREACH_FACE(face) {
+    if (isValueReceivedOnFaceExpired(face)) continue;
+
+    currently_connected_faces_ |= (1 << face);
+
     Value value = {.as_byte = getLastValueReceivedOnFace(face)};
 
-    if (!isValueReceivedOnFaceExpired(face)) {
-      currently_connected_faces_ |= 1 << face;
-    } else {
-      value.map_requested = false;
-      value.player = 0;
-    }
-
     if (value.reset_state != previous_value_[face].reset_state) {
-      InternalResetGame(value.reset_state);
+      reset_state_ = value.reset_state;
+      InternalResetGame();
     }
 
     if (value.color_override != previous_value_[face].color_override &&
@@ -66,19 +62,16 @@ bool ValueHandler::FaceDisconnected(byte face) const {
          ((currently_connected_faces_ & (1 << face)) == 0);
 }
 
-bool ValueHandler::MapRequestedFace() const { return map_requested_face_; }
+byte ValueHandler::MapRequestedFace() const { return map_requested_face_; }
 
-void __attribute__((noinline)) ValueHandler::ResetGame() {
-  InternalResetGame(!reset_state_);
+void ValueHandler::ResetGame() {
+  reset_state_ = !reset_state_;
+
+  InternalResetGame();
 }
 
-void __attribute__((noinline))
-ValueHandler::InternalResetGame(bool new_reset_state) {
-  if (new_reset_state == reset_state_) return;
-
+void ValueHandler::InternalResetGame() {
   FOREACH_FACE(face) { resetPendingDatagramOnFace(face); }
-
-  reset_state_ = new_reset_state;
 
   blink::state::StartColorOverride();
 
@@ -93,6 +86,8 @@ Value ValueHandler::previous_value_[FACE_COUNT] = {
 byte ValueHandler::previously_connected_faces_ = 0;
 
 byte ValueHandler::currently_connected_faces_ = 0;
+
+bool ValueHandler::reset_state_ = false;
 
 }  // namespace face
 
