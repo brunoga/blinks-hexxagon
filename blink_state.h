@@ -24,9 +24,6 @@ byte GetTargetType();
 void SetPlayer(byte player);
 byte GetPlayer();
 
-void SetMapRequestedFace(byte map_requested_face);
-byte GetMapRequestedFace();
-
 void StartColorOverride();
 bool GetColorOverride();
 

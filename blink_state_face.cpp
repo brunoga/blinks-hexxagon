@@ -15,12 +15,17 @@ ValueHandler::ValueHandler() {
   previously_connected_faces_ = currently_connected_faces_;
   currently_connected_faces_ = 0;
 
+  map_requested_face_ = FACE_COUNT;
+
   FOREACH_FACE(face) {
+    Value value = {.as_byte = getLastValueReceivedOnFace(face)};
+
     if (!isValueReceivedOnFaceExpired(face)) {
       currently_connected_faces_ |= 1 << face;
+    } else {
+      value.map_requested = false;
+      value.player = 0;
     }
-
-    Value value = {.as_byte = getLastValueReceivedOnFace(face)};
 
     if (value.reset_state != previous_value_[face].reset_state) {
       InternalResetGame(value.reset_state);
@@ -32,7 +37,7 @@ ValueHandler::ValueHandler() {
     }
 
     if (value.map_requested) {
-      blink::state::SetMapRequestedFace(face);
+      map_requested_face_ = face;
     }
 
     previous_value_[face] = value;
@@ -60,6 +65,8 @@ bool ValueHandler::FaceDisconnected(byte face) const {
   return ((previously_connected_faces_ & (1 << face)) != 0) &&
          ((currently_connected_faces_ & (1 << face)) == 0);
 }
+
+bool ValueHandler::MapRequestedFace() const { return map_requested_face_; }
 
 void __attribute__((noinline)) ValueHandler::ResetGame() {
   InternalResetGame(!reset_state_);

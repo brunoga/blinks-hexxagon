@@ -25,34 +25,17 @@ namespace upload {
 
 static byte index_;
 static byte state_;
-
-static byte update_map_requested_face(
-    const blink::state::face::ValueHandler& face_value_handler) {
-  byte map_requested_face = blink::state::GetMapRequestedFace();
-
-  // Check if we are currently connected.
-  if (map_requested_face != FACE_COUNT) {
-    // We are, did we get disconnected?
-    if (face_value_handler.FaceDisconnected(map_requested_face)) {
-      Reset();
-
-      // Make sure we will not leave data hanging if disconnected in the middle
-      // of a transfer.
-      resetPendingDatagramOnFace(map_requested_face);
-
-      blink::state::SetMapRequestedFace(FACE_COUNT);
-
-      map_requested_face = FACE_COUNT;
-    }
-  }
-
-  return map_requested_face;
-}
+static byte previous_map_requested_face_ = FACE_COUNT;
 
 bool Process(const blink::state::face::ValueHandler& face_value_handler) {
-  byte face = update_map_requested_face(face_value_handler);
+  byte current_map_requested_face = face_value_handler.MapRequestedFace();
+  if (current_map_requested_face != previous_map_requested_face_) {
+    resetPendingDatagramOnFace(previous_map_requested_face_);
+    index_ = 0;
+    previous_map_requested_face_ = current_map_requested_face;
+  }
 
-  if ((face == FACE_COUNT) || Uploaded() ||
+  if ((current_map_requested_face == FACE_COUNT) || Uploaded() ||
       (game::state::Get() != GAME_STATE_PLAY_SELECT_ORIGIN)) {
     // Only send a map when we are sure we have one.
     return false;
@@ -66,7 +49,8 @@ bool Process(const blink::state::face::ValueHandler& face_value_handler) {
       // Upload just started. Send map metadata.
       byte payload[GAME_MAP_UPLOAD_METADATA_SIZE] = {
           MESSAGE_MAP_UPLOAD, map_size, game::state::GetData()};
-      if (sendDatagramOnFace(payload, GAME_MAP_UPLOAD_METADATA_SIZE, face)) {
+      if (sendDatagramOnFace(payload, GAME_MAP_UPLOAD_METADATA_SIZE,
+                             current_map_requested_face)) {
         // Size sent. Switch to actual map upload.
         state_ = GAME_MAP_UPLOAD_STATE_UPLOAD;
       }
@@ -79,7 +63,8 @@ bool Process(const blink::state::face::ValueHandler& face_value_handler) {
       byte delta = remaining > GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
                        ? GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
                        : remaining;
-      if (sendDatagramOnFace(&(map_data[index_]), delta * 2, face)) {
+      if (sendDatagramOnFace(&(map_data[index_]), delta * 2,
+                             current_map_requested_face)) {
         // Chunk sent. Increase the map upload index.
         index_ += delta;
       }

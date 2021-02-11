@@ -18,11 +18,9 @@ struct State {
   bool origin;
   bool target;
   byte player;
-  byte map_requested_face;
   byte target_type;
 };
-static State state_ = {false, false, 0, FACE_COUNT,
-                       BLINK_STATE_TARGET_TYPE_NONE};
+static State state_;
 
 namespace state {
 
@@ -42,11 +40,6 @@ byte GetTargetType() { return state_.target_type; }
 void SetPlayer(byte player) { state_.player = player; }
 byte GetPlayer() { return state_.player; }
 
-void SetMapRequestedFace(byte map_requested_face) {
-  state_.map_requested_face = map_requested_face;
-}
-byte GetMapRequestedFace() { return state_.map_requested_face; }
-
 void StartColorOverride() { color_override_timer_.set(200); }
 
 bool __attribute__((noinline)) GetColorOverride() {
@@ -58,7 +51,6 @@ void __attribute__((noinline)) Reset() {
   state_.target = false;
   state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
   state_.player = 0;
-  state_.map_requested_face = FACE_COUNT;
 }
 
 void Render(byte game_state) {

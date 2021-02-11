@@ -26,10 +26,23 @@ class ValueHandler {
   ValueHandler();
   ~ValueHandler();
 
+  // Return the player associated with the Blink connected at the given face.
+  // Note it will return 0 if there is no Blink connected (and also if there is
+  // a Blink connected but it has no associated player).
   byte GetPlayerAtFace(byte face) const;
 
+  // True if the given face was disconnected the previous loop iteration and is
+  // connected now.
   bool FaceConnected(byte face) const;
+
+  // True if the given face was connected the previous loop iteration and is
+  // disconnected now.
   bool FaceDisconnected(byte face) const;
+
+  // Returns the highest numbered face that is requesting a map.
+  bool MapRequestedFace() const;
+
+  // Send a game reset request accross the board.
   void ResetGame();
 
  private:
@@ -40,6 +53,7 @@ class ValueHandler {
   static byte previously_connected_faces_;
   static byte currently_connected_faces_;
 
+  byte map_requested_face_;
   bool reset_state_;
 };
 
