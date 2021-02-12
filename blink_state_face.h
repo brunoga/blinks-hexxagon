@@ -26,10 +26,9 @@ class ValueHandler {
   ValueHandler();
   ~ValueHandler();
 
-  // Returns the player associated with the Blink connected at the given face.
-  // Note it will return 0 if there is no Blink connected (and also if there is
-  // a Blink connected but it has no associated player).
-  byte GetPlayerAtFace(byte face) const;
+  // Returns true if there are any neighbor Nlinks that belong to another
+  // player.
+  bool EnemyNeighbor() const;
 
   // True if the given face was disconnected the previous loop iteration and is
   // connected now.
@@ -56,6 +55,7 @@ class ValueHandler {
   static bool reset_state_;
 
   byte map_requested_face_;
+  bool enemy_neighbor_;
 };
 
 }  // namespace face

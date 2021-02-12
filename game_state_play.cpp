@@ -16,19 +16,6 @@ namespace play {
 
 static bool auto_select_ = false;
 
-// Returns true if there is any Blink around us that belongs to another player.
-static bool has_enemy_neighbor(
-    const blink::state::face::ValueHandler& face_value_handler) {
-  FOREACH_FACE(face) {
-    byte player = face_value_handler.GetPlayerAtFace(face);
-    if ((player != 0) && (player != blink::state::GetPlayer())) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 static void select_origin(byte* state) {
   if (game::state::Changed()) {
     // State changed. Reset animation timer to improve synchronization.
@@ -144,7 +131,7 @@ static void move_confirmed(
   // We are the target, so we are now owned by the current player.
   blink::state::SetPlayer(game::state::GetPlayer());
 
-  if (has_enemy_neighbor(face_value_handler)) return;
+  if (face_value_handler.EnemyNeighbor()) return;
 
   *state = GAME_STATE_PLAY_RESOLVE_MOVE;
 }

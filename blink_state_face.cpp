@@ -9,7 +9,8 @@ namespace state {
 
 namespace face {
 
-ValueHandler::ValueHandler() : map_requested_face_(FACE_COUNT) {
+ValueHandler::ValueHandler()
+    : map_requested_face_(FACE_COUNT), enemy_neighbor_(false) {
   // Cache the previously connected faces and zero-out the currently connected
   // ones.
   previously_connected_faces_ = currently_connected_faces_;
@@ -36,6 +37,10 @@ ValueHandler::ValueHandler() : map_requested_face_(FACE_COUNT) {
       map_requested_face_ = face;
     }
 
+    if (value.player != 0 && value.player != blink::state::GetPlayer()) {
+      enemy_neighbor_ = true;
+    }
+
     previous_value_[face] = value;
   }
 }
@@ -46,9 +51,7 @@ ValueHandler::~ValueHandler() {
   setValueSentOnAllFaces(output_value.as_byte);
 }
 
-byte ValueHandler::GetPlayerAtFace(byte face) const {
-  return previous_value_[face].player;
-}
+bool ValueHandler::EnemyNeighbor() const { return enemy_neighbor_; }
 
 bool ValueHandler::FaceConnected(byte face) const {
   // Face was not connected before and is connected now.
