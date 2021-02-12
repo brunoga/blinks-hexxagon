@@ -40,18 +40,6 @@ void loop() {
       return;
     }
 
-    // TODO(bga): Instead of simply resetting the game on face disconnection,
-    // warn the user and give them a chance to reconnect (space allowing).
-    if (state > GAME_STATE_SETUP_SELECT_PLAYERS && state < GAME_STATE_END) {
-      FOREACH_FACE(face) {
-        if (face_value_handler.FaceDisconnected(face)) {
-          face_value_handler.ResetGame();
-
-          return;
-        }
-      }
-    }
-
     if (game::state::Propagate()) {
       // Run our state machine.
       if (state < GAME_STATE_SETUP) {

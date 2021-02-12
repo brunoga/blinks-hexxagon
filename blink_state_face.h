@@ -30,14 +30,6 @@ class ValueHandler {
   // player.
   bool EnemyNeighbor() const;
 
-  // True if the given face was disconnected the previous loop iteration and is
-  // connected now.
-  bool FaceConnected(byte face) const;
-
-  // True if the given face was connected the previous loop iteration and is
-  // disconnected now.
-  bool FaceDisconnected(byte face) const;
-
   // Returns the highest numbered face that is requesting a map.
   byte MapRequestedFace() const;
 
@@ -50,7 +42,6 @@ class ValueHandler {
   static Value previous_value_[FACE_COUNT];
 
   static byte previously_connected_faces_;
-  static byte currently_connected_faces_;
 
   static bool reset_state_;
 

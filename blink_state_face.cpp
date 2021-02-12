@@ -11,15 +11,17 @@ namespace face {
 
 ValueHandler::ValueHandler()
     : map_requested_face_(FACE_COUNT), enemy_neighbor_(false) {
-  // Cache the previously connected faces and zero-out the currently connected
-  // ones.
-  previously_connected_faces_ = currently_connected_faces_;
-  currently_connected_faces_ = 0;
+  byte currently_connected_faces = 0;
 
   FOREACH_FACE(face) {
-    if (isValueReceivedOnFaceExpired(face)) continue;
+    if (isValueReceivedOnFaceExpired(face)) {
+      if (previously_connected_faces_ & (1 << face)) {
+        ResetGame();
+      }
+      continue;
+    }
 
-    currently_connected_faces_ |= (1 << face);
+    currently_connected_faces |= (1 << face);
 
     Value value = {.as_byte = getLastValueReceivedOnFace(face)};
 
@@ -43,6 +45,8 @@ ValueHandler::ValueHandler()
 
     previous_value_[face] = value;
   }
+
+  previously_connected_faces_ = currently_connected_faces;
 }
 
 ValueHandler::~ValueHandler() {
@@ -52,18 +56,6 @@ ValueHandler::~ValueHandler() {
 }
 
 bool ValueHandler::EnemyNeighbor() const { return enemy_neighbor_; }
-
-bool ValueHandler::FaceConnected(byte face) const {
-  // Face was not connected before and is connected now.
-  return ((previously_connected_faces_ & (1 << face)) == 0) &&
-         ((currently_connected_faces_ & (1 << face)) != 0);
-}
-
-bool ValueHandler::FaceDisconnected(byte face) const {
-  // Face was connected before and is not connected now.
-  return ((previously_connected_faces_ & (1 << face)) != 0) &&
-         ((currently_connected_faces_ & (1 << face)) == 0);
-}
 
 byte ValueHandler::MapRequestedFace() const { return map_requested_face_; }
 
@@ -87,8 +79,6 @@ Value ValueHandler::previous_value_[FACE_COUNT] = {
 };
 
 byte ValueHandler::previously_connected_faces_ = 0;
-
-byte ValueHandler::currently_connected_faces_ = 0;
 
 bool ValueHandler::reset_state_ = false;
 

@@ -38,13 +38,11 @@ void __attribute__((noinline)) SetTargetType(byte target_type) {
 byte GetTargetType() { return state_.target_type; }
 
 void SetPlayer(byte player) { state_.player = player; }
-byte GetPlayer() { return state_.player; }
+byte __attribute__((noinline)) GetPlayer() { return state_.player; }
 
 void StartColorOverride() { color_override_timer_.set(200); }
 
-bool __attribute__((noinline)) GetColorOverride() {
-  return !color_override_timer_.isExpired();
-}
+bool GetColorOverride() { return !color_override_timer_.isExpired(); }
 
 void __attribute__((noinline)) Reset() {
   state_.origin = false;
