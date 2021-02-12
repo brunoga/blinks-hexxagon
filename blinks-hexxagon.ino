@@ -33,11 +33,6 @@ void loop() {
     // Cache current state.
     byte state = game::state::Get();
 
-    if (game::state::Changed()) {
-      // State changed. Reset animation timer to improve synchronization.
-      render::animation::ResetTimer();
-    }
-
     // Check escape hatch. Reset to idle state if button is long pressed.
     if (buttonLongPressed()) {
       face_value_handler.ResetGame();

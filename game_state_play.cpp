@@ -30,7 +30,10 @@ static bool has_enemy_neighbor(
 }
 
 static void select_origin(byte* state) {
-  (void)state;
+  if (game::state::Changed()) {
+    // State changed. Reset animation timer to improve synchronization.
+    render::animation::ResetPulseTimer();
+  }
 
   bool button_clicked = util::NoSleepButtonSingleClicked();
 
@@ -64,8 +67,6 @@ static void select_origin(byte* state) {
 }
 
 static void origin_selected(byte* state) {
-  (void)state;
-
   // Only the origin blink has anything to do here.
   if (!blink::state::GetOrigin()) return;
 
@@ -78,8 +79,6 @@ static void origin_selected(byte* state) {
 }
 
 static void select_target(byte* state) {
-  (void)state;
-
   bool button_clicked = util::NoSleepButtonSingleClicked();
 
   // We are going to select a target, so reset any blink that is currently
@@ -119,8 +118,6 @@ static void select_target(byte* state) {
 }
 
 static void target_selected(byte* state) {
-  (void)state;
-
   // Only the target blink has anything to do here.
   if (!blink::state::GetTarget()) return;
 
@@ -134,8 +131,6 @@ static void target_selected(byte* state) {
 
 static void move_confirmed(
     byte* state, const blink::state::face::ValueHandler& face_value_handler) {
-  (void)state;
-
   if (blink::state::GetOrigin() &&
       position::coordinates::Distance(game::map::GetMoveOrigin(),
                                       game::map::GetMoveTarget()) != 1) {
