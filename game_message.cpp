@@ -93,14 +93,9 @@ bool SendGameStateChange() {
   return sendMessage(MESSAGE_GAME_STATE_CHANGE, &payload, 1);
 }
 
-bool SendSelectOrigin(int8_t x, int8_t y) {
+bool SendSelectBlink(byte message_id, int8_t x, int8_t y) {
   byte payload[2] = {(byte)x, (byte)y};
-  return sendMessage(MESSAGE_SELECT_ORIGIN, payload, 2);
-}
-
-bool SendSelectTarget(int8_t x, int8_t y) {
-  byte payload[2] = {(byte)x, (byte)y};
-  return sendMessage(MESSAGE_SELECT_TARGET, payload, 2);
+  return sendMessage(message_id, payload, 2);
 }
 
 bool SendExternalPropagateCoordinates(int8_t x, int8_t y, byte player) {

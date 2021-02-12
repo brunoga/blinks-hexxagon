@@ -69,8 +69,8 @@ static void origin_selected(byte* state) {
   // Only the origin blink has anything to do here.
   if (!blink::state::GetOrigin()) return;
 
-  if (!game::message::SendSelectOrigin(position::Local().x,
-                                       position::Local().y)) {
+  if (!game::message::SendSelectBlink(
+          MESSAGE_SELECT_ORIGIN, position::Local().x, position::Local().y)) {
     return;
   }
 
@@ -124,8 +124,8 @@ static void target_selected(byte* state) {
   // Only the target blink has anything to do here.
   if (!blink::state::GetTarget()) return;
 
-  if (!game::message::SendSelectTarget(position::Local().x,
-                                       position::Local().y)) {
+  if (!game::message::SendSelectBlink(
+          MESSAGE_SELECT_TARGET, position::Local().x, position::Local().y)) {
     return;
   }
 

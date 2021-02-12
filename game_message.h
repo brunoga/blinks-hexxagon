@@ -20,9 +20,7 @@ void Setup();
 
 bool SendGameStateChange();
 
-bool SendSelectOrigin(int8_t x, int8_t y);
-
-bool SendSelectTarget(int8_t x, int8_t y);
+bool SendSelectBlink(byte message_id, int8_t x, int8_t y);
 
 bool SendExternalPropagateCoordinates(int8_t x, int8_t y, byte player);
 
