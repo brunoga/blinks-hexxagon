@@ -10,7 +10,4 @@
 // Enable message handler support. Required by the mapping code.
 #define BROADCAST_ENABLE_MESSAGE_HANDLER
 
-// Enable tracking of connection state.
-#define BROADCAST_TRACK_FACE_CONNECTION_STATE
-
 #endif
