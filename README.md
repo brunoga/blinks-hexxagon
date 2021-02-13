@@ -11,6 +11,18 @@ git clone --recurse-submodules https://github.com/brunoga/blinks-hexxagon
 
 # Introduction
 
+<table>
+  <tr>
+    <td><b>Number of Players</b></td><td>2 to 4</td>
+  </tr>
+  <tr>
+    <td><b>Number of Blinks</b></td><td>12 to 128</td>
+  </tr>
+  <tr>
+    <td><b>Play Time</b></td><td>5 to 30 minutes</td>
+  </tr>
+</table>
+
 In a distant future in a different planet where overpopulation is the biggest problem an entire civilization is facing, land became the most valuable resource (specially fertile land) and having access to it is a matter of life or death.
 
 Nations defend their land with all they've got, but the need for expansion is pressing all of them and a major worldwide war was about to become inevitable when a major earthquake hit in the middle of a major ocean and this caused underwater volcanoes to  erupt and form a huge new mass of land.
@@ -24,18 +36,6 @@ Even with this advanced equipment, your task will not be easy. At every turn you
 Godspeed.
 
 # How to Play
-
-<table>
-  <tr>
-    <td><b>Number of Players</b></td><td>2 to 4</td>
-  </tr>
-  <tr>
-    <td><b>Number of Blinks</b></td><td>12 to 128</td>
-  </tr>
-  <tr>
-    <td><b>Play Time</b></td><td>5 to 30 minutes</td>
-  </tr>
-</table>
 
 As your nation's strategist, your main objective is to decide how and where to move your expansion efforts so you can increase your controlled area and, whenever possible, take over controlled area from other players. You also need to be carefull as the other players will be trying to do just the same.
 
