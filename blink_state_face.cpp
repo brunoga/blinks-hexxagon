@@ -65,7 +65,9 @@ void ValueHandler::ResetGame() {
   InternalResetGame();
 }
 
-void ValueHandler::InternalResetGame() {
+void __attribute__((noinline)) ValueHandler::InternalResetGame() {
+  if (game::state::Get() == GAME_STATE_IDLE) return;
+
   FOREACH_FACE(face) { resetPendingDatagramOnFace(face); }
 
   blink::state::StartColorOverride();
