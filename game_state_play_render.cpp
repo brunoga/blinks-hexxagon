@@ -68,11 +68,17 @@ void Render() {
   // an unaffected enemy Blink or a non-target empty Blink.
   if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE) {
     if (state == GAME_STATE_PLAY_SELECT_TARGET && player == 0) {
-      setColor(
-          dim(player_color, RENDER_CONFIG_PLAY_STATE_SELECT_TARGET_COLOR_DIM));
+      render::animation::Empty(
+          RENDER_CONFIG_PLAY_STATE_SELECT_TARGET_COLOR_DIM);
     } else {
-      setColor(dim(player_color, RENDER_CONFIG_PLAY_STATE_COLOR_DIM));
+      if (player == 0) {
+        render::animation::Empty(RENDER_CONFIG_PLAY_STATE_COLOR_DIM);
+      } else {
+        setColor(dim(player_color, RENDER_CONFIG_PLAY_STATE_COLOR_DIM));
+      }
     }
+  } else if (player == 0) {
+    render::animation::Empty(255);
   }
 }
 

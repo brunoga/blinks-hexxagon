@@ -1,5 +1,7 @@
 #include "render_animation.h"
 
+#include "game_player.h"
+
 // (255 * 3) + 200
 #define RENDER_ANIMATION_EXPLOSION_MS 965
 
@@ -24,21 +26,27 @@ static bool reset_timer_if_expired(Timer* timer, word ms) {
   return false;
 }
 
-void ResetPulseTimer() {
-  pulse_timer_.set(0);
-  reverse_ = false;
-}
-
-void Pulse(const Color& base_color, byte start, byte slowdown) {
+static byte compute_pulse_dim(byte start, byte slowdown) {
   if (reset_timer_if_expired(&pulse_timer_, (255 - start) * slowdown)) {
     reverse_ = !reverse_;
   }
 
   byte base_brightness = pulse_timer_.getRemaining() / slowdown;
 
-  byte brightness = reverse_ ? 255 - base_brightness : start + base_brightness;
+  return reverse_ ? 255 - base_brightness : start + base_brightness;
+}
 
-  setColor(dim(base_color, brightness));
+void ResetPulseTimer() {
+  pulse_timer_.set(0);
+  reverse_ = false;
+}
+
+void Pulse(const Color& base_color, byte start, byte slowdown) {
+  setColor(dim(base_color, compute_pulse_dim(start, slowdown)));
+}
+
+void Pulse(void (*render_function)(byte dim_level), byte start, byte slowdown) {
+  render_function(compute_pulse_dim(start, slowdown));
 }
 
 void Spinner(const Color& spinner_color, byte slowdown) {
@@ -71,6 +79,13 @@ bool __attribute__((noinline)) Explosion(Color base_color) {
   }
 
   return false;
+}
+
+void Empty(byte dim_level) {
+  setColor(OFF);
+  for (byte face = 0; face < FACE_COUNT; face += 2) {
+    setColorOnFace(dim(game::player::GetColor(0), dim_level), face);
+  }
 }
 
 }  // namespace animation

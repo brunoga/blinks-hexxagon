@@ -12,9 +12,15 @@ namespace state {
 namespace end {
 
 void Render() {
-  render::animation::Pulse(game::player::GetColor(blink::state::GetPlayer()),
-                           RENDER_CONFIG_END_STATE_PULSE_START_DIM,
-                           RENDER_CONFIG_END_STATE_PULSE_SLOWDOWN);
+  if (blink::state::GetPlayer() == 0) {
+    render::animation::Pulse(render::animation::Empty,
+                             RENDER_CONFIG_END_STATE_PULSE_START_DIM,
+                             RENDER_CONFIG_END_STATE_PULSE_SLOWDOWN);
+  } else {
+    render::animation::Pulse(game::player::GetColor(blink::state::GetPlayer()),
+                             RENDER_CONFIG_END_STATE_PULSE_START_DIM,
+                             RENDER_CONFIG_END_STATE_PULSE_SLOWDOWN);
+  }
 }
 
 }  // namespace end

@@ -11,7 +11,7 @@ namespace state {
 namespace idle {
 
 void Render() {
-  render::animation::Pulse(game::player::GetColor(0),
+  render::animation::Pulse(render::animation::Empty,
                            RENDER_CONFIG_IDLE_STATE_PULSE_START_DIM,
                            RENDER_CONFIG_IDLE_STATE_PULSE_SLOWDOWN);
 }
