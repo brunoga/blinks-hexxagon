@@ -7,7 +7,7 @@
 
 // Set data transmission timeouts. Due to the number of datagrams being sent in
 // multiple faces, the default values are not enough fot Hexxagon, so we
-// increase them by 100 ms here.
+// increase them by 150 ms here.
 #define BGA_CUSTOM_BLINKLIB_SEND_PROBE_TIMEOUT_MS 300
 #define BGA_CUSTOM_BLINKLIB_FACE_EXPIRATION_TIMEOUT_MS 350
 
