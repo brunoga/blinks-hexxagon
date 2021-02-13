@@ -75,7 +75,7 @@ There are 2 different actions that you can take based on what position you selec
 
 #### Select Target : Expand
 
-You can decide to expand by selecting a target that is an immediate neighbor of your origin BLINK. As the distance you have to move is shorter thna it would be otherwise, you have time to spend on duplicating all required resources and moving half of them to the target position. This will allow you to take control of the new position without losing control of your origin position. As this always results in an increase of your nation's conquered area, this is the preferred move when there are no other variables ar play (seee **Action Resolution** below).
+You can decide to expand by selecting a target that is an immediate neighbor of your origin BLINK. As the distance you have to move is shorter thna it would be otherwise, you have time to spend on duplicating all required resources and moving half of them to the target position. This will allow you to take control of the new position without losing control of your origin position. As this always results in an increase of your nation's conquered area, this is the preferred move when there are no other variables ar play (see **Action Resolution** below).
 
 #### Select Target : Move
 
