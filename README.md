@@ -37,7 +37,7 @@ Godspeed.
   </tr>
 </table>
 
-As the strategist, your main objective is to decide how and where to move your expansion efforts so you can increase your controlled area and, whenever possible, take over controlled area from other players. You also need to be carefull as the other players will be trying to do just the same.
+As your natio's strategist, your main objective is to decide how and where to move your expansion efforts so you can increase your controlled area and, whenever possible, take over controlled area from other players. You also need to be carefull as the other players will be trying to do just the same.
 
 Your main interface to do that is a highly advanced (if simple-looking) piece of gear: The Battle Linked Interface Network Kit (a.k.a. BLINK). Each BLINK is a small hexagonal piece that represents one unit of area that can be controlled by a player. You will have access to several of these devices that are linked together in a way that represents the disputed area and you will be able to use this representation to direct your troops movement.
 
