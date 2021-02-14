@@ -49,7 +49,7 @@ void NextPlayer() {
       // This player can move, return it.
       break;
     } else {
-      // Thisn player can not move.
+      // This player can not move.
       if ((player_stats.blink_count != 0) && (next_player != 0)) {
         // And it was because there was no place for it to move. Send flash.
         blink::state::StartColorOverride();
