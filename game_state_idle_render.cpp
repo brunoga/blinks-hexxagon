@@ -12,8 +12,7 @@ namespace state {
 namespace idle {
 
 void Render() {
-  blink::state::render::Pulse(blink::state::render::Empty,
-                              HEXXAGON_RENDER_IDLE_STATE_PULSE_START_DIM,
+  blink::state::render::Pulse(HEXXAGON_RENDER_IDLE_STATE_PULSE_START_DIM,
                               HEXXAGON_RENDER_IDLE_STATE_PULSE_SLOWDOWN);
 }
 

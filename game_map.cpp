@@ -112,11 +112,7 @@ void consume(const broadcast::Message* message, byte local_absolute_face) {
     return;
   }
 
-  if (blink::state::GetPlayer() == GAME_PLAYER_NO_PLAYER) {
-    blink::state::render::Empty(255);
-  } else {
-    setColor(game::player::GetColor(blink::state::GetPlayer()));
-  }
+  blink::state::render::Player(255);
 
   add_to_map((int8_t)message->payload[1], (int8_t)message->payload[2],
              message->payload[3]);

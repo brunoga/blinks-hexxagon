@@ -13,16 +13,8 @@ namespace state {
 namespace end {
 
 void Render() {
-  if (blink::state::GetPlayer() == GAME_PLAYER_NO_PLAYER) {
-    blink::state::render::Pulse(blink::state::render::Empty,
-                                HEXXAGON_RENDER_END_STATE_PULSE_START_DIM,
-                                HEXXAGON_RENDER_END_STATE_PULSE_SLOWDOWN);
-  } else {
-    blink::state::render::Pulse(
-        game::player::GetColor(blink::state::GetPlayer()),
-        HEXXAGON_RENDER_END_STATE_PULSE_START_DIM,
-        HEXXAGON_RENDER_END_STATE_PULSE_SLOWDOWN);
-  }
+  blink::state::render::Pulse(HEXXAGON_RENDER_END_STATE_PULSE_START_DIM,
+                              HEXXAGON_RENDER_END_STATE_PULSE_SLOWDOWN);
 }
 
 }  // namespace end

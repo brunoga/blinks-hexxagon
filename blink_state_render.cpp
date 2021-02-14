@@ -1,5 +1,6 @@
 #include "blink_state_render.h"
 
+#include "blink_state.h"
 #include "game_player.h"
 
 // (255 * 3) + 200
@@ -43,12 +44,8 @@ void ResetPulseTimer() {
   reverse_ = false;
 }
 
-void Pulse(const Color& base_color, byte start, byte slowdown) {
-  setColor(dim(base_color, compute_pulse_dim(start, slowdown)));
-}
-
-void Pulse(void (*render_function)(byte dim_level), byte start, byte slowdown) {
-  render_function(compute_pulse_dim(start, slowdown));
+void Pulse(byte start, byte slowdown) {
+  Player(compute_pulse_dim(start, slowdown));
 }
 
 void Spinner(const Color& spinner_color, byte slowdown) {
@@ -83,10 +80,14 @@ bool __attribute__((noinline)) Explosion(Color base_color) {
   return false;
 }
 
-void Empty(byte dim_level) {
-  setColor(OFF);
-  for (byte face = 0; face < FACE_COUNT; face += 2) {
-    setColorOnFace(dim(game::player::GetColor(0), dim_level), face);
+void Player(byte dim_level) {
+  byte player = blink::state::GetPlayer();
+  FOREACH_FACE(face) {
+    if (face % 2 || player != GAME_PLAYER_NO_PLAYER) {
+      setColorOnFace(dim(game::player::GetColor(player), dim_level), face);
+    } else {
+      setColorOnFace(OFF, face);
+    }
   }
 }
 

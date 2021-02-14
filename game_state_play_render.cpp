@@ -27,7 +27,7 @@ void Render() {
 
   // Set initial color for this Blink. This is required as some of the render
   // animations only render an overlay.
-  setColor(player_color);
+  blink::state::render::Player(255);
 
   if ((blink::state::GetOrigin() &&
        (state < GAME_STATE_PLAY_TARGET_SELECTED)) ||
@@ -46,8 +46,7 @@ void Render() {
         game::map::GetStatistics().local_blink_empty_space_in_range) {
       // Move has not been confirmed yet and the Blink has a space in range to
       // move to (or is a possible target). Render pulse animation.
-      blink::state::render::Pulse(player_color,
-                                  HEXXAGON_RENDER_PLAY_STATE_PULSE_START_DIM,
+      blink::state::render::Pulse(HEXXAGON_RENDER_PLAY_STATE_PULSE_START_DIM,
                                   HEXXAGON_RENDER_PLAY_STATE_PULSE_SLOWDOWN);
       return;
     }
@@ -70,17 +69,11 @@ void Render() {
   if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE) {
     if (state == GAME_STATE_PLAY_SELECT_TARGET &&
         player == GAME_PLAYER_NO_PLAYER) {
-      blink::state::render::Empty(
+      blink::state::render::Player(
           HEXXAGON_RENDER_PLAY_STATE_SELECT_TARGET_COLOR_DIM);
     } else {
-      if (player == GAME_PLAYER_NO_PLAYER) {
-        blink::state::render::Empty(HEXXAGON_RENDER_PLAY_STATE_COLOR_DIM);
-      } else {
-        setColor(dim(player_color, HEXXAGON_RENDER_PLAY_STATE_COLOR_DIM));
-      }
+      blink::state::render::Player(HEXXAGON_RENDER_PLAY_STATE_COLOR_DIM);
     }
-  } else if (player == GAME_PLAYER_NO_PLAYER) {
-    blink::state::render::Empty(255);
   }
 }
 
