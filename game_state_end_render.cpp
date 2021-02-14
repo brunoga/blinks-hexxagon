@@ -12,7 +12,7 @@ namespace state {
 namespace end {
 
 void Render() {
-  if (blink::state::GetPlayer() == 0) {
+  if (blink::state::GetPlayer() == GAME_PLAYER_NO_PLAYER) {
     render::animation::Pulse(render::animation::Empty,
                              RENDER_CONFIG_END_STATE_PULSE_START_DIM,
                              RENDER_CONFIG_END_STATE_PULSE_SLOWDOWN);

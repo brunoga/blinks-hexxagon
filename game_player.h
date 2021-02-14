@@ -6,12 +6,7 @@
 // Including 0 (no player)
 #define GAME_PLAYER_MAX_PLAYERS 5
 
-// Players.
 #define GAME_PLAYER_NO_PLAYER 0
-#define GAME_PLAYER_RED_PLAYER 1
-#define GAME_PLAYER_BLUE_PLAYER 2
-#define GAME_PLAYER_GREEN_PLAYER 3
-#define GAME_PLAYER_MAGENTA_PLAYER 4
 
 namespace game {
 

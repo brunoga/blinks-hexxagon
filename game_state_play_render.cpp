@@ -67,17 +67,18 @@ void Render() {
   // We did not match anything above, which means we are a locked player Blink,
   // an unaffected enemy Blink or a non-target empty Blink.
   if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE) {
-    if (state == GAME_STATE_PLAY_SELECT_TARGET && player == 0) {
+    if (state == GAME_STATE_PLAY_SELECT_TARGET &&
+        player == GAME_PLAYER_NO_PLAYER) {
       render::animation::Empty(
           RENDER_CONFIG_PLAY_STATE_SELECT_TARGET_COLOR_DIM);
     } else {
-      if (player == 0) {
+      if (player == GAME_PLAYER_NO_PLAYER) {
         render::animation::Empty(RENDER_CONFIG_PLAY_STATE_COLOR_DIM);
       } else {
         setColor(dim(player_color, RENDER_CONFIG_PLAY_STATE_COLOR_DIM));
       }
     }
-  } else if (player == 0) {
+  } else if (player == GAME_PLAYER_NO_PLAYER) {
     render::animation::Empty(255);
   }
 }

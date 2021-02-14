@@ -17,7 +17,7 @@ void Render() {
   if (game::state::Get() != GAME_STATE_SETUP_MAP) {
     Color player_color = game::player::GetColor(blink::state::GetPlayer());
 
-    if (blink::state::GetPlayer() == 0) {
+    if (blink::state::GetPlayer() == GAME_PLAYER_NO_PLAYER) {
       render::animation::Empty(RENDER_CONFIG_SETUP_STATE_COLOR_DIM);
     } else {
       setColor(dim(player_color, RENDER_CONFIG_SETUP_STATE_COLOR_DIM));

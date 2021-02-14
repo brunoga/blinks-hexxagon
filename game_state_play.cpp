@@ -72,7 +72,7 @@ static void select_target(byte* state) {
   // one.
   blink::state::SetTarget(false);
 
-  if (blink::state::GetPlayer() == 0 &&
+  if (blink::state::GetPlayer() == GAME_PLAYER_NO_PLAYER &&
       position::Distance(game::map::GetMoveOrigin()) <= 2) {
     blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_TARGET);
   }

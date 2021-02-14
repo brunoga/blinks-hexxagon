@@ -111,7 +111,7 @@ void consume(const broadcast::Message* message, byte local_absolute_face) {
     return;
   }
 
-  if (blink::state::GetPlayer() == 0) {
+  if (blink::state::GetPlayer() == GAME_PLAYER_NO_PLAYER) {
     render::animation::Empty(255);
   } else {
     setColor(game::player::GetColor(blink::state::GetPlayer()));
@@ -153,7 +153,7 @@ void ComputeMapStats() {
 
     // Update player can move.
     for (byte j = 0; j < index_; ++j) {
-      if ((map_[j].player == 0) &&
+      if ((map_[j].player == GAME_PLAYER_NO_PLAYER) &&
           (position::coordinates::Distance(
                {(int8_t)map_data.x, (int8_t)map_data.y},
                {(int8_t)map_[j].x, (int8_t)map_[j].y}) <= 2)) {
@@ -165,7 +165,7 @@ void ComputeMapStats() {
     // Update empty space in range.
     if (!(stats_.local_blink_empty_space_in_range)) {
       stats_.local_blink_empty_space_in_range =
-          ((map_data.player == 0) &&
+          ((map_data.player == GAME_PLAYER_NO_PLAYER) &&
            (position::Distance(position::Coordinates{
                 (int8_t)map_data.x, (int8_t)map_data.y}) <= 2));
     }
