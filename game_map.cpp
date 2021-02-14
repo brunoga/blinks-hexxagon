@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "blink_state.h"
+#include "blink_state_render.h"
 #include "game_map_upload.h"
 #include "game_message.h"
 #include "game_state.h"
@@ -112,7 +113,7 @@ void consume(const broadcast::Message* message, byte local_absolute_face) {
   }
 
   if (blink::state::GetPlayer() == GAME_PLAYER_NO_PLAYER) {
-    render::animation::Empty(255);
+    blink::state::render::Empty(255);
   } else {
     setColor(game::player::GetColor(blink::state::GetPlayer()));
   }

@@ -1,10 +1,10 @@
 #include "game_state_play.h"
 
 #include "blink_state.h"
+#include "blink_state_render.h"
 #include "game_map.h"
 #include "game_message.h"
 #include "game_state.h"
-#include "render_animation.h"
 #include "src/blinks-position/position.h"
 #include "util.h"
 
@@ -19,7 +19,7 @@ static bool auto_select_ = false;
 static void select_origin(byte* state) {
   if (game::state::Changed()) {
     // State changed. Reset animation timer to improve synchronization.
-    render::animation::ResetPulseTimer();
+    blink::state::render::ResetPulseTimer();
   }
 
   bool button_clicked = util::NoSleepButtonSingleClicked();

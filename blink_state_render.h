@@ -1,11 +1,13 @@
-#ifndef RENDER_ANIMATION_H_
-#define RENDER_ANIMATION_H_
+#ifndef BLINK_STATE_RENDER_H_
+#define BLINK_STATE_RENDER_H_
 
 #include "blinklib.h"
 
-namespace render {
+namespace blink {
 
-namespace animation {
+namespace state {
+
+namespace render {
 
 void ResetPulseTimer();
 
@@ -19,8 +21,10 @@ bool Explosion(Color base_color);
 // Not an animation per see, but being here will do.
 void Empty(byte dim_level);
 
-}  // namespace animation
-
 }  // namespace render
+
+}  // namespace state
+
+}  // namespace blink
 
 #endif

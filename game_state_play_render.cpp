@@ -1,12 +1,13 @@
 #include "game_state_play_render.h"
 
+#include <hexxagon_config.h>
+
 #include "blink_state.h"
+#include "blink_state_render.h"
 #include "game_map.h"
 #include "game_player.h"
 #include "game_state.h"
 #include "game_state_play.h"
-#include "render_animation.h"
-#include "render_config.h"
 
 namespace game {
 
@@ -34,8 +35,8 @@ void Render() {
        (state == GAME_STATE_PLAY_MOVE_CONFIRMED))) {
     // We are the origin and and a target was not selected yet or we are a
     // target and the move is being confirmed. Render spinning animation.
-    render::animation::Spinner(RENDER_CONFIG_PLAY_STATE_SPINNER_COLOR,
-                               RENDER_CONFIG_PLAY_STATE_SPINNER_SLOWDOWN);
+    blink::state::render::Spinner(HEXXAGON_RENDER_PLAY_STATE_SPINNER_COLOR,
+                                  HEXXAGON_RENDER_PLAY_STATE_SPINNER_SLOWDOWN);
     return;
   }
 
@@ -45,9 +46,9 @@ void Render() {
         game::map::GetStatistics().local_blink_empty_space_in_range) {
       // Move has not been confirmed yet and the Blink has a space in range to
       // move to (or is a possible target). Render pulse animation.
-      render::animation::Pulse(player_color,
-                               RENDER_CONFIG_PLAY_STATE_PULSE_START_DIM,
-                               RENDER_CONFIG_PLAY_STATE_PULSE_SLOWDOWN);
+      blink::state::render::Pulse(player_color,
+                                  HEXXAGON_RENDER_PLAY_STATE_PULSE_START_DIM,
+                                  HEXXAGON_RENDER_PLAY_STATE_PULSE_SLOWDOWN);
       return;
     }
   } else if (player != 0) {
@@ -56,7 +57,7 @@ void Render() {
         position::Distance(game::map::GetMoveTarget()) == 1) {
       // Move is being confirmed and we are neighbors of the target. Render
       // explosion animation.
-      if (render::animation::Explosion(player_color)) {
+      if (blink::state::render::Explosion(player_color)) {
         blink::state::SetPlayer(game_player);
       }
 
@@ -69,17 +70,17 @@ void Render() {
   if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE) {
     if (state == GAME_STATE_PLAY_SELECT_TARGET &&
         player == GAME_PLAYER_NO_PLAYER) {
-      render::animation::Empty(
-          RENDER_CONFIG_PLAY_STATE_SELECT_TARGET_COLOR_DIM);
+      blink::state::render::Empty(
+          HEXXAGON_RENDER_PLAY_STATE_SELECT_TARGET_COLOR_DIM);
     } else {
       if (player == GAME_PLAYER_NO_PLAYER) {
-        render::animation::Empty(RENDER_CONFIG_PLAY_STATE_COLOR_DIM);
+        blink::state::render::Empty(HEXXAGON_RENDER_PLAY_STATE_COLOR_DIM);
       } else {
-        setColor(dim(player_color, RENDER_CONFIG_PLAY_STATE_COLOR_DIM));
+        setColor(dim(player_color, HEXXAGON_RENDER_PLAY_STATE_COLOR_DIM));
       }
     }
   } else if (player == GAME_PLAYER_NO_PLAYER) {
-    render::animation::Empty(255);
+    blink::state::render::Empty(255);
   }
 }
 

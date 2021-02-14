@@ -3,8 +3,6 @@
 
 #include <blinklib.h>
 
-#include "render_animation.h"
-
 #define BLINK_STATE_TARGET_TYPE_NONE 0
 #define BLINK_STATE_TARGET_TYPE_TARGET 1
 

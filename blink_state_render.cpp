@@ -1,13 +1,15 @@
-#include "render_animation.h"
+#include "blink_state_render.h"
 
 #include "game_player.h"
 
 // (255 * 3) + 200
-#define RENDER_ANIMATION_EXPLOSION_MS 965
+#define BLINK_STATE_RENDER_EXPLOSION_MS 965
+
+namespace blink {
+
+namespace state {
 
 namespace render {
-
-namespace animation {
 
 static Timer pulse_timer_;
 static Timer spinner_timer_;
@@ -59,7 +61,7 @@ void Spinner(const Color& spinner_color, byte slowdown) {
 
 bool __attribute__((noinline)) Explosion(Color base_color) {
   if (reset_timer_if_expired(&explosion_timer_,
-                             RENDER_ANIMATION_EXPLOSION_MS)) {
+                             BLINK_STATE_RENDER_EXPLOSION_MS)) {
     if (animation_started_) {
       animation_started_ = false;
 
@@ -88,6 +90,8 @@ void Empty(byte dim_level) {
   }
 }
 
-}  // namespace animation
-
 }  // namespace render
+
+}  // namespace state
+
+}  // namespace blink

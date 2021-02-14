@@ -10,7 +10,6 @@
 #include "game_state_idle.h"
 #include "game_state_play.h"
 #include "game_state_setup.h"
-#include "render_animation.h"
 #include "src/blinks-broadcast/manager.h"
 
 #ifndef BGA_CUSTOM_BLINKLIB
