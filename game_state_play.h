@@ -3,8 +3,6 @@
 
 #include <blinklib.h>
 
-#include "blink_state_face.h"
-
 namespace game {
 
 namespace state {
@@ -12,8 +10,7 @@ namespace state {
 namespace play {
 
 // Play state handler. Handles actual game play.
-void Handler(byte* state,
-             const blink::state::face::ValueHandler& face_value_handler);
+void Handler(byte* state);
 
 }  // namespace play
 

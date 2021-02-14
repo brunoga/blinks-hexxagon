@@ -3,6 +3,7 @@
 #include <blinklib.h>
 
 #include "blink_state.h"
+#include "blink_state_face.h"
 #include "game_map.h"
 #include "game_message.h"
 #include "game_state.h"
@@ -27,8 +28,9 @@ static byte index_;
 static byte state_;
 static byte previous_map_requested_face_ = FACE_COUNT;
 
-bool Process(const blink::state::face::ValueHandler& face_value_handler) {
-  byte current_map_requested_face = face_value_handler.MapRequestedFace();
+bool Process() {
+  byte current_map_requested_face =
+      blink::state::face::handler::MapRequestedFace();
   if (current_map_requested_face != previous_map_requested_face_) {
     resetPendingDatagramOnFace(previous_map_requested_face_);
     index_ = 0;

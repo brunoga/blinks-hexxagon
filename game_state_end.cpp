@@ -1,19 +1,20 @@
 #include "game_state_end.h"
 
 #include "blink_state.h"
+#include "blink_state_face.h"
 #include "game_map.h"
 #include "game_message.h"
 #include "game_player.h"
 #include "game_state.h"
 #include "util.h"
+
 namespace game {
 
 namespace state {
 
 namespace end {
 
-void Handler(byte* state,
-             blink::state::face::ValueHandler* face_value_handler) {
+void Handler(byte* state) {
   byte max_count = 0;
   byte winner_player = 0;
   for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS; ++i) {
@@ -31,7 +32,7 @@ void Handler(byte* state,
 
   if (util::NoSleepButtonSingleClicked()) {
     *state = GAME_STATE_IDLE;
-    face_value_handler->ResetGame();
+    blink::state::face::handler::ResetGame();
     return;
   }
 }

@@ -23,9 +23,9 @@ void setup() {
 }
 
 void loop() {
-  blink::state::face::ValueHandler face_value_handler;
+  blink::state::face::handler::ProcessTop();
 
-  if (!game::map::upload::Process(face_value_handler)) {
+  if (!game::map::upload::Process()) {
     // Process any pending game messages.
     broadcast::manager::Process();
 
@@ -34,7 +34,7 @@ void loop() {
 
     // Check escape hatch. Reset to idle state if button is long pressed.
     if (buttonLongPressed()) {
-      face_value_handler.ResetGame();
+      blink::state::face::handler::ResetGame();
 
       return;
     }
@@ -46,9 +46,9 @@ void loop() {
       } else if (state < GAME_STATE_PLAY) {
         game::state::setup::Handler(&state);
       } else if (state < GAME_STATE_END) {
-        game::state::play::Handler(&state, face_value_handler);
+        game::state::play::Handler(&state);
       } else {
-        game::state::end::Handler(&state, &face_value_handler);
+        game::state::end::Handler(&state);
       }
 
       // Switch our state to the computed one.This will be propagated to other
@@ -64,4 +64,6 @@ void loop() {
   // it most likelly means another Blink woke us up. This will prevent us
   // "swallowing" the first click on this Blink after wakeup.
   hasWoken();
+
+  blink::state::face::handler::ProcessBottom();
 }

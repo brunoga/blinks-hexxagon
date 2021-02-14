@@ -9,25 +9,69 @@ namespace state {
 
 namespace face {
 
-ValueHandler::ValueHandler()
-    : map_requested_face_(FACE_COUNT), enemy_neighbor_(false) {
+namespace handler {
+
+static Value previous_value_[FACE_COUNT];
+
+static byte previously_connected_faces_;
+static byte wants_connection_faces_;
+static byte wants_disconnection_faces_;
+
+static bool reset_state_;
+
+static byte map_requested_face_;
+static bool enemy_neighbor_;
+
+static void __attribute__((noinline)) reset_game() {
+  if (game::state::Get() == GAME_STATE_IDLE) return;
+
+  FOREACH_FACE(face) { resetPendingDatagramOnFace(face); }
+
+  blink::state::StartColorOverride();
+
+  game::state::Set(GAME_STATE_IDLE, true);
+}
+
+void ProcessTop() {
+  map_requested_face_ = FACE_COUNT;
+  enemy_neighbor_ = false;
+
   byte currently_connected_faces = 0;
 
   FOREACH_FACE(face) {
+    byte face_mask = (1 << face);
     if (isValueReceivedOnFaceExpired(face)) {
-      if (previously_connected_faces_ & (1 << face)) {
-        ResetGame();
+      if (previously_connected_faces_ & face_mask) {
+        // Face just disconnected.
+        if (!(wants_disconnection_faces_ & face_mask)) {
+          // And it was not one we expected to be disconnected.
+          wants_connection_faces_ |= face_mask;
+        } else {
+          // We wanted it to be disconnected. All good.
+          wants_disconnection_faces_ &= ~face_mask;
+        }
       }
       continue;
+    } else {
+      if (!(previously_connected_faces_ & face_mask)) {
+        // Face just connected.
+        if (!(wants_connection_faces_ & face_mask)) {
+          // And it is not one we expected to be connecting to us.
+          wants_disconnection_faces_ |= face_mask;
+        } else {
+          // We wanted it to be connected. All good.
+          wants_connection_faces_ &= ~face_mask;
+        }
+      }
     }
 
-    currently_connected_faces |= (1 << face);
+    currently_connected_faces |= face_mask;
 
     Value value = {.as_byte = getLastValueReceivedOnFace(face)};
 
     if (value.reset_state != previous_value_[face].reset_state) {
       reset_state_ = value.reset_state;
-      InternalResetGame();
+      reset_game();
     }
 
     if (value.color_override != previous_value_[face].color_override &&
@@ -49,40 +93,28 @@ ValueHandler::ValueHandler()
   previously_connected_faces_ = currently_connected_faces;
 }
 
-ValueHandler::~ValueHandler() {
+void ProcessBottom() {
   Value output_value = {0, blink::state::GetColorOverride(), reset_state_,
                         false, blink::state::GetPlayer()};
   setValueSentOnAllFaces(output_value.as_byte);
 }
 
-bool ValueHandler::EnemyNeighbor() const { return enemy_neighbor_; }
+bool EnemyNeighbor() { return enemy_neighbor_; }
 
-byte ValueHandler::MapRequestedFace() const { return map_requested_face_; }
+byte MapRequestedFace() { return map_requested_face_; }
 
-void ValueHandler::ResetGame() {
+bool FaceOk(byte face) {
+  return (!((wants_disconnection_faces_ | wants_disconnection_faces_) &
+            (1 << face)));
+}
+
+void ResetGame() {
   reset_state_ = !reset_state_;
 
-  InternalResetGame();
+  reset_game();
 }
 
-void __attribute__((noinline)) ValueHandler::InternalResetGame() {
-  if (game::state::Get() == GAME_STATE_IDLE) return;
-
-  FOREACH_FACE(face) { resetPendingDatagramOnFace(face); }
-
-  blink::state::StartColorOverride();
-
-  game::state::Set(GAME_STATE_IDLE, true);
-}
-
-Value ValueHandler::previous_value_[FACE_COUNT] = {
-    {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0},
-};
-
-byte ValueHandler::previously_connected_faces_ = 0;
-
-bool ValueHandler::reset_state_ = false;
+}  // namespace handler
 
 }  // namespace face
 

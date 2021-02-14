@@ -3,8 +3,6 @@
 
 #include <blinklib.h>
 
-#include "blink_state_face.h"
-
 namespace game {
 
 namespace state {
@@ -12,7 +10,7 @@ namespace state {
 namespace end {
 
 // End state handler. Just let everybody knows who won.
-void Handler(byte* state, blink::state::face::ValueHandler* face_value_handler);
+void Handler(byte* state);
 
 }  // namespace end
 

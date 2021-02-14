@@ -21,33 +21,30 @@ union Value {
   byte as_byte;
 };
 
-class ValueHandler {
- public:
-  ValueHandler();
-  ~ValueHandler();
+namespace handler {
 
-  // Returns true if there are any neighbor Nlinks that belong to another
-  // player.
-  bool EnemyNeighbor() const;
+// Must be called at the top of loop().
+void ProcessTop();
 
-  // Returns the highest numbered face that is requesting a map.
-  byte MapRequestedFace() const;
+// Must be called at the bottom of the loop and must always be executed (careful
+// with early returns).
+void ProcessBottom();
 
-  // Send a game reset request accross the board.
-  void ResetGame();
+// Returns true if there are any neighbor Nlinks that belong to another
+// player.
+bool EnemyNeighbor();
 
- private:
-  void InternalResetGame();
+// Returns the highest numbered face that is requesting a map.
+byte MapRequestedFace();
 
-  static Value previous_value_[FACE_COUNT];
+// Returns true if this face is connected/disconnected as expected. False if
+// it is connected and was supposed to be disconnected or vice-versa.
+bool FaceOk(byte face);
 
-  static byte previously_connected_faces_;
+// Send a game reset request accross the board.
+void ResetGame();
 
-  static bool reset_state_;
-
-  byte map_requested_face_;
-  bool enemy_neighbor_;
-};
+}  // namespace handler
 
 }  // namespace face
 

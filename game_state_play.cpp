@@ -1,6 +1,7 @@
 #include "game_state_play.h"
 
 #include "blink_state.h"
+#include "blink_state_face.h"
 #include "blink_state_render.h"
 #include "game_map.h"
 #include "game_message.h"
@@ -116,8 +117,7 @@ static void target_selected(byte* state) {
   *state = GAME_STATE_PLAY_MOVE_CONFIRMED;
 }
 
-static void move_confirmed(
-    byte* state, const blink::state::face::ValueHandler& face_value_handler) {
+static void move_confirmed(byte* state) {
   if (blink::state::GetOrigin() &&
       position::coordinates::Distance(game::map::GetMoveOrigin(),
                                       game::map::GetMoveTarget()) != 1) {
@@ -131,7 +131,7 @@ static void move_confirmed(
   // We are the target, so we are now owned by the current player.
   blink::state::SetPlayer(game::state::GetPlayer());
 
-  if (face_value_handler.EnemyNeighbor()) return;
+  if (blink::state::face::handler::EnemyNeighbor()) return;
 
   *state = GAME_STATE_PLAY_RESOLVE_MOVE;
 }
@@ -152,8 +152,7 @@ static void resolve_move(byte* state) {
   }
 }
 
-void Handler(byte* state,
-             const blink::state::face::ValueHandler& face_value_handler) {
+void Handler(byte* state) {
   if (*state == GAME_STATE_PLAY) {
     *state = GAME_STATE_PLAY_SELECT_ORIGIN;
   }
@@ -174,7 +173,7 @@ void Handler(byte* state,
       target_selected(state);
       break;
     case GAME_STATE_PLAY_MOVE_CONFIRMED:
-      move_confirmed(state, face_value_handler);
+      move_confirmed(state);
       break;
     case GAME_STATE_PLAY_RESOLVE_MOVE:
       resolve_move(state);
