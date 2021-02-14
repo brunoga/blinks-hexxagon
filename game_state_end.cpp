@@ -16,7 +16,7 @@ void Handler(byte* state,
              blink::state::face::ValueHandler* face_value_handler) {
   byte max_count = 0;
   byte winner_player = 0;
-  for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS + 1; ++i) {
+  for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS; ++i) {
     byte player_count = game::map::GetStatistics().player[i].blink_count;
     if (player_count > max_count) {
       max_count = player_count;
