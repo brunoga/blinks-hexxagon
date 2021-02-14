@@ -11,7 +11,7 @@ namespace face {
 
 union Value {
   struct {
-    bool unused : 3;
+    bool unused : 2;
     bool color_override : 1;  // If true, start color override.
     bool reset_state : 1;     // If this bit changes, then we should reset.
     bool map_requested : 1;   // Map data was requested on this face.
