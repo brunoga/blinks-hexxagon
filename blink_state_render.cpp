@@ -85,8 +85,8 @@ bool Explosion(Color base_color) {
 }
 
 void Player(byte dim_level) {
-  byte player = blink::state::GetPlayer();
   FOREACH_FACE(face) {
+    Color color;
     if (!blink::state::face::handler::FaceOk(face)) {
       if (blink_timer_.isExpired()) {
         blink_timer_.set(200);
@@ -94,15 +94,17 @@ void Player(byte dim_level) {
       }
 
       if (blink_on_) {
-        setColorOnFace(WHITE, face);
+        color = WHITE;
       } else {
-        setColorOnFace(OFF, face);
+        color = OFF;
       }
-    } else if (face % 2 || player != GAME_PLAYER_NO_PLAYER) {
-      setColorOnFace(dim(game::player::GetColor(player), dim_level), face);
+    } else if (face % 2 || blink::state::GetPlayer() != GAME_PLAYER_NO_PLAYER) {
+      color = dim(game::player::GetColor(blink::state::GetPlayer()), dim_level);
     } else {
-      setColorOnFace(OFF, face);
+      color = OFF;
     }
+
+    setColorOnFace(color, face);
   }
 }
 
