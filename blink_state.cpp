@@ -30,19 +30,19 @@ void SetOrigin(bool origin) { state_.origin = origin; }
 bool __attribute__((noinline)) GetOrigin() { return state_.origin; }
 
 void SetTarget(bool target) { state_.target = target; }
-bool __attribute__((noinline)) GetTarget() { return state_.target; }
+bool GetTarget() { return state_.target; }
 
-void __attribute__((noinline)) SetTargetType(byte target_type) {
-  state_.target_type = target_type;
-}
+void SetTargetType(byte target_type) { state_.target_type = target_type; }
 byte GetTargetType() { return state_.target_type; }
 
 void SetPlayer(byte player) { state_.player = player; }
-byte __attribute__((noinline)) GetPlayer() { return state_.player; }
+byte GetPlayer() { return state_.player; }
 
 void StartColorOverride() { color_override_timer_.set(200); }
 
-bool GetColorOverride() { return !color_override_timer_.isExpired(); }
+bool __attribute__((noinline)) GetColorOverride() {
+  return !color_override_timer_.isExpired();
+}
 
 void __attribute__((noinline)) Reset() {
   state_.origin = false;

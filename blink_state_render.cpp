@@ -48,7 +48,7 @@ void ResetPulseTimer() {
   reverse_ = false;
 }
 
-void Pulse(byte start, byte slowdown) {
+void __attribute__((noinline)) Pulse(byte start, byte slowdown) {
   Player(compute_pulse_dim(start, slowdown));
 }
 
@@ -60,7 +60,7 @@ void Spinner(const Color& spinner_color, byte slowdown) {
   setColorOnFace(spinner_color, f);
 }
 
-bool __attribute__((noinline)) Explosion(Color base_color) {
+bool Explosion(Color base_color) {
   if (reset_timer_if_expired(&explosion_timer_,
                              BLINK_STATE_RENDER_EXPLOSION_MS)) {
     if (animation_started_) {

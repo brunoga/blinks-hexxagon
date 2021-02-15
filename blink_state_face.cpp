@@ -22,7 +22,7 @@ static bool reset_state_;
 static byte map_requested_face_;
 static bool enemy_neighbor_;
 
-static void __attribute__((noinline)) reset_game() {
+static void reset_game() {
   if (game::state::Get() == GAME_STATE_IDLE) return;
 
   FOREACH_FACE(face) { resetPendingDatagramOnFace(face); }
