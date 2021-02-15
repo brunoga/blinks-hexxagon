@@ -22,7 +22,7 @@ static bool reset_state_;
 static byte map_requested_face_;
 static bool enemy_neighbor_;
 
-static void reset_game() {
+static void __attribute__((noinline)) reset_game() {
   if (game::state::Get() == GAME_STATE_IDLE) return;
 
   FOREACH_FACE(face) { resetPendingDatagramOnFace(face); }
@@ -52,7 +52,7 @@ void ProcessTop() {
           if (game_state > GAME_STATE_SETUP_SELECT_PLAYERS &&
               game_state < GAME_STATE_PLAY) {
             // Blink removed while mapping. Reset game.
-            reset_game();
+            ResetGame();
             return;
           }
 
