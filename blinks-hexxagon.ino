@@ -1,4 +1,5 @@
 #include <blinklib.h>
+#include <hexxagon_config.h>
 
 #include "blink_state.h"
 #include "blink_state_face.h"
@@ -33,7 +34,11 @@ void loop() {
     byte state = game::state::Get();
 
     // Check escape hatch. Reset to idle state if button is long pressed.
+#ifdef HEXXAGON_MULTI_CLICK_RESET
+    if (buttonMultiClicked()) {
+#else
     if (buttonLongPressed()) {
+#endif
       blink::state::face::handler::ResetGame();
 
       return;
