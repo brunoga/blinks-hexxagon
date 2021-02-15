@@ -38,36 +38,48 @@ void ProcessTop() {
 
   byte currently_connected_faces = 0;
 
+  byte game_state = game::state::Get();
+
   FOREACH_FACE(face) {
     byte face_mask = (1 << face);
-    if (isValueReceivedOnFaceExpired(face)) {
-      if (previously_connected_faces_ & face_mask) {
-        // Face just disconnected.
-        if (!(wants_disconnection_faces_ & face_mask)) {
-          // And it was not one we expected to be disconnected.
-          wants_connection_faces_ |= face_mask;
-        } else {
-          // We wanted it to be disconnected. All good.
-          wants_disconnection_faces_ &= ~face_mask;
-        }
-      }
-      continue;
-    } else {
-      if (!(previously_connected_faces_ & face_mask)) {
-        // Face just connected.
-        if (!(wants_connection_faces_ & face_mask)) {
-          // And it is not one we expected to be connecting to us.
-          wants_disconnection_faces_ |= face_mask;
-        } else {
-          // We wanted it to be connected. All good.
-          wants_connection_faces_ &= ~face_mask;
-        }
-      }
-    }
-
-    currently_connected_faces |= face_mask;
 
     Value value = {.as_byte = getLastValueReceivedOnFace(face)};
+
+    if (!value.map_requested) {
+      if (isValueReceivedOnFaceExpired(face)) {
+        if (previously_connected_faces_ & face_mask) {
+          // Face just disconnected.
+          if (game_state > GAME_STATE_SETUP_SELECT_PLAYERS &&
+              game_state < GAME_STATE_PLAY) {
+            // Blink removed while mapping. Reset game.
+            reset_game();
+            return;
+          }
+
+          if (!(wants_disconnection_faces_ & face_mask)) {
+            // And it was not one we expected to be disconnected.
+            wants_connection_faces_ |= face_mask;
+          } else {
+            // We wanted it to be disconnected. All good.
+            wants_disconnection_faces_ &= ~face_mask;
+          }
+        }
+        continue;
+      } else {
+        if (!(previously_connected_faces_ & face_mask)) {
+          // Face just connected.
+          if (!(wants_connection_faces_ & face_mask)) {
+            // And it is not one we expected to be connecting to us.
+            wants_disconnection_faces_ |= face_mask;
+          } else {
+            // We wanted it to be connected. All good.
+            wants_connection_faces_ &= ~face_mask;
+          }
+        }
+      }
+
+      currently_connected_faces |= face_mask;
+    }
 
     if (value.reset_state != previous_value_[face].reset_state) {
       reset_state_ = value.reset_state;
@@ -91,6 +103,13 @@ void ProcessTop() {
   }
 
   previously_connected_faces_ = currently_connected_faces;
+
+  // TODO(BGA): Find a better way to do this.
+  if (game::state::Get() < GAME_STATE_PLAY ||
+      game::state::Get() >= GAME_STATE_END) {
+    wants_connection_faces_ = 0;
+    wants_disconnection_faces_ = 0;
+  }
 }
 
 void ProcessBottom() {
@@ -104,8 +123,8 @@ bool EnemyNeighbor() { return enemy_neighbor_; }
 byte MapRequestedFace() { return map_requested_face_; }
 
 bool FaceOk(byte face) {
-  return (!((wants_disconnection_faces_ | wants_disconnection_faces_) &
-            (1 << face)));
+  return !((wants_connection_faces_ | wants_disconnection_faces_) &
+           (1 << face));
 }
 
 void ResetGame() {

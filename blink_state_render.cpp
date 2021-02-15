@@ -1,6 +1,7 @@
 #include "blink_state_render.h"
 
 #include "blink_state.h"
+#include "blink_state_face.h"
 #include "game_player.h"
 
 // (255 * 3) + 200
@@ -15,9 +16,12 @@ namespace render {
 static Timer pulse_timer_;
 static Timer spinner_timer_;
 static Timer explosion_timer_;
+static Timer blink_timer_;
 
 static bool reverse_ = true;
 static bool animation_started_;
+
+static bool blink_on_;
 
 static bool reset_timer_if_expired(Timer* timer, word ms) {
   if (timer->isExpired()) {
@@ -83,7 +87,18 @@ bool __attribute__((noinline)) Explosion(Color base_color) {
 void Player(byte dim_level) {
   byte player = blink::state::GetPlayer();
   FOREACH_FACE(face) {
-    if (face % 2 || player != GAME_PLAYER_NO_PLAYER) {
+    if (!blink::state::face::handler::FaceOk(face)) {
+      if (blink_timer_.isExpired()) {
+        blink_timer_.set(200);
+        blink_on_ = !blink_on_;
+      }
+
+      if (blink_on_) {
+        setColorOnFace(WHITE, face);
+      } else {
+        setColorOnFace(OFF, face);
+      }
+    } else if (face % 2 || player != GAME_PLAYER_NO_PLAYER) {
       setColorOnFace(dim(game::player::GetColor(player), dim_level), face);
     } else {
       setColorOnFace(OFF, face);
