@@ -100,13 +100,15 @@ void ProcessTop() {
     }
 
     previous_value_[face] = value;
+
+    // Game state might have changed.
+    game_state = game::state::Get();
   }
 
   previously_connected_faces_ = currently_connected_faces;
 
   // TODO(BGA): Find a better way to do this.
-  if (game::state::Get() < GAME_STATE_PLAY ||
-      game::state::Get() >= GAME_STATE_END) {
+  if (game_state < GAME_STATE_PLAY || game_state >= GAME_STATE_END) {
     wants_connection_faces_ = 0;
     wants_disconnection_faces_ = 0;
   }
