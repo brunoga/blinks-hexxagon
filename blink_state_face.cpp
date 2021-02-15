@@ -19,7 +19,7 @@ static byte wants_disconnection_faces_;
 
 static bool reset_state_;
 
-static byte map_requested_face_;
+static byte ai_face_;
 static bool enemy_neighbor_;
 
 static void __attribute__((noinline)) reset_game() {
@@ -33,7 +33,7 @@ static void __attribute__((noinline)) reset_game() {
 }
 
 void ProcessTop() {
-  map_requested_face_ = FACE_COUNT;
+  ai_face_ = FACE_COUNT;
   enemy_neighbor_ = false;
 
   byte currently_connected_faces = 0;
@@ -45,7 +45,7 @@ void ProcessTop() {
 
     Value value = {.as_byte = getLastValueReceivedOnFace(face)};
 
-    if (!value.map_requested) {
+    if (!value.ai) {
       if (isValueReceivedOnFaceExpired(face)) {
         if (previously_connected_faces_ & face_mask) {
           // Face just disconnected.
@@ -91,8 +91,8 @@ void ProcessTop() {
       blink::state::StartColorOverride();
     }
 
-    if (value.map_requested) {
-      map_requested_face_ = face;
+    if (value.ai) {
+      ai_face_ = face;
     }
 
     if (value.player != 0 && value.player != blink::state::GetPlayer()) {
@@ -122,7 +122,7 @@ void ProcessBottom() {
 
 bool EnemyNeighbor() { return enemy_neighbor_; }
 
-byte MapRequestedFace() { return map_requested_face_; }
+byte AIFace() { return ai_face_; }
 
 bool FaceOk(byte face) {
   return !((wants_connection_faces_ | wants_disconnection_faces_) &

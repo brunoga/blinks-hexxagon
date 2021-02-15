@@ -14,7 +14,7 @@ union Value {
     bool unused : 2;
     bool color_override : 1;  // If true, start color override.
     bool reset_state : 1;     // If this bit changes, then we should reset.
-    bool map_requested : 1;   // Map data was requested on this face.
+    bool ai : 1;              // AI connected to this face.
     byte player : 3;          // 0 means empty.
   };
 
@@ -34,8 +34,8 @@ void ProcessBottom();
 // player.
 bool EnemyNeighbor();
 
-// Returns the highest numbered face that is requesting a map.
-byte MapRequestedFace();
+// Returns the highest numbered face that has an AI connected.
+byte AIFace();
 
 // Returns true if this face is connected/disconnected as expected. False if
 // it is connected and was supposed to be disconnected or vice-versa.

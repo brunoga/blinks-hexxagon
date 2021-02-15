@@ -26,20 +26,19 @@ namespace upload {
 
 static byte index_;
 static byte state_;
-static byte previous_map_requested_face_ = FACE_COUNT;
+static byte previous_ai_face_ = FACE_COUNT;
 
 bool Process() {
-  byte current_map_requested_face =
-      blink::state::face::handler::MapRequestedFace();
-  if (current_map_requested_face != previous_map_requested_face_) {
-    resetPendingDatagramOnFace(previous_map_requested_face_);
+  byte current_ai_face = blink::state::face::handler::AIFace();
+  if (current_ai_face != previous_ai_face_) {
+    resetPendingDatagramOnFace(previous_ai_face_);
     index_ = 0;
-    previous_map_requested_face_ = current_map_requested_face;
+    previous_ai_face_ = current_ai_face;
   }
 
   byte map_size = game::map::GetSize();
 
-  if ((current_map_requested_face == FACE_COUNT) || (index_ == map_size) ||
+  if ((current_ai_face == FACE_COUNT) || (index_ == map_size) ||
       (game::state::Get() != GAME_STATE_PLAY_SELECT_ORIGIN)) {
     return false;
   }
@@ -52,7 +51,7 @@ bool Process() {
       byte payload[GAME_MAP_UPLOAD_METADATA_SIZE] = {
           MESSAGE_MAP_UPLOAD, map_size, game::state::GetData()};
       if (sendDatagramOnFace(payload, GAME_MAP_UPLOAD_METADATA_SIZE,
-                             current_map_requested_face)) {
+                             current_ai_face)) {
         // Size sent. Switch to actual map upload.
         state_ = GAME_MAP_UPLOAD_STATE_UPLOAD;
       }
@@ -65,8 +64,7 @@ bool Process() {
       byte delta = remaining > GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
                        ? GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
                        : remaining;
-      if (sendDatagramOnFace(&(map_data[index_]), delta * 2,
-                             current_map_requested_face)) {
+      if (sendDatagramOnFace(&(map_data[index_]), delta * 2, current_ai_face)) {
         // Chunk sent. Increase the map upload index.
         index_ += delta;
       }
