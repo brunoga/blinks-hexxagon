@@ -31,8 +31,12 @@ static byte previous_ai_face_ = FACE_COUNT;
 bool Process() {
   byte current_ai_face = blink::state::face::handler::AIFace();
   if (current_ai_face != previous_ai_face_) {
-    resetPendingDatagramOnFace(previous_ai_face_);
+    if (previous_ai_face_ != FACE_COUNT) {
+      resetPendingDatagramOnFace(previous_ai_face_);
+    }
+
     index_ = 0;
+    state_ = GAME_MAP_UPLOAD_STATE_SEND_METADATA;
     previous_ai_face_ = current_ai_face;
   }
 

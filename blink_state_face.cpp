@@ -45,27 +45,27 @@ void ProcessTop() {
 
     Value value = {.as_byte = getLastValueReceivedOnFace(face)};
 
-    if (!value.ai) {
-      if (isValueReceivedOnFaceExpired(face)) {
-        if (previously_connected_faces_ & face_mask) {
-          // Face just disconnected.
-          if (game_state > GAME_STATE_SETUP_SELECT_PLAYERS &&
-              game_state < GAME_STATE_PLAY) {
-            // Blink removed while mapping. Reset game.
-            ResetGame();
-            return;
-          }
-
-          if (!(wants_disconnection_faces_ & face_mask)) {
-            // And it was not one we expected to be disconnected.
-            wants_connection_faces_ |= face_mask;
-          } else {
-            // We wanted it to be disconnected. All good.
-            wants_disconnection_faces_ &= ~face_mask;
-          }
+    if (isValueReceivedOnFaceExpired(face)) {
+      if ((previously_connected_faces_ & face_mask) && !value.ai) {
+        // Face just disconnected.
+        if (game_state > GAME_STATE_SETUP_SELECT_PLAYERS &&
+            game_state < GAME_STATE_PLAY) {
+          // Blink removed while mapping. Reset game.
+          ResetGame();
+          return;
         }
-        continue;
-      } else {
+
+        if (!(wants_disconnection_faces_ & face_mask)) {
+          // And it was not one we expected to be disconnected.
+          wants_connection_faces_ |= face_mask;
+        } else {
+          // We wanted it to be disconnected. All good.
+          wants_disconnection_faces_ &= ~face_mask;
+        }
+      }
+      continue;
+    } else {
+      if (!value.ai) {
         if (!(previously_connected_faces_ & face_mask)) {
           // Face just connected.
           if (!(wants_connection_faces_ & face_mask)) {
@@ -76,9 +76,9 @@ void ProcessTop() {
             wants_connection_faces_ &= ~face_mask;
           }
         }
-      }
 
-      currently_connected_faces |= face_mask;
+        currently_connected_faces |= face_mask;
+      }
     }
 
     if (value.reset_state != previous_value_[face].reset_state) {
@@ -91,7 +91,7 @@ void ProcessTop() {
       blink::state::StartColorOverride();
     }
 
-    if (value.ai) {
+    if (value.ai && !value.hexxagon) {
       ai_face_ = face;
     }
 
@@ -115,8 +115,12 @@ void ProcessTop() {
 }
 
 void ProcessBottom() {
-  Value output_value = {0, blink::state::GetColorOverride(), reset_state_,
-                        false, blink::state::GetPlayer()};
+  Value output_value = {/*unused=*/0,
+                        /*hexxagon=*/true,
+                        /*color_override=*/blink::state::GetColorOverride(),
+                        /*reset_state=*/reset_state_,
+                        /*ai=*/false,
+                        /*player=*/blink::state::GetPlayer()};
   setValueSentOnAllFaces(output_value.as_byte);
 }
 

@@ -11,7 +11,8 @@ namespace face {
 
 union Value {
   struct {
-    bool unused : 2;
+    bool unused : 1;          // Unused for now.
+    bool hexxagon : 1;        // Hexxagon connected to this face.
     bool color_override : 1;  // If true, start color override.
     bool reset_state : 1;     // If this bit changes, then we should reset.
     bool ai : 1;              // AI connected to this face.
