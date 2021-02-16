@@ -52,14 +52,14 @@ static void maybe_propagate() {
   propagation_index_++;
 }
 
-static Data* find_entry_in_map(int8_t x, int8_t y) {
+static bool find_entry_in_map(int8_t x, int8_t y) {
   for (byte i = 0; i < index_; ++i) {
     if (x == map_[i].x && y == map_[i].y) {
-      return &map_[i];
+      return true;
     }
   }
 
-  return nullptr;
+  return false;
 }
 
 static void __attribute__((noinline))
@@ -106,7 +106,7 @@ void consume(const broadcast::Message* message, byte local_absolute_face) {
   }
 
   if (find_entry_in_map((int8_t)message->payload[1],
-                        (int8_t)message->payload[2]) != nullptr) {
+                        (int8_t)message->payload[2])) {
     setColor(OFF);
 
     return;
