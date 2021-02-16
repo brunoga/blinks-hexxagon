@@ -105,12 +105,8 @@ void consume(const broadcast::Message* message, byte local_absolute_face) {
 
   if (find_entry_in_map((int8_t)message->payload[1],
                         (int8_t)message->payload[2])) {
-    blink::state::render::Player(255);
-
     return;
   }
-
-  setColor(OFF);
 
   add_to_map((int8_t)message->payload[1], (int8_t)message->payload[2],
              message->payload[3]);
