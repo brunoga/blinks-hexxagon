@@ -1,6 +1,8 @@
 
 #include "game_state.h"
 
+#include <string.h>
+
 #include "blink_state.h"
 #include "game_map.h"
 #include "game_message.h"
@@ -12,6 +14,7 @@ struct State {
   byte current;
   byte previous;
   byte player;
+  byte winner_player;
   bool from_network;
 };
 static State state_;
@@ -63,14 +66,15 @@ void NextPlayer() {
   SetPlayer(next_player);
 }
 
+void SetWinnerPlayer(byte winner_player) {
+  state_.winner_player = winner_player;
+}
+
+byte GetWinnerPlayer() { return state_.winner_player; }
+
 byte GetData() { return Data{0, state_.current, state_.player}.as_byte; }
 
-void Reset() {
-  state_.current = GAME_STATE_IDLE;
-  state_.previous = GAME_STATE_IDLE;
-  state_.player = 0;
-  state_.from_network = false;
-}
+void Reset() { memset(&state_, 0, sizeof(state_)); }
 
 bool Changed() { return state_.current != state_.previous; }
 

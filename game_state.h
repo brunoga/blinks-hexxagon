@@ -47,6 +47,9 @@ void SetPlayer(byte next_player);
 byte GetPlayer();
 void NextPlayer();
 
+void SetWinnerPlayer(byte winner_player);
+byte GetWinnerPlayer();
+
 byte GetData();
 
 void Reset();

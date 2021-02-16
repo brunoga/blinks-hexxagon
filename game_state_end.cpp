@@ -16,19 +16,20 @@ namespace end {
 
 void Handler(byte* state) {
   byte max_count = 0;
-  byte winner_player = 0;
   for (byte i = 1; i < GAME_PLAYER_MAX_PLAYERS; ++i) {
     byte player_count = game::map::GetStatistics().player[i].blink_count;
     if (player_count > max_count) {
       max_count = player_count;
-      winner_player = i;
+      game::state::SetWinnerPlayer(i);
     } else if (player_count == max_count) {
-      winner_player = 0;
+      game::state::SetWinnerPlayer(0);
     }
   }
 
   // Switch to the winner player.
-  blink::state::SetPlayer(winner_player);
+  if (blink::state::GetPlayer() != game::state::GetWinnerPlayer()) {
+    blink::state::SetPlayer(GAME_PLAYER_NO_PLAYER);
+  }
 
   if (util::NoSleepButtonSingleClicked()) {
     *state = GAME_STATE_IDLE;

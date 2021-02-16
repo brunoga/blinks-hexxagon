@@ -3,6 +3,7 @@
 #include "blink_state.h"
 #include "blink_state_face.h"
 #include "game_player.h"
+#include "game_state.h"
 
 // (255 * 3) + 200
 #define BLINK_STATE_RENDER_EXPLOSION_MS 965
@@ -85,11 +86,17 @@ bool Explosion(Color base_color) {
   return false;
 }
 
-void Player(byte dim_level) {
+void __attribute__((noinline)) Player(byte dim_level) {
   if (blink_timer_.isExpired()) {
     blink_timer_.set(BLINK_STATE_RENDER_BLINK_MS);
     blink_on_ = !blink_on_;
   }
+
+  // Override player we want to render in case there is a winning player. This
+  // will only happen in the end state.
+  byte player = game::state::GetWinnerPlayer() == 0
+                    ? blink::state::GetPlayer()
+                    : game::state::GetWinnerPlayer();
 
   FOREACH_FACE(face) {
     Color color;
@@ -100,7 +107,7 @@ void Player(byte dim_level) {
         color = OFF;
       }
     } else if (face % 2 || blink::state::GetPlayer() != GAME_PLAYER_NO_PLAYER) {
-      color = dim(game::player::GetColor(blink::state::GetPlayer()), dim_level);
+      color = dim(game::player::GetColor(player), dim_level);
     } else {
       color = OFF;
     }
