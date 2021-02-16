@@ -37,10 +37,7 @@ void Render() {
     // target and the move is being confirmed. Render spinning animation.
     blink::state::render::Spinner(HEXXAGON_RENDER_PLAY_STATE_SPINNER_COLOR,
                                   HEXXAGON_RENDER_PLAY_STATE_SPINNER_SLOWDOWN);
-    return;
-  }
-
-  if (player == game_player) {
+  } else if (player == game_player) {
     // We are the current player.
     if ((state < GAME_STATE_PLAY_MOVE_CONFIRMED) &&
         game::map::GetStatistics().local_blink_empty_space_in_range) {
@@ -62,11 +59,9 @@ void Render() {
 
       return;
     }
-  }
-
-  // We did not match anything above, which means we are a locked player Blink,
-  // an unaffected enemy Blink or a non-target empty Blink.
-  if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE) {
+  } else if (blink::state::GetTargetType() == BLINK_STATE_TARGET_TYPE_NONE) {
+    // We did not match anything above, which means we are a locked player
+    // Blink, an unaffected enemy Blink or a non-target empty Blink.
     if (state == GAME_STATE_PLAY_SELECT_TARGET &&
         player == GAME_PLAYER_NO_PLAYER) {
       blink::state::render::Player(
