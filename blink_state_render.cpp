@@ -86,14 +86,14 @@ bool Explosion(Color base_color) {
 }
 
 void Player(byte dim_level) {
+  if (blink_timer_.isExpired()) {
+    blink_timer_.set(BLINK_STATE_RENDER_BLINK_MS);
+    blink_on_ = !blink_on_;
+  }
+
   FOREACH_FACE(face) {
     Color color;
     if (!blink::state::face::handler::FaceOk(face)) {
-      if (blink_timer_.isExpired()) {
-        blink_timer_.set(BLINK_STATE_RENDER_BLINK_MS);
-        blink_on_ = !blink_on_;
-      }
-
       if (blink_on_) {
         color = WHITE;
       } else {
