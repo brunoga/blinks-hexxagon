@@ -12,6 +12,8 @@
 #include <hexxagon_config.h>
 #endif
 
+#define BLINK_STATE_COLOR_OVERRIDE_TIMEOUT 200
+
 namespace blink {
 
 struct State {
@@ -30,7 +32,7 @@ void SetOrigin(bool origin) { state_.origin = origin; }
 bool __attribute__((noinline)) GetOrigin() { return state_.origin; }
 
 void SetTarget(bool target) { state_.target = target; }
-bool GetTarget() { return state_.target; }
+bool __attribute__((noinline)) GetTarget() { return state_.target; }
 
 void SetTargetType(byte target_type) { state_.target_type = target_type; }
 byte GetTargetType() { return state_.target_type; }
@@ -38,11 +40,11 @@ byte GetTargetType() { return state_.target_type; }
 void SetPlayer(byte player) { state_.player = player; }
 byte GetPlayer() { return state_.player; }
 
-void StartColorOverride() { color_override_timer_.set(200); }
-
-bool __attribute__((noinline)) GetColorOverride() {
-  return !color_override_timer_.isExpired();
+void StartColorOverride() {
+  color_override_timer_.set(BLINK_STATE_COLOR_OVERRIDE_TIMEOUT);
 }
+
+bool GetColorOverride() { return !color_override_timer_.isExpired(); }
 
 void __attribute__((noinline)) Reset() {
   state_.origin = false;
