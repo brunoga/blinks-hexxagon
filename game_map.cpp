@@ -64,9 +64,7 @@ static bool find_entry_in_map(int8_t x, int8_t y) {
 
 static void __attribute__((noinline))
 add_to_map(int8_t x, int8_t y, byte player) {
-  map_[index_].x = x;
-  map_[index_].y = y;
-  map_[index_].player = player;
+  map_[index_] = {x, y, player};
   index_++;
 }
 
