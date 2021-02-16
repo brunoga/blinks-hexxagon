@@ -6,6 +6,7 @@
 
 // (255 * 3) + 200
 #define BLINK_STATE_RENDER_EXPLOSION_MS 965
+#define BLINK_STATE_RENDER_BLINK_MS 200
 
 namespace blink {
 
@@ -89,7 +90,7 @@ void Player(byte dim_level) {
     Color color;
     if (!blink::state::face::handler::FaceOk(face)) {
       if (blink_timer_.isExpired()) {
-        blink_timer_.set(200);
+        blink_timer_.set(BLINK_STATE_RENDER_BLINK_MS);
         blink_on_ = !blink_on_;
       }
 
