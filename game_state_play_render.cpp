@@ -27,7 +27,7 @@ void Render() {
 
   // Set initial color for this Blink. This is required as some of the render
   // animations only render an overlay.
-  blink::state::render::Player(255);
+  setColor(player_color);
 
   if ((blink::state::GetOrigin() &&
        (state < GAME_STATE_PLAY_TARGET_SELECTED)) ||
@@ -69,6 +69,9 @@ void Render() {
     } else {
       blink::state::render::Player(HEXXAGON_RENDER_PLAY_STATE_COLOR_DIM);
     }
+  } else if (position::Distance(game::map::GetMoveOrigin()) ==
+             BLINK_STATE_TARGET_TYPE_MOVE) {
+    blink::state::render::Player(255);
   }
 }
 

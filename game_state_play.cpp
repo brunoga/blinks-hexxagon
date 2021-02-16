@@ -75,7 +75,7 @@ static void select_target(byte* state) {
 
   if (blink::state::GetPlayer() == GAME_PLAYER_NO_PLAYER &&
       position::Distance(game::map::GetMoveOrigin()) <= 2) {
-    blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_TARGET);
+    blink::state::SetTargetType(position::Distance(game::map::GetMoveOrigin()));
   }
 
   // We pass all checks, but we do nothing until we get a click.

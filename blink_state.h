@@ -4,7 +4,8 @@
 #include <blinklib.h>
 
 #define BLINK_STATE_TARGET_TYPE_NONE 0
-#define BLINK_STATE_TARGET_TYPE_TARGET 1
+#define BLINK_STATE_TARGET_TYPE_DUPLICATE 1
+#define BLINK_STATE_TARGET_TYPE_MOVE 2
 
 namespace blink {
 
