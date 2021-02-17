@@ -139,7 +139,7 @@ static void move_confirmed(byte* state) {
 
   if (blink::state::face::handler::EnemyNeighbor() ||
       !wait_timer_.isExpired()) {
-    // Wither we are still seeing enemies around us or our wait time did not
+    // Either we are still seeing enemies around us or our wait time did not
     // expire yet.
     return;
   }
