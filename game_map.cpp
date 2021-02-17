@@ -209,6 +209,8 @@ void Reset() {
   propagation_index_ = 0;
 
   ComputeMapStats();
+
+  game::map::upload::Reset();
 }
 
 }  // namespace map
