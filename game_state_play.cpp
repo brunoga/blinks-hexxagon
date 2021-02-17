@@ -9,6 +9,8 @@
 #include "src/blinks-position/position.h"
 #include "util.h"
 
+#define GAME_STATE_PLAY_WAIT_TIMEOUT 1000
+
 namespace game {
 
 namespace state {
@@ -16,6 +18,8 @@ namespace state {
 namespace play {
 
 static bool auto_select_ = false;
+
+static Timer wait_timer_;
 
 static void select_origin(byte* state) {
   if (game::state::Changed()) {
@@ -114,6 +118,8 @@ static void target_selected(byte* state) {
     return;
   }
 
+  wait_timer_.set(GAME_STATE_PLAY_WAIT_TIMEOUT);
+
   *state = GAME_STATE_PLAY_MOVE_CONFIRMED;
 }
 
@@ -131,7 +137,12 @@ static void move_confirmed(byte* state) {
   // We are the target, so we are now owned by the current player.
   blink::state::SetPlayer(game::state::GetPlayer());
 
-  if (blink::state::face::handler::EnemyNeighbor()) return;
+  if (blink::state::face::handler::EnemyNeighbor() ||
+      !wait_timer_.isExpired()) {
+    // Wither we are still seeing enemies around us or our wait time did not
+    // expire yet.
+    return;
+  }
 
   *state = GAME_STATE_PLAY_RESOLVE_MOVE;
 }
