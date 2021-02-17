@@ -9,6 +9,8 @@ namespace upload {
 
 bool Process();
 
+void Reset();
+
 }  // namespace upload
 
 }  // namespace map

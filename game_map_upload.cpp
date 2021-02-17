@@ -35,8 +35,8 @@ bool Process() {
       resetPendingDatagramOnFace(previous_ai_face_);
     }
 
-    index_ = 0;
-    state_ = GAME_MAP_UPLOAD_STATE_SEND_METADATA;
+    Reset();
+
     previous_ai_face_ = current_ai_face;
   }
 
@@ -76,6 +76,11 @@ bool Process() {
   }
 
   return true;
+}
+
+void Reset() {
+  index_ = 0;
+  state_ = GAME_MAP_UPLOAD_STATE_SEND_METADATA;
 }
 
 }  // namespace upload
