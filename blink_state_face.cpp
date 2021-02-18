@@ -91,7 +91,9 @@ void ProcessTop() {
       blink::state::StartColorOverride();
     }
 
-    if (value.ai && !value.hexxagon) {
+    if (value.ai && !value.hexxagon && value.map_requested) {
+      // The Blink connected to this face looks like an AI and is requesting the
+      // map.
       ai_face_ = face;
     }
 
@@ -115,7 +117,7 @@ void ProcessTop() {
 }
 
 void ProcessBottom() {
-  Value output_value = {/*unused=*/0,
+  Value output_value = {/*map_requested=*/false,
                         /*hexxagon=*/true,
                         /*color_override=*/blink::state::GetColorOverride(),
                         /*reset_state=*/reset_state_,
