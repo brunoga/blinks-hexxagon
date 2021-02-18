@@ -23,7 +23,7 @@ struct Statistics {
   struct {
     byte blink_count : 7;
     bool can_move : 1;
-  } player[GAME_PLAYER_MAX_PLAYERS + 1];
+  } player[GAME_PLAYER_MAX_PLAYERS];
   bool local_blink_empty_space_in_range;
 };
 
