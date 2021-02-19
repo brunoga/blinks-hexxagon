@@ -158,10 +158,6 @@ static void resolve_move(byte* state) {
 }
 
 void Handler(byte* state) {
-  if (*state == GAME_STATE_PLAY) {
-    *state = GAME_STATE_PLAY_SELECT_ORIGIN;
-  }
-
   blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
 
   switch (*state) {

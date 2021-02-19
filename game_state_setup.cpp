@@ -61,7 +61,7 @@ static void validate(byte* state) {
     // Game state is good. Switch to first available player.
     game::state::NextPlayer();
 
-    *state = GAME_STATE_PLAY;
+    *state = GAME_STATE_PLAY_SELECT_ORIGIN;
   } else {
     *state = GAME_STATE_SETUP_SELECT_PLAYERS;
   }
