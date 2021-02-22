@@ -86,7 +86,7 @@ bool Explosion(Color base_color) {
   return false;
 }
 
-void __attribute__((noinline)) Player(byte dim_level) {
+void Player(byte dim_level) {
   if (blink_timer_.isExpired()) {
     blink_timer_.set(BLINK_STATE_RENDER_BLINK_MS);
     blink_on_ = !blink_on_;
@@ -106,7 +106,7 @@ void __attribute__((noinline)) Player(byte dim_level) {
       } else {
         color = OFF;
       }
-    } else if (face % 2 || blink::state::GetPlayer() != GAME_PLAYER_NO_PLAYER) {
+    } else if (game::player::GetLitFace(player, face)) {
       color = dim(game::player::GetColor(player), dim_level);
     } else {
       color = OFF;

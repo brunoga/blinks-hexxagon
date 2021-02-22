@@ -20,14 +20,13 @@ void Render() {
   // intuition is that it can be done. Try again?
 
   byte player = blink::state::GetPlayer();
-  Color player_color = game::player::GetColor(player);
 
   byte game_player = game::state::GetPlayer();
   byte state = game::state::Get();
 
   // Set initial color for this Blink. This is required as some of the render
   // animations only render an overlay.
-  setColor(player_color);
+  blink::state::render::Player(255);
 
   if ((blink::state::GetOrigin() &&
        (state < GAME_STATE_PLAY_TARGET_SELECTED)) ||
@@ -53,7 +52,7 @@ void Render() {
         position::Distance(game::map::GetMoveTarget()) == 1) {
       // Move is being confirmed and we are neighbors of the target. Render
       // explosion animation.
-      if (blink::state::render::Explosion(player_color)) {
+      if (blink::state::render::Explosion(game::player::GetColor(player))) {
         blink::state::SetPlayer(game_player);
       }
 
@@ -69,9 +68,6 @@ void Render() {
     } else {
       blink::state::render::Player(HEXXAGON_RENDER_PLAY_STATE_COLOR_DIM);
     }
-  } else if (position::Distance(game::map::GetMoveOrigin()) ==
-             BLINK_STATE_TARGET_TYPE_MOVE) {
-    blink::state::render::Player(255);
   }
 }
 
