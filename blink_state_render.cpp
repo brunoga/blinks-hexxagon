@@ -92,27 +92,22 @@ void Player(byte dim_level) {
     blink_on_ = !blink_on_;
   }
 
-  // Override player we want to render in case there is a winning player. This
-  // will only happen in the end state.
-  byte player = game::state::GetWinnerPlayer() == 0
-                    ? blink::state::GetPlayer()
-                    : game::state::GetWinnerPlayer();
+  byte player = blink::state::GetPlayer();
 
+  // It is actually cheaper to call setColorOnFace() multiple times below than
+  // to use a variable and call it only once.
   FOREACH_FACE(face) {
-    Color color;
     if (!blink::state::face::handler::FaceOk(face)) {
       if (blink_on_) {
-        color = WHITE;
+        setColorOnFace(WHITE, face);
       } else {
-        color = OFF;
+        setColorOnFace(OFF, face);
       }
     } else if (game::player::GetLitFace(player, face)) {
-      color = dim(game::player::GetColor(player), dim_level);
+      setColorOnFace(dim(game::player::GetColor(player), dim_level), face);
     } else {
-      color = OFF;
+      setColorOnFace(OFF, face);
     }
-
-    setColorOnFace(color, face);
   }
 }
 
