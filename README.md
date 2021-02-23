@@ -9,6 +9,12 @@ This project uses Git Submodules. To clone it, use:
 
 git clone --recurse-submodules https://github.com/brunoga/blinks-hexxagon
 
+Blinks Installer downloads (requires Blink Dev Kit):
+
+Windows (64 bits): https://www.bug-br.org.br/hexxagon-installer-windows-amd64.zip
+MacOS (64 bits): https://www.bug-br.org.br/hexxagon-installer-darwin-amd64.zip
+Linux (64 bits): https://www.bug-br.org.br/hexxagon-installer-windows-amd64.zip
+
 # Introduction
 
 <table>
