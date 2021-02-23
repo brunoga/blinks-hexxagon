@@ -92,7 +92,15 @@ void Player(byte dim_level) {
     blink_on_ = !blink_on_;
   }
 
-  byte player = blink::state::GetPlayer();
+  if (game::state::GetWinnerPlayer() != 0 &&
+      game::state::GetWinnerPlayer() != blink::state::GetPlayer()) {
+    // We have a winner and this Blink does not belong to it. Render as solid
+    // winner color.
+    setColor(
+        dim(game::player::GetColor(game::state::GetWinnerPlayer()), dim_level));
+
+    return;
+  }
 
   // It is actually cheaper to call setColorOnFace() multiple times below than
   // to use a variable and call it only once.
@@ -103,8 +111,10 @@ void Player(byte dim_level) {
       } else {
         setColorOnFace(OFF, face);
       }
-    } else if (game::player::GetLitFace(player, face)) {
-      setColorOnFace(dim(game::player::GetColor(player), dim_level), face);
+    } else if (game::player::GetLitFace(blink::state::GetPlayer(), face)) {
+      setColorOnFace(
+          dim(game::player::GetColor(blink::state::GetPlayer()), dim_level),
+          face);
     } else {
       setColorOnFace(OFF, face);
     }

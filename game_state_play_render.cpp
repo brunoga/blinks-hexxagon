@@ -68,6 +68,9 @@ void Render() {
     } else {
       blink::state::render::Player(HEXXAGON_RENDER_PLAY_STATE_COLOR_DIM);
     }
+  } else if (blink::state::GetTargetType() ==
+             BLINK_STATE_TARGET_TYPE_DUPLICATE) {
+    setColor(game::player::GetColor(GAME_PLAYER_NO_PLAYER));
   }
 }
 

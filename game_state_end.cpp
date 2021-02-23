@@ -26,11 +26,6 @@ void Handler(byte* state) {
     }
   }
 
-  // Switch to the winner player.
-  if (blink::state::GetPlayer() != game::state::GetWinnerPlayer()) {
-    blink::state::SetPlayer(GAME_PLAYER_NO_PLAYER);
-  }
-
   if (util::NoSleepButtonSingleClicked()) {
     *state = GAME_STATE_IDLE;
     blink::state::face::handler::ResetGame();
