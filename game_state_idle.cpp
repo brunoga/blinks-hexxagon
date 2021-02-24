@@ -16,7 +16,7 @@ void Handler(byte* state, bool button_double_clicked) {
   game::state::Reset();
   blink::state::Reset();
 
-  if (button_double_clicked) return;
+  if (!button_double_clicked) return;
 
   *state = GAME_STATE_SETUP_SELECT_PLAYERS;
 }
