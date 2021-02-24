@@ -10,7 +10,7 @@ namespace game {
 namespace player {
 
 static const Color colors_[] = {GREEN, MAPLE, SPRUCE, CHERRY, ELM};
-static const byte patterns_[] = {0b00010101, 0b00010111, 0b00000101, 0b00011011,
+static const byte patterns_[] = {0b00010101, 0b00010111, 0b00011111, 0b00011011,
                                  0b00001001};
 
 byte GetNext(byte current_player) {
