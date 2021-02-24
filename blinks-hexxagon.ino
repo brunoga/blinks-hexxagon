@@ -27,10 +27,9 @@ void loop() {
   blink::state::face::handler::ProcessTop();
 
   // Consume all relevant state flags.
-  bool button_single_clicked = buttonSingleClicked();
+  bool has_woken = hasWoken();
+  bool button_single_clicked = buttonSingleClicked() & !has_woken;
   bool button_double_clicked = buttonDoubleClicked();
-
-  button_single_clicked &= !hasWoken();
 
   if (!game::map::upload::Process()) {
     // Process any pending game messages.
