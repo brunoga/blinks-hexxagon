@@ -17,7 +17,7 @@ void Handler(byte* state) {
   game::state::Reset();
   blink::state::Reset();
 
-  if (!util::NoSleepButtonSingleClicked()) return;
+  if (!buttonDoubleClicked()) return;
 
   *state = GAME_STATE_SETUP;
 }

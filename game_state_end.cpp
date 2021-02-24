@@ -26,11 +26,10 @@ void Handler(byte* state) {
     }
   }
 
-  if (util::NoSleepButtonSingleClicked()) {
-    *state = GAME_STATE_IDLE;
-    blink::state::face::handler::ResetGame();
-    return;
-  }
+  if (!buttonDoubleClicked()) return;
+
+  *state = GAME_STATE_IDLE;
+  blink::state::face::handler::ResetGame();
 }
 
 }  // namespace end
