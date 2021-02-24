@@ -3,7 +3,6 @@
 #include "blink_state.h"
 #include "game_message.h"
 #include "game_state.h"
-#include "util.h"
 
 namespace game {
 
@@ -11,15 +10,15 @@ namespace state {
 
 namespace idle {
 
-void Handler(byte* state) {
+void Handler(byte* state, bool button_double_clicked) {
   // To simplify logic we juts keep reseting the global (game) and local (Blink)
   // states every loop iteration here. This is kinda harmless.
   game::state::Reset();
   blink::state::Reset();
 
-  if (!buttonDoubleClicked()) return;
+  if (button_double_clicked) return;
 
-  *state = GAME_STATE_SETUP;
+  *state = GAME_STATE_SETUP_SELECT_PLAYERS;
 }
 
 }  // namespace idle

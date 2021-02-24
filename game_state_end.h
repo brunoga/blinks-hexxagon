@@ -10,7 +10,7 @@ namespace state {
 namespace end {
 
 // End state handler. Just let everybody knows who won.
-void Handler(byte* state);
+void Handler(byte* state, bool button_double_clicked);
 
 }  // namespace end
 

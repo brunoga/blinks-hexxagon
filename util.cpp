@@ -7,10 +7,6 @@
 
 namespace util {
 
-bool NoSleepButtonSingleClicked() {
-  return buttonSingleClicked() && !hasWoken();
-}
-
 bool CheckValidateStateAndReport() {
   if (!game::map::ValidState()) {
     blink::state::StartColorOverride();

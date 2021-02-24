@@ -26,6 +26,12 @@ void setup() {
 void loop() {
   blink::state::face::handler::ProcessTop();
 
+  // Consume all relevant state flags.
+  bool button_single_clicked = buttonSingleClicked();
+  bool button_double_clicked = buttonDoubleClicked();
+
+  button_single_clicked &= !hasWoken();
+
   if (!game::map::upload::Process()) {
     // Process any pending game messages.
     broadcast::manager::Process();
@@ -34,11 +40,7 @@ void loop() {
     byte state = game::state::Get();
 
     // Check escape hatch. Reset to idle state if button is long pressed.
-#ifdef HEXXAGON_MULTI_CLICK_RESET
     if (buttonMultiClicked()) {
-#else
-    if (buttonLongPressed()) {
-#endif
       blink::state::face::handler::ResetGame();
 
       return;
@@ -47,13 +49,14 @@ void loop() {
     if (game::state::Propagate()) {
       // Run our state machine.
       if (state < GAME_STATE_SETUP) {
-        game::state::idle::Handler(&state);
+        game::state::idle::Handler(&state, button_double_clicked);
       } else if (state < GAME_STATE_PLAY) {
-        game::state::setup::Handler(&state);
+        game::state::setup::Handler(&state, button_single_clicked,
+                                    button_double_clicked);
       } else if (state < GAME_STATE_END) {
-        game::state::play::Handler(&state);
+        game::state::play::Handler(&state, button_single_clicked);
       } else {
-        game::state::end::Handler(&state);
+        game::state::end::Handler(&state, button_double_clicked);
       }
 
       // Switch our state to the computed one.This will be propagated to other
@@ -65,14 +68,4 @@ void loop() {
   blink::state::Render(game::state::Get());
 
   blink::state::face::handler::ProcessBottom();
-
-  // Consume any pending woken state. The rationale is that we already went
-  // through our loop and if the state is still set here we want to consume as
-  // it most likelly means another Blink woke us up. This will prevent us
-  // "swallowing" the first click on this Blink after wakeup.
-  hasWoken();
-
-  // Also consume pending button flags.
-  buttonDoubleClicked();
-  buttonSingleClicked();
 }

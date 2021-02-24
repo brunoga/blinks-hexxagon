@@ -14,7 +14,8 @@ namespace state {
 
 namespace setup {
 
-static void players(byte* state) {
+static void players(byte* state, bool button_single_clicked,
+                    bool button_double_clicked) {
   // Make sure map is empty.
   //
   // TODO(bga): There might be a race condition between the state change message
@@ -23,7 +24,7 @@ static void players(byte* state) {
   // and the added Blink will be removed. Investigate.
   game::map::Reset();
 
-  if (buttonDoubleClicked()) {
+  if (button_double_clicked) {
     // We seem to be done with setting up the game. We now need to validate
     // if the board state is actually valid.
 
@@ -38,7 +39,7 @@ static void players(byte* state) {
     game::map::StartMapping();
 
     *state = GAME_STATE_SETUP_MAP;
-  } else if (util::NoSleepButtonSingleClicked()) {
+  } else if (button_single_clicked) {
     // Blink was clicked. Switch it to next player.
     blink::state::SetPlayer(game::player::GetNext(blink::state::GetPlayer()));
   }
@@ -69,14 +70,11 @@ static void validate(byte* state) {
   blink::state::SetOrigin(false);
 }
 
-void Handler(byte* state) {
-  if (*state == GAME_STATE_SETUP) {
-    *state = GAME_STATE_SETUP_SELECT_PLAYERS;
-  }
-
+void Handler(byte* state, bool button_single_clicked,
+             bool button_double_clicked) {
   switch (*state) {
     case GAME_STATE_SETUP_SELECT_PLAYERS:
-      players(state);
+      players(state, button_single_clicked, button_double_clicked);
       break;
     case GAME_STATE_SETUP_MAP:
       map(state);

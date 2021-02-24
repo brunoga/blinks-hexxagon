@@ -10,7 +10,8 @@ namespace state {
 namespace setup {
 
 // Setup state handler. Handles game configuration and mapping the board.
-void Handler(byte* state);
+void Handler(byte* state, bool button_single_clicked,
+             bool button_double_clicked);
 
 }  // namespace setup
 

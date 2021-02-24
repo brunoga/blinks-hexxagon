@@ -3,8 +3,6 @@
 
 namespace util {
 
-bool NoSleepButtonSingleClicked();
-
 bool CheckValidateStateAndReport();
 
 }  // namespace util
