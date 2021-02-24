@@ -6,7 +6,7 @@
 #include "game_state.h"
 
 // (255 * 3) + 200
-#define BLINK_STATE_RENDER_EXPLOSION_MS 965
+#define BLINK_STATE_RENDER_EXPLOSION_MS 1020
 #define BLINK_STATE_RENDER_BLINK_MS 200
 
 namespace blink {
@@ -16,7 +16,6 @@ namespace state {
 namespace render {
 
 static Timer pulse_timer_;
-static Timer spinner_timer_;
 static Timer explosion_timer_;
 static Timer blink_timer_;
 
@@ -55,11 +54,7 @@ void __attribute__((noinline)) Pulse(byte start, byte slowdown) {
 }
 
 void Spinner(const Color& spinner_color, byte slowdown) {
-  reset_timer_if_expired(&spinner_timer_, (FACE_COUNT * slowdown) - 1);
-
-  byte f = (FACE_COUNT - 1) - spinner_timer_.getRemaining() / slowdown;
-
-  setColorOnFace(spinner_color, f);
+  setColorOnFace(spinner_color, (millis() / slowdown) % FACE_COUNT);
 }
 
 bool Explosion(Color base_color) {
@@ -74,14 +69,7 @@ bool Explosion(Color base_color) {
     }
   }
 
-  if (explosion_timer_.getRemaining() > 200) {
-    setColor(lighten(base_color,
-                     255 - ((explosion_timer_.getRemaining() - 200) / 3)));
-  } else if (explosion_timer_.getRemaining() > 100) {
-    setColor(WHITE);
-  } else {
-    setColor(OFF);
-  }
+  setColor(lighten(base_color, 255 - (explosion_timer_.getRemaining() / 4)));
 
   return false;
 }
