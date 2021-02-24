@@ -133,14 +133,15 @@ void ComputeMapStats() {
 
   for (byte i = 0; i < index_; ++i) {
     const Data& map_data = map_[i];
-    // Update number of players.
-    if (map_data.player != 0 &&
-        stats_.player[map_data.player].blink_count == 0) {
-      stats_.player_count++;
-    }
 
     // Update player blink count.
     stats_.player[map_data.player].blink_count++;
+
+    // Update number of players.
+    if (map_data.player != 0 &&
+        stats_.player[map_data.player].blink_count == 1) {
+      stats_.player_count++;
+    }
 
     // Update player can move.
     for (byte j = 0; j < index_; ++j) {
