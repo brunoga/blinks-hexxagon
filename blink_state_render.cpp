@@ -35,7 +35,8 @@ static bool reset_timer_if_expired(Timer* timer, word ms) {
 }
 
 static byte compute_pulse_dim(byte start, byte slowdown) {
-  if (reset_timer_if_expired(&pulse_timer_, (255 - start) * slowdown)) {
+  if (pulse_timer_.isExpired()) {
+    pulse_timer_.set((255 - start) * slowdown);
     reverse_ = !reverse_;
   }
 
@@ -49,7 +50,7 @@ void ResetPulseTimer() {
   reverse_ = false;
 }
 
-void __attribute__((noinline)) Pulse(byte start, byte slowdown) {
+void Pulse(byte start, byte slowdown) {
   Player(compute_pulse_dim(start, slowdown));
 }
 
@@ -75,19 +76,8 @@ bool Explosion(Color base_color) {
 }
 
 void Player(byte dim_level) {
-  if (blink_timer_.isExpired()) {
-    blink_timer_.set(BLINK_STATE_RENDER_BLINK_MS);
+  if (reset_timer_if_expired(&blink_timer_, BLINK_STATE_RENDER_BLINK_MS)) {
     blink_on_ = !blink_on_;
-  }
-
-  if (game::state::GetWinnerPlayer() != 0 &&
-      game::state::GetWinnerPlayer() != blink::state::GetPlayer()) {
-    // We have a winner and this Blink does not belong to it. Render as solid
-    // winner color.
-    setColor(
-        dim(game::player::GetColor(game::state::GetWinnerPlayer()), dim_level));
-
-    return;
   }
 
   // It is actually cheaper to call setColorOnFace() multiple times below than

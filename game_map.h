@@ -25,6 +25,7 @@ struct Statistics {
     bool can_move : 1;
   } player[GAME_PLAYER_MAX_PLAYERS];
   bool local_blink_empty_space_in_range;
+  byte winning_players_mask;
 };
 
 void Setup();

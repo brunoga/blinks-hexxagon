@@ -131,6 +131,7 @@ bool GetMapping() { return (!propagation_timer_.isExpired()); }
 void ComputeMapStats() {
   memset(&stats_, 0, sizeof(Statistics));
 
+  byte max_player_blinks = 0;
   for (byte i = 0; i < index_; ++i) {
     const Data& map_data = map_[i];
 
@@ -138,9 +139,19 @@ void ComputeMapStats() {
     stats_.player[map_data.player].blink_count++;
 
     // Update number of players.
-    if (map_data.player != 0 &&
-        stats_.player[map_data.player].blink_count == 1) {
-      stats_.player_count++;
+    if (map_data.player != 0) {
+      if (stats_.player[map_data.player].blink_count == 1) {
+        stats_.player_count++;
+      }
+
+      byte player_mask = 1 << map_data.player;
+
+      if (stats_.player[map_data.player].blink_count > max_player_blinks) {
+        max_player_blinks = stats_.player[map_data.player].blink_count;
+        stats_.winning_players_mask = player_mask;
+      } else {
+        stats_.winning_players_mask |= player_mask;
+      }
     }
 
     // Update player can move.
