@@ -42,16 +42,12 @@ static bool record_connection_state(bool check1, bool check2, byte face_mask,
   return false;
 }
 
-static byte check_face_connection(byte face_mask, bool expired, bool is_ai) {
+static byte check_face_connection(byte face_mask, bool expired) {
   bool previously_connected_face = previously_connected_faces_ & face_mask;
   bool wants_disconnection_face = wants_disconnection_faces_ & face_mask;
   bool wants_connection_face = wants_connection_faces_ & face_mask;
   bool track_connection = game::state::Get() >= GAME_STATE_SETUP_MAP &&
                           game::state::Get() < GAME_STATE_END;
-
-  if (is_ai) {
-    return BLINK_STATE_FACE_DISCONNECTED;
-  }
 
   if (expired) {
     // Face is not connected.
@@ -83,14 +79,23 @@ void ProcessTop() {
   byte currently_connected_faces = 0;
 
   FOREACH_FACE(face) {
+    bool expired = isValueReceivedOnFaceExpired(face);
+
     Value value = {.as_byte = getLastValueReceivedOnFace(face)};
 
-    bool is_ai = value.ai && !value.hexxagon;
+    if (value.ai && !value.hexxagon) {
+      if (!expired && value.map_requested) {
+        // The Blink connected to this face looks like an AI and is requesting
+        // the map.
+        ai_face_ = face;
+      }
+
+      continue;
+    }
 
     byte face_mask = (1 << face);
 
-    switch (check_face_connection(face_mask, isValueReceivedOnFaceExpired(face),
-                                  is_ai)) {
+    switch (check_face_connection(face_mask, expired)) {
       case BLINK_STATE_FACE_CONNECTED:
         currently_connected_faces |= face_mask;
         break;
@@ -115,12 +120,6 @@ void ProcessTop() {
                value.color_override) {
       // Color override is on and it was not because the game was reset.
       blink::state::StartColorOverride();
-    }
-
-    if (is_ai && value.map_requested) {
-      // The Blink connected to this face looks like an AI and is requesting
-      // the map.
-      ai_face_ = face;
     }
 
     if (value.player != 0 && value.player != blink::state::GetPlayer()) {

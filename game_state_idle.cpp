@@ -1,6 +1,7 @@
 #include "game_state_idle.h"
 
 #include "blink_state.h"
+#include "blink_state_face.h"
 #include "game_message.h"
 #include "game_state.h"
 
@@ -15,6 +16,7 @@ void Handler(byte* state, bool button_double_clicked) {
   // states every loop iteration here. This is kinda harmless.
   game::state::Reset();
   blink::state::Reset();
+  blink::state::face::handler::Reset();
 
   if (!button_double_clicked) return;
 
