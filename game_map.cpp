@@ -145,12 +145,14 @@ void ComputeMapStats() {
       }
 
       byte player_mask = 1 << map_data.player;
+      byte player_blink_count = stats_.player[map_data.player].blink_count;
 
-      if (stats_.player[map_data.player].blink_count > max_player_blinks) {
+      if (player_blink_count >= max_player_blinks) {
+        stats_.winning_players_mask =
+            player_blink_count == max_player_blinks
+                ? stats_.winning_players_mask | player_mask
+                : player_mask;
         max_player_blinks = stats_.player[map_data.player].blink_count;
-        stats_.winning_players_mask = player_mask;
-      } else {
-        stats_.winning_players_mask |= player_mask;
       }
     }
 
