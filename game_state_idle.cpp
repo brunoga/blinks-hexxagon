@@ -18,6 +18,8 @@ void Handler(byte* state, bool button_double_clicked) {
   blink::state::Reset();
   blink::state::face::handler::Reset();
 
+  FOREACH_FACE(face) { resetPendingDatagramOnFace(face); }
+
   if (!button_double_clicked) return;
 
   *state = GAME_STATE_SETUP_SELECT_PLAYERS;

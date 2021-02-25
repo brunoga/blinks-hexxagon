@@ -152,8 +152,6 @@ bool FaceOk(byte face) {
 }
 
 void ResetGame() {
-  FOREACH_FACE(face) { resetPendingDatagramOnFace(face); }
-
   if (game::state::Get() == GAME_STATE_IDLE) return;
 
   blink::state::StartColorOverride();
