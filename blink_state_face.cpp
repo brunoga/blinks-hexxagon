@@ -71,6 +71,7 @@ void ProcessTop() {
           if (!(wants_connection_faces_ & face_mask)) {
             // And it is not one we expected to be connecting to us.
             wants_disconnection_faces_ |= face_mask;
+            continue;
           } else {
             // We wanted it to be connected. All good.
             wants_connection_faces_ &= ~face_mask;
