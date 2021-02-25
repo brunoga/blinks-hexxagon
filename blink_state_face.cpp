@@ -152,12 +152,9 @@ bool FaceOk(byte face) {
 }
 
 void ResetGame() {
-  if (game::state::Get() == GAME_STATE_IDLE) return;
-
-  // wants_connection_faces_ = 0;
-  // wants_disconnection_faces_ = 0;
-
   FOREACH_FACE(face) { resetPendingDatagramOnFace(face); }
+
+  if (game::state::Get() == GAME_STATE_IDLE) return;
 
   blink::state::StartColorOverride();
 
