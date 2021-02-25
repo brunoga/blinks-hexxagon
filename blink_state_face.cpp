@@ -56,18 +56,6 @@ static byte check_face_connection(byte face_mask, bool expired, bool is_ai) {
   if (expired) {
     // Face is not connected.
     if (track_connection) {
-      //      if (previously_connected_face) {
-      //        // It just disconnected.
-      //        if (!wants_disconnection_face) {
-      // It is not one we expected to be disconnected.
-      //          wants_connection_faces_ |= face_mask;
-      //          return BLINK_STATE_FACE_WANTS_CONNECTED;
-      //        } else {
-      // We wanted it to be disconnected. All good.
-      //          wants_disconnection_faces_ &= ~face_mask;
-      //        }
-      //      }
-
       if (record_connection_state(
               previously_connected_face, !wants_disconnection_face, face_mask,
               &wants_connection_faces_, &wants_disconnection_faces_)) {
@@ -78,31 +66,14 @@ static byte check_face_connection(byte face_mask, bool expired, bool is_ai) {
   } else {
     // Face is connected.
     if (track_connection) {
-      //  if (!previously_connected_face) {
-      // It just connected.
-      //    if (!wants_connection_face) {
-      // It is not one we expected to be connected.
-      //      wants_disconnection_faces_ |= face_mask;
-      //      return BLINK_STATE_FACE_WANTS_DISCONNECTED;
-      //    } else {
-      // We wanted it to be connected. All good.
-      //      wants_connection_faces_ &= ~face_mask;
-      //    }
-      //  }
-
       if (record_connection_state(
               !previously_connected_face, !wants_connection_face, face_mask,
               &wants_disconnection_faces_, &wants_connection_faces_)) {
         return BLINK_STATE_FACE_WANTS_DISCONNECTED;
       }
-      //}   else {
-      // return BLINK_STATE_FACE_CONNECTED;
-      //}
     }
     return BLINK_STATE_FACE_CONNECTED;
   }
-  // This face is not connected to any Blink or we are not tracking face
-  // commections.
 }
 
 void ProcessTop() {
@@ -128,13 +99,12 @@ void ProcessTop() {
         // FALLTHROUGH
       case BLINK_STATE_FACE_DISCONNECTED:
         continue;
-        break;
       case BLINK_STATE_FACE_WANTS_CONNECTED:
         if (game::state::Get() == GAME_STATE_SETUP_MAP) {
           // Blink removed while mapping. Reset game.
           ResetGame();
         }
-        break;
+        continue;
     }
 
     if (value.reset_state != previous_value_[face].reset_state &&
@@ -143,6 +113,7 @@ void ProcessTop() {
       ResetGame();
     } else if (value.color_override != previous_value_[face].color_override &&
                value.color_override) {
+      // Color override is on and it was not because the game was reset.
       blink::state::StartColorOverride();
     }
 
