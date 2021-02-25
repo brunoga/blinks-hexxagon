@@ -2,6 +2,7 @@
 
 #include <blinklib.h>
 
+#include "blink_state_face.h"
 #include "game_state.h"
 #include "game_state_end_render.h"
 #include "game_state_idle_render.h"
@@ -51,6 +52,8 @@ void __attribute__((noinline)) Reset() {
   state_.target = false;
   state_.target_type = BLINK_STATE_TARGET_TYPE_NONE;
   state_.player = 0;
+
+  blink::state::face::handler::Reset();
 }
 
 void Render(byte game_state) {
