@@ -19,6 +19,18 @@ namespace game {
 
 namespace message {
 
+static void maybe_select_blink(const byte* payload,
+                               void (*move_setter)(position::Coordinates),
+                               void (*blink_setter)(bool), byte new_state) {
+  if (new_state == game::state::Get()) return;
+
+  move_setter(*((position::Coordinates*)payload));
+  if (position::Distance({(int8_t)payload[0], (int8_t)payload[1]}) == 0) {
+    blink_setter(true);
+    game::state::Set(new_state);
+  }
+}
+
 static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
                                 bool loop) {
   (void)src_face;
@@ -37,18 +49,14 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
       break;
     }
     case MESSAGE_SELECT_ORIGIN:
-      game::map::SetMoveOrigin(*((position::Coordinates*)payload));
-      if (position::Distance({(int8_t)payload[0], (int8_t)payload[1]}) == 0) {
-        blink::state::SetOrigin(true);
-        game::state::Set(GAME_STATE_PLAY_SELECT_TARGET);
-      }
+      maybe_select_blink(payload, game::map::SetMoveOrigin,
+                         blink::state::SetOrigin,
+                         GAME_STATE_PLAY_SELECT_TARGET);
       break;
     case MESSAGE_SELECT_TARGET:
-      game::map::SetMoveTarget(*((position::Coordinates*)payload));
-      if (position::Distance({(int8_t)payload[0], (int8_t)payload[1]}) == 0) {
-        blink::state::SetTarget(true);
-        game::state::Set(GAME_STATE_PLAY_MOVE_CONFIRMED);
-      }
+      maybe_select_blink(payload, game::map::SetMoveTarget,
+                         blink::state::SetTarget,
+                         GAME_STATE_PLAY_MOVE_CONFIRMED);
       break;
   }
 }
