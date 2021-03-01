@@ -25,6 +25,8 @@ static byte wants_disconnection_faces_;
 static byte ai_face_;
 static bool enemy_neighbor_;
 
+static bool reset_state_;
+
 static bool record_connection_state(bool check1, bool check2, byte face_mask,
                                     byte* mask1, byte* mask2) {
   if (check1) {
@@ -112,9 +114,9 @@ void ProcessTop() {
         continue;
     }
 
-    if (value.reset_state != previous_value_[face].reset_state &&
-        value.reset_state) {
-      // Connected Blink changed state to reset, so we also reset.
+    if (value.reset_state != previous_value_[face].reset_state) {
+      // Connected Blink changed reset state, so we also do it.
+      reset_state_ = !value.reset_state;  // Ugly.
       ResetGame();
     } else if (value.color_override != previous_value_[face].color_override &&
                value.color_override) {
@@ -136,7 +138,7 @@ void ProcessBottom() {
   Value output_value = {/*map_requested=*/false,
                         /*hexxagon=*/true,
                         /*color_override=*/blink::state::GetColorOverride(),
-                        /*reset_state=*/game::state::Get() == GAME_STATE_IDLE,
+                        /*reset_state=*/reset_state_,
                         /*ai=*/false,
                         /*player=*/blink::state::GetPlayer()};
   setValueSentOnAllFaces(output_value.as_byte);
@@ -152,7 +154,7 @@ bool FaceOk(byte face) {
 }
 
 void ResetGame() {
-  if (game::state::Get() == GAME_STATE_IDLE) return;
+  reset_state_ = !reset_state_;
 
   blink::state::StartColorOverride();
 
