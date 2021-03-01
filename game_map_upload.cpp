@@ -12,7 +12,7 @@
 #define GAME_MAP_UPLOAD_STATE_SEND_METADATA 0
 #define GAME_MAP_UPLOAD_STATE_UPLOAD 1
 
-#define GAME_MAP_UPLOAD_METADATA_SIZE 3
+#define GAME_MAP_UPLOAD_METADATA_SIZE 2
 
 // 2 byte entries (4 bytes total). Chosen to be smaller than the maximum size of
 // datagram we use otherwise.
@@ -52,8 +52,8 @@ bool Process() {
   switch (state_) {
     case GAME_MAP_UPLOAD_STATE_SEND_METADATA: {
       // Upload just started. Send map metadata.
-      byte payload[GAME_MAP_UPLOAD_METADATA_SIZE] = {
-          MESSAGE_MAP_UPLOAD, map_size, game::state::GetData()};
+      byte payload[GAME_MAP_UPLOAD_METADATA_SIZE] = {MESSAGE_MAP_UPLOAD,
+                                                     map_size};
       if (sendDatagramOnFace(payload, GAME_MAP_UPLOAD_METADATA_SIZE,
                              current_ai_face)) {
         // Size sent. Switch to actual map upload.
@@ -72,6 +72,14 @@ bool Process() {
         // Chunk sent. Increase the map upload index.
         index_ += delta;
       }
+
+      if (index_ == map_size) {
+        // Force sending a game state update message so the AI has up-to-date
+        // data.
+        game::state::Set(GAME_STATE_PLAY, true);
+        game::state::Set(GAME_STATE_PLAY_SELECT_ORIGIN);
+      }
+
       break;
   }
 
