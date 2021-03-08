@@ -1,6 +1,7 @@
 #include "game_map_upload.h"
 
 #include <blinklib.h>
+#include <string.h>
 
 #include "blink_state.h"
 #include "blink_state_face.h"
@@ -49,11 +50,14 @@ bool Process() {
 
   const game::map::Data* map_data = game::map::Get();
 
+  byte payload[5];
+  payload[0] = MESSAGE_MAP_UPLOAD;
+
   switch (state_) {
     case GAME_MAP_UPLOAD_STATE_SEND_METADATA: {
       // Upload just started. Send map metadata.
-      byte payload[GAME_MAP_UPLOAD_METADATA_SIZE] = {MESSAGE_MAP_UPLOAD,
-                                                     map_size};
+      payload[1] = map_size;
+
       if (sendDatagramOnFace(payload, GAME_MAP_UPLOAD_METADATA_SIZE,
                              current_ai_face)) {
         // Size sent. Switch to actual map upload.
@@ -68,7 +72,8 @@ bool Process() {
       byte delta = remaining > GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
                        ? GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
                        : remaining;
-      if (sendDatagramOnFace(&(map_data[index_]), delta * 2, current_ai_face)) {
+      memcpy(&payload[1], &(map_data[index_]), (delta * 2));
+      if (sendDatagramOnFace(payload, (delta * 2) + 1, current_ai_face)) {
         // Chunk sent. Increase the map upload index.
         index_ += delta;
       }
