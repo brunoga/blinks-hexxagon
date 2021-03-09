@@ -64,7 +64,7 @@ static bool find_entry_in_map(int8_t x, int8_t y) {
 
 static void __attribute__((noinline))
 add_to_map(int8_t x, int8_t y, byte player) {
-  map_[index_++] = {x, y, player};
+  map_[index_] = {x, y, player};
   index_++;
 }
 
@@ -154,7 +154,7 @@ void ComputeMapStats() {
             player_blink_count == max_player_blinks
                 ? stats_.winning_players_mask | player_mask
                 : player_mask;
-        max_player_blinks = stats_.player[map_data.player].blink_count;
+        max_player_blinks = player_blink_count;
       }
     }
 
