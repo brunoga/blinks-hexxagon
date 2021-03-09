@@ -64,7 +64,7 @@ static bool find_entry_in_map(int8_t x, int8_t y) {
 
 static void __attribute__((noinline))
 add_to_map(int8_t x, int8_t y, byte player) {
-  map_[index_] = {x, y, player};
+  map_[index_++] = {x, y, player};
   index_++;
 }
 
@@ -76,15 +76,16 @@ static void add_local_to_map() {
 static void update_blinks(position::Coordinates coordinates, byte player,
                           bool update_neighbors) {
   for (byte i = 0; i < index_; ++i) {
-    if ((position::coordinates::Distance({(int8_t)map_[i].x, (int8_t)map_[i].y},
-                                         coordinates) == 0) ||
-        (update_neighbors && (map_[i].player != 0) &&
-         (position::coordinates::Distance(
-              coordinates, {(int8_t)map_[i].x, (int8_t)map_[i].y}) == 1))) {
+    byte distance = position::coordinates::Distance(
+        {(int8_t)map_[i].x, (int8_t)map_[i].y}, coordinates);
+    if ((distance == 0) ||
+        (update_neighbors && (map_[i].player != GAME_PLAYER_NO_PLAYER) &&
+         (distance == 1))) {
       // This is either the position we are updating or we also want to update
       // neighboors and this is a non-empty neighbor (we just needed to update
       // neighbors of different players, but that would be an extra check and
-      // use more storage due to that. Updating a player to itself is harmless).
+      // use more storage due to that. Updating a player to itself is
+      // harmless).
       map_[i].player = player;
     }
   }
@@ -138,12 +139,13 @@ void ComputeMapStats() {
     // Update player blink count.
     stats_.player[map_data.player].blink_count++;
 
-    // Update number of players.
-    if (map_data.player != 0) {
+    if (map_data.player != GAME_PLAYER_NO_PLAYER) {
+      // Update number of players.
       if (stats_.player[map_data.player].blink_count == 1) {
         stats_.player_count++;
       }
 
+      // Keep track of currently winning players.
       byte player_mask = 1 << map_data.player;
       byte player_blink_count = stats_.player[map_data.player].blink_count;
 
