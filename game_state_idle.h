@@ -10,7 +10,7 @@ namespace state {
 namespace idle {
 
 // Idle state handler. This just waits for a click to move to the setup state.
-void Handler(byte* state);
+void Handler(byte* state, bool button_double_clicked);
 
 }  // namespace idle
 

@@ -19,13 +19,11 @@ namespace play {
 
 static bool auto_select_ = false;
 
-static void select_origin(byte* state) {
+static void select_origin(byte* state, bool button_single_clicked) {
   if (game::state::Changed()) {
     // State changed. Reset animation timer to improve synchronization.
     blink::state::render::ResetPulseTimer();
   }
-
-  bool button_clicked = util::NoSleepButtonSingleClicked();
 
   // We are going to select an origin, so reset any Blink that is currently
   // one.
@@ -44,7 +42,7 @@ static void select_origin(byte* state) {
   }
 
   // We pass all checks, but we do nothing until we get a click.
-  if (!button_clicked && !auto_select_) return;
+  if (!button_single_clicked && !auto_select_) return;
 
   auto_select_ = false;
 
@@ -68,20 +66,18 @@ static void origin_selected(byte* state) {
   *state = GAME_STATE_PLAY_SELECT_TARGET;
 }
 
-static void select_target(byte* state) {
-  bool button_clicked = util::NoSleepButtonSingleClicked();
-
+static void select_target(byte* state, bool button_single_clicked) {
   // We are going to select a target, so reset any blink that is currently
   // one.
   blink::state::SetTarget(false);
 
-  if (blink::state::GetPlayer() == GAME_PLAYER_NO_PLAYER &&
-      position::Distance(game::map::GetMoveOrigin()) <= 2) {
-    blink::state::SetTargetType(position::Distance(game::map::GetMoveOrigin()));
+  byte distance = position::Distance(game::map::GetMoveOrigin());
+  if (blink::state::GetPlayer() == GAME_PLAYER_NO_PLAYER && distance <= 2) {
+    blink::state::SetTargetType(distance);
   }
 
   // We pass all checks, but we do nothing until we get a click.
-  if (!button_clicked) return;
+  if (!button_single_clicked) return;
 
   // Are we a blink that belongs to the current player?
   if (blink::state::GetPlayer() == game::state::GetPlayer() &&
@@ -157,18 +153,18 @@ static void resolve_move(byte* state) {
   }
 }
 
-void Handler(byte* state) {
+void Handler(byte* state, bool button_single_clicked) {
   blink::state::SetTargetType(BLINK_STATE_TARGET_TYPE_NONE);
 
   switch (*state) {
     case GAME_STATE_PLAY_SELECT_ORIGIN:
-      select_origin(state);
+      select_origin(state, button_single_clicked);
       break;
     case GAME_STATE_PLAY_ORIGIN_SELECTED:
       origin_selected(state);
       break;
     case GAME_STATE_PLAY_SELECT_TARGET:
-      select_target(state);
+      select_target(state, button_single_clicked);
       break;
     case GAME_STATE_PLAY_TARGET_SELECTED:
       target_selected(state);

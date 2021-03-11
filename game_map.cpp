@@ -76,15 +76,16 @@ static void add_local_to_map() {
 static void update_blinks(position::Coordinates coordinates, byte player,
                           bool update_neighbors) {
   for (byte i = 0; i < index_; ++i) {
-    if ((position::coordinates::Distance({(int8_t)map_[i].x, (int8_t)map_[i].y},
-                                         coordinates) == 0) ||
-        (update_neighbors && (map_[i].player != 0) &&
-         (position::coordinates::Distance(
-              coordinates, {(int8_t)map_[i].x, (int8_t)map_[i].y}) == 1))) {
+    byte distance = position::coordinates::Distance(
+        {(int8_t)map_[i].x, (int8_t)map_[i].y}, coordinates);
+    if ((distance == 0) ||
+        (update_neighbors && (map_[i].player != GAME_PLAYER_NO_PLAYER) &&
+         (distance == 1))) {
       // This is either the position we are updating or we also want to update
       // neighboors and this is a non-empty neighbor (we just needed to update
       // neighbors of different players, but that would be an extra check and
-      // use more storage due to that. Updating a player to itself is harmless).
+      // use more storage due to that. Updating a player to itself is
+      // harmless).
       map_[i].player = player;
     }
   }
@@ -131,16 +132,31 @@ bool GetMapping() { return (!propagation_timer_.isExpired()); }
 void ComputeMapStats() {
   memset(&stats_, 0, sizeof(Statistics));
 
+  byte max_player_blinks = 0;
   for (byte i = 0; i < index_; ++i) {
     const Data& map_data = map_[i];
-    // Update number of players.
-    if (map_data.player != 0 &&
-        stats_.player[map_data.player].blink_count == 0) {
-      stats_.player_count++;
-    }
 
     // Update player blink count.
     stats_.player[map_data.player].blink_count++;
+
+    if (map_data.player != GAME_PLAYER_NO_PLAYER) {
+      // Update number of players.
+      if (stats_.player[map_data.player].blink_count == 1) {
+        stats_.player_count++;
+      }
+
+      // Keep track of currently winning players.
+      byte player_mask = 1 << map_data.player;
+      byte player_blink_count = stats_.player[map_data.player].blink_count;
+
+      if (player_blink_count >= max_player_blinks) {
+        stats_.winning_players_mask =
+            player_blink_count == max_player_blinks
+                ? stats_.winning_players_mask | player_mask
+                : player_mask;
+        max_player_blinks = player_blink_count;
+      }
+    }
 
     // Update player can move.
     for (byte j = 0; j < index_; ++j) {

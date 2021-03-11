@@ -7,9 +7,6 @@
 // a software bug but also a hardware one).
 //#define HEXXAGON_ENABLE_PENDING_FACE_DEBUG
 
-// Uncomment to switch reset from long-press to multi-click.
-#define HEXXAGON_MULTI_CLICK_RESET
-
 // Blink state render configuration (these are all non-optional).
 
 // Idle state.

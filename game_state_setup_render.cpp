@@ -15,11 +15,14 @@ namespace state {
 namespace setup {
 
 void Render() {
-  blink::state::render::Player(HEXXAGON_RENDER_SETUP_STATE_COLOR_DIM);
-
   if (game::state::Get() == GAME_STATE_SETUP_MAP) {
     blink::state::render::Pulse(HEXXAGON_RENDER_SETUP_STATE_PULSE_START_DIM,
                                 HEXXAGON_RENDER_SETUP_STATE_PULSE_SLOWDOWN);
+  } else {
+    byte brightness = blink::state::GetPlayer() == GAME_PLAYER_NO_PLAYER
+                          ? HEXXAGON_RENDER_SETUP_STATE_COLOR_DIM
+                          : 255;
+    blink::state::render::Player(brightness);
   }
 }
 

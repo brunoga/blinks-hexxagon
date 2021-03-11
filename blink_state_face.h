@@ -45,6 +45,9 @@ bool FaceOk(byte face);
 // Send a game reset request accross the board.
 void ResetGame();
 
+// Resets face value handler.
+void Reset();
+
 }  // namespace handler
 
 }  // namespace face

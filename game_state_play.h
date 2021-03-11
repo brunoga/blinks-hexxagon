@@ -10,7 +10,7 @@ namespace state {
 namespace play {
 
 // Play state handler. Handles actual game play.
-void Handler(byte* state);
+void Handler(byte* state, bool button_single_clicked);
 
 }  // namespace play
 

@@ -14,6 +14,7 @@ namespace player {
 
 byte GetNext(byte current_player);
 Color GetColor(byte player);
+bool GetLitFace(byte player, byte face);
 
 }  // namespace player
 
