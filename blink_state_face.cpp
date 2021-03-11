@@ -117,8 +117,8 @@ void ProcessTop() {
       game::state::Set(GAME_STATE_IDLE, true);
     }
 
-    if (value.color_override != previous_value_[face].color_override &&
-               value.color_override) {
+    if (value.color_override && (value.color_override !=
+        previous_value_[face].color_override)) {
       // Color override is on and it was not because the game was reset.
       blink::state::StartColorOverride();
     }
