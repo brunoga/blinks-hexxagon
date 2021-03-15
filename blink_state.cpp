@@ -2,6 +2,7 @@
 
 #include <blinklib.h>
 
+#include "blink_state_render.h"
 #include "game_state.h"
 #include "game_state_end_render.h"
 #include "game_state_idle_render.h"
@@ -42,6 +43,9 @@ byte GetPlayer() { return state_.player; }
 
 void StartColorOverride() {
   color_override_timer_.set(BLINK_STATE_COLOR_OVERRIDE_TIMEOUT);
+
+  // Use the opportunity to reset the pulse timer.
+  blink::state::render::ResetPulseTimer();
 }
 
 bool GetColorOverride() { return !color_override_timer_.isExpired(); }
