@@ -45,7 +45,7 @@ static byte compute_pulse_dim(byte start, byte slowdown) {
   return reverse_ ? 255 - base_brightness : start + base_brightness;
 }
 
-void ResetPulseTimer() {
+void __attribute__((noinline)) ResetPulseTimer() {
   pulse_timer_.set(0);
   reverse_ = false;
 }
