@@ -48,7 +48,7 @@ void loop() {
     if (game::state::Propagate()) {
       // Run our state machine.
       if (state < GAME_STATE_SETUP) {
-        game::state::idle::Handler(&state, button_double_clicked);
+        game::state::idle::Handler(&state, button_single_clicked);
       } else if (state < GAME_STATE_PLAY) {
         game::state::setup::Handler(&state, button_single_clicked,
                                     button_double_clicked);

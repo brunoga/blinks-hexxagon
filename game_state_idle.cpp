@@ -12,7 +12,7 @@ namespace state {
 
 namespace idle {
 
-void Handler(byte* state, bool button_double_clicked) {
+void Handler(byte* state, bool button_single_clicked) {
   // Reset all relevant state.
   game::state::Reset();
   blink::state::Reset();
@@ -22,7 +22,10 @@ void Handler(byte* state, bool button_double_clicked) {
   // up under some edge-case conditions.
   FOREACH_FACE(face) { resetPendingDatagramOnFace(face); }
 
-  if (!button_double_clicked) return;
+  if (!button_single_clicked) return;
+
+  // Immediately switch to player 1.
+  blink::state::SetPlayer(1);
 
   *state = GAME_STATE_SETUP_SELECT_PLAYERS;
 }
