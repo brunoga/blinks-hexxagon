@@ -11,7 +11,7 @@
 
 // Maximum level of adjustment to the dimness applied to colors throughout the
 // game. Any explicitly given dim value below (*_DIM) must be smaller than 256 -
-// HEXXAGON_RENDER_DIM_ADJUSTMENT.
+// this value.
 #define HEXXAGON_RENDER_DIM_ADJUSTMENT 32
 
 // Idle state.

@@ -95,15 +95,12 @@ void Player(byte dim_level) {
     } else {
       byte dim_adjustment =
           getSerialNumberByte(face) % HEXXAGON_RENDER_DIM_ADJUSTMENT;
-      if (game::player::GetLitFace(blink::state::GetPlayer(), face)) {
-        setColorOnFace(dim(game::player::GetColor(blink::state::GetPlayer()),
-                           dim_level + dim_adjustment),
-                       face);
-      } else {
-        setColorOnFace(dim(game::player::GetColor(blink::state::GetPlayer()),
-                           dim_adjustment * 4),
-                       face);
-      }
+      setColorOnFace(
+          dim(game::player::GetColor(blink::state::GetPlayer()),
+              game::player::GetLitFace(blink::state::GetPlayer(), face)
+                  ? dim_level + dim_adjustment
+                  : dim_adjustment * 4),
+          face);
     }
   }
 }
