@@ -9,6 +9,11 @@
 
 // Blink state render configuration (these are all non-optional).
 
+// Maximum level of adjustment to the dimness applied to colors throughout the
+// game. Any explicitly given dim value below (*_DIM) must be smaller than 256 -
+// HEXXAGON_RENDER_DIM_ADJUSTMENT.
+#define HEXXAGON_RENDER_DIM_ADJUSTMENT 32
+
 // Idle state.
 #define HEXXAGON_RENDER_IDLE_STATE_PULSE_START_DIM 143
 #define HEXXAGON_RENDER_IDLE_STATE_PULSE_SLOWDOWN 10

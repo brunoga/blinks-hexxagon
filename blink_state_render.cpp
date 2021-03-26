@@ -1,5 +1,7 @@
 #include "blink_state_render.h"
 
+#include <hexxagon_config.h>
+
 #include "blink_state.h"
 #include "blink_state_face.h"
 #include "game_player.h"
@@ -36,13 +38,14 @@ static bool reset_timer_if_expired(Timer* timer, word ms) {
 
 static byte compute_pulse_dim(byte start, byte slowdown) {
   if (pulse_timer_.isExpired()) {
-    pulse_timer_.set((255 - start) * slowdown);
+    pulse_timer_.set((255 - HEXXAGON_RENDER_DIM_ADJUSTMENT - start) * slowdown);
     reverse_ = !reverse_;
   }
 
   byte base_brightness = pulse_timer_.getRemaining() / slowdown;
 
-  return reverse_ ? 255 - base_brightness : start + base_brightness;
+  return reverse_ ? 255 - HEXXAGON_RENDER_DIM_ADJUSTMENT - base_brightness
+                  : start + base_brightness;
 }
 
 void __attribute__((noinline)) ResetPulseTimer() {
@@ -89,12 +92,18 @@ void Player(byte dim_level) {
       } else {
         setColorOnFace(OFF, face);
       }
-    } else if (game::player::GetLitFace(blink::state::GetPlayer(), face)) {
-      setColorOnFace(
-          dim(game::player::GetColor(blink::state::GetPlayer()), dim_level),
-          face);
     } else {
-      setColorOnFace(OFF, face);
+      byte dim_adjustment =
+          getSerialNumberByte(face) % HEXXAGON_RENDER_DIM_ADJUSTMENT;
+      if (game::player::GetLitFace(blink::state::GetPlayer(), face)) {
+        setColorOnFace(dim(game::player::GetColor(blink::state::GetPlayer()),
+                           dim_level + dim_adjustment),
+                       face);
+      } else {
+        setColorOnFace(dim(game::player::GetColor(blink::state::GetPlayer()),
+                           dim_adjustment * 4),
+                       face);
+      }
     }
   }
 }
