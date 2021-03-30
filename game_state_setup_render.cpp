@@ -21,7 +21,7 @@ void Render() {
   } else {
     byte brightness = blink::state::GetPlayer() == GAME_PLAYER_NO_PLAYER
                           ? HEXXAGON_RENDER_SETUP_STATE_COLOR_DIM
-                          : 255 - HEXXAGON_RENDER_DIM_ADJUSTMENT;
+                          : 255 - HEXXAGON_RENDER_LIT_DIM_OFFSET;
     blink::state::render::Player(brightness);
   }
 }

@@ -12,7 +12,11 @@
 // Maximum level of adjustment to the dimness applied to colors throughout the
 // game. Any explicitly given dim value below (*_DIM) must be smaller than 256 -
 // this value.
-#define HEXXAGON_RENDER_DIM_ADJUSTMENT 32
+#define HEXXAGON_RENDER_LIT_DIM_OFFSET 64
+
+// Same as above, but applies as the multiplier to the dim level to use for a
+// face that would otherwise be OFF (or close to OFF).
+#define HEXXAGON_RENDER_UNLIT_DIM_MULTIPLIER 2
 
 // Idle state.
 #define HEXXAGON_RENDER_IDLE_STATE_PULSE_START_DIM 143

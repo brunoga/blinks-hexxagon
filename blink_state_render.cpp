@@ -38,13 +38,13 @@ static bool reset_timer_if_expired(Timer* timer, word ms) {
 
 static byte compute_pulse_dim(byte start, byte slowdown) {
   if (pulse_timer_.isExpired()) {
-    pulse_timer_.set((255 - HEXXAGON_RENDER_DIM_ADJUSTMENT - start) * slowdown);
+    pulse_timer_.set((255 - HEXXAGON_RENDER_LIT_DIM_OFFSET - start) * slowdown);
     reverse_ = !reverse_;
   }
 
   byte base_brightness = pulse_timer_.getRemaining() / slowdown;
 
-  return reverse_ ? 255 - HEXXAGON_RENDER_DIM_ADJUSTMENT - base_brightness
+  return reverse_ ? 255 - HEXXAGON_RENDER_LIT_DIM_OFFSET - base_brightness
                   : start + base_brightness;
 }
 
@@ -94,12 +94,12 @@ void Player(byte dim_level) {
       }
     } else {
       byte dim_adjustment =
-          getSerialNumberByte(face) % HEXXAGON_RENDER_DIM_ADJUSTMENT;
+          getSerialNumberByte(face) % HEXXAGON_RENDER_LIT_DIM_OFFSET;
       setColorOnFace(
           dim(game::player::GetColor(blink::state::GetPlayer()),
               game::player::GetLitFace(blink::state::GetPlayer(), face)
                   ? dim_level + dim_adjustment
-                  : dim_adjustment * 4),
+                  : dim_adjustment * HEXXAGON_RENDER_UNLIT_DIM_MULTIPLIER),
           face);
     }
   }
