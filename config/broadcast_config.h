@@ -1,11 +1,12 @@
 #ifndef BROADCAST_CONFIG_H_
 #define BROADCAST_CONFIG_H_
 
+// Forward declarations to prevent include cycles.
 namespace broadcast {
 
 struct Message;
 
-}
+}  // namespace broadcast
 
 namespace game {
 
@@ -19,7 +20,6 @@ namespace message {
 
 void rcv_message_handler(byte message_id, byte src_face, byte* payload,
                          bool loop);
-
 byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
                          byte* payload);
 
