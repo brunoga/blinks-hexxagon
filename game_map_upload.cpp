@@ -9,15 +9,7 @@
 #include "game_message.h"
 #include "game_state.h"
 #include "game_state_play.h"
-
-#define GAME_MAP_UPLOAD_STATE_SEND_METADATA 0
-#define GAME_MAP_UPLOAD_STATE_UPLOAD 1
-
-#define GAME_MAP_UPLOAD_METADATA_SIZE 2
-
-// 2 byte entries (4 bytes total). Chosen to be smaller than the maximum size of
-// datagram we use otherwise.
-#define GAME_MAP_UPLOAD_MAX_CHUNK_SIZE 2
+#include "src/blinks-mapping/mapping.h"
 
 namespace game {
 
@@ -25,9 +17,10 @@ namespace map {
 
 namespace upload {
 
-static byte index_;
-static byte state_;
 static byte previous_ai_face_ = FACE_COUNT;
+
+static mapping::Iterator iterator_;
+static bool map_uploaded_;
 
 bool Process() {
   byte current_ai_face = blink::state::face::handler::AIFace();
@@ -41,59 +34,40 @@ bool Process() {
     previous_ai_face_ = current_ai_face;
   }
 
-  byte map_size = game::map::GetSize();
-
-  if ((current_ai_face == FACE_COUNT) || (index_ == map_size) ||
+  if ((current_ai_face == FACE_COUNT) || map_uploaded_ ||
       (game::state::Get() != GAME_STATE_PLAY_SELECT_ORIGIN)) {
     return false;
   }
 
-  const game::map::Data* map_data = game::map::Get();
+  int8_t x;
+  int8_t y;
+  byte value = mapping::GetNextValidPosition(&iterator_, &x, &y);
 
-  byte payload[5];
-  payload[0] = MESSAGE_MAP_UPLOAD;
+  if (value == MAPPING_POSITION_EMPTY) {
+    map_uploaded_ = true;
 
-  switch (state_) {
-    case GAME_MAP_UPLOAD_STATE_SEND_METADATA: {
-      // Upload just started. Send map metadata.
-      payload[1] = map_size;
+    // Force sending a game state update message so the AI has up-to-date data.
+    game::state::Set(GAME_STATE_PLAY, true);
+    game::state::Set(GAME_STATE_PLAY_SELECT_ORIGIN);
 
-      if (sendDatagramOnFace(payload, GAME_MAP_UPLOAD_METADATA_SIZE,
-                             current_ai_face)) {
-        // Size sent. Switch to actual map upload.
-        state_ = GAME_MAP_UPLOAD_STATE_UPLOAD;
-      }
-      break;
-    }
-    case GAME_MAP_UPLOAD_STATE_UPLOAD:
-      // Now upload the actual map in chunks of
-      // GAME_MAP_UPLOAD_MAX_CHUNK_SIZE.
-      byte remaining = map_size - index_;
-      byte delta = remaining > GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
-                       ? GAME_MAP_UPLOAD_MAX_CHUNK_SIZE
-                       : remaining;
-      memcpy(&payload[1], &(map_data[index_]), (delta * 2));
-      if (sendDatagramOnFace(payload, (delta * 2) + 1, current_ai_face)) {
-        // Chunk sent. Increase the map upload index.
-        index_ += delta;
-      }
+    return false;
+  }
 
-      if (index_ == map_size) {
-        // Force sending a game state update message so the AI has up-to-date
-        // data.
-        game::state::Set(GAME_STATE_PLAY, true);
-        game::state::Set(GAME_STATE_PLAY_SELECT_ORIGIN);
-      }
+  byte payload[4] = {MESSAGE_MAP_UPLOAD, (byte)x, (byte)y, value};
 
-      break;
+  if (!sendDatagramOnFace(payload, 4, current_ai_face)) {
+    // TODO(bga): Need to resend the same position. There is currently no way to
+    // do that.
   }
 
   return true;
 }
 
-void Reset() {
-  index_ = 0;
-  state_ = GAME_MAP_UPLOAD_STATE_SEND_METADATA;
+void __attribute__((noinline)) Reset() {
+  // Doing this is enough to reset the iterator.
+  iterator_.initialized = false;
+
+  map_uploaded_ = false;
 }
 
 }  // namespace upload

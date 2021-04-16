@@ -7,17 +7,9 @@
 #include "src/blinks-broadcast/message.h"
 #include "src/blinks-position/position.h"
 
-#define GAME_MAP_MAX_BLINKS 128
-
 namespace game {
 
 namespace map {
-
-struct Data {
-  int16_t x : 6;
-  int16_t y : 6;
-  uint16_t player : 4;
-};
 
 struct Statistics {
   byte player_count;
@@ -43,9 +35,6 @@ void StartMapping();
 bool GetMapping();
 
 void ComputeMapStats();
-
-const Data* Get();
-byte GetSize();
 
 void SetMoveOrigin(position::Coordinates coordinates);
 position::Coordinates GetMoveOrigin();

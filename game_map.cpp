@@ -9,6 +9,7 @@
 #include "game_state.h"
 #include "game_state_play.h"
 #include "src/blinks-broadcast/manager.h"
+#include "src/blinks-mapping/mapping.h"
 #include "src/blinks-orientation/orientation.h"
 
 // As we can not known beforehand how many Blinks are in the map, we need a
@@ -16,14 +17,17 @@
 // last mapping message was received.
 #define GAME_MAP_PROPAGATION_TIMEOUT 2000
 
+// We use the most significant bit to indicate if the value is new (has not been
+// propagated yet) or not. This is only relevant during map generation but this
+// means we can only use values from 1 (0 is reserved) to 127 (which is fine
+// as we only use 5 values anyway).
+#define GAME_MAP_SET_NEW_VALUE(v) ((v) | 0b10000000)
+#define GAME_MAP_IS_NEW_VALUE(v) ((v)&0b10000000)
+#define GAME_MAP_RESET_NEW_VALUE(v) ((v)&0b011111111)
+
 namespace game {
 
-static game::map::Data map_[GAME_MAP_MAX_BLINKS];
-
 namespace map {
-
-static byte index_;
-static byte propagation_index_;
 
 Statistics stats_;
 
@@ -38,54 +42,49 @@ struct MoveData {
 
 static MoveData move_data_;
 
-static void maybe_propagate() {
-  if (index_ <= propagation_index_) return;
-
-  if (!game::message::SendExternalPropagateCoordinates(
-          (int8_t)map_[propagation_index_].x,
-          (int8_t)map_[propagation_index_].y,
-          (byte)map_[propagation_index_].player)) {
-    return;
-  }
-
-  propagation_index_++;
-}
-
-static bool find_entry_in_map(int8_t x, int8_t y) {
-  for (byte i = 0; i < index_; ++i) {
-    if (x == map_[i].x && y == map_[i].y) {
-      return true;
+static bool propagate_value(int8_t x, int8_t y, byte value) {
+  if (GAME_MAP_IS_NEW_VALUE(value)) {
+    byte player = GAME_MAP_RESET_NEW_VALUE(value) - 1;
+    if (game::message::SendExternalPropagateCoordinates(x, y, player)) {
+      mapping::Set(x, y, player + 1);
     }
+
+    return true;
   }
 
   return false;
 }
 
-static void __attribute__((noinline))
-add_to_map(int8_t x, int8_t y, byte player) {
-  map_[index_] = {x, y, player};
-  index_++;
-}
+static void maybe_propagate() {
+  if (!mapping::Initialized()) return;
 
-static void add_local_to_map() {
-  add_to_map(position::Local().x, position::Local().y,
-             blink::state::GetPlayer());
+  byte value = mapping::Get(position::Local().x, position::Local().y);
+  if (propagate_value(position::Local().x, position::Local().y, value)) {
+    return;
+  }
+
+  mapping::Iterator iterator;
+  int8_t x;
+  int8_t y;
+  while (byte value = mapping::GetNextValidPosition(&iterator, &x, &y) !=
+                      MAPPING_POSITION_EMPTY) {
+    if (propagate_value(x, y, value)) break;
+  }
 }
 
 static void update_blinks(position::Coordinates coordinates, byte player,
                           bool update_neighbors) {
-  for (byte i = 0; i < index_; ++i) {
-    byte distance = position::coordinates::Distance(
-        {(int8_t)map_[i].x, (int8_t)map_[i].y}, coordinates);
-    if ((distance == 0) ||
-        (update_neighbors && (map_[i].player != GAME_PLAYER_NO_PLAYER) &&
-         (distance == 1))) {
-      // This is either the position we are updating or we also want to update
-      // neighboors and this is a non-empty neighbor (we just needed to update
-      // neighbors of different players, but that would be an extra check and
-      // use more storage due to that. Updating a player to itself is
-      // harmless).
-      map_[i].player = player;
+  mapping::Set(coordinates.x, coordinates.y, player + 1);
+
+  if (update_neighbors) {
+    mapping::Iterator iterator;
+    int8_t x;
+    int8_t y;
+    while (byte value = mapping::GetNextValidPositionAround(
+                            coordinates.x, coordinates.y, 1, &iterator, &x,
+                            &y) != MAPPING_POSITION_EMPTY) {
+      byte map_player = value - 1;
+      if (map_player != GAME_PLAYER_NO_PLAYER) mapping::Set(x, y, player + 1);
     }
   }
 }
@@ -98,21 +97,21 @@ bool external_message_handler(byte local_absolute_face,
 
   propagation_timer_.set(GAME_MAP_PROPAGATION_TIMEOUT);
 
-  if (index_ == 0) {
-    // We do not have anything on our map, so we
-    // need to initialize our local data and add
-    // it to the map.
+  if (!mapping::Initialized()) {
+    // We do not have anything on our map, so we need to initialize our local
+    // data and add it to the map.
     orientation::Setup(message->payload[0], local_absolute_face);
     position::Setup(orientation::RelativeLocalFace(local_absolute_face),
                     (int8_t)message->payload[1], (int8_t)message->payload[2]);
 
-    add_local_to_map();
+    mapping::Set(position::Local().x, position::Local().y,
+                 GAME_MAP_SET_NEW_VALUE(blink::state::GetPlayer() + 1));
   }
 
-  if (!find_entry_in_map((int8_t)message->payload[1],
-                         (int8_t)message->payload[2])) {
-    add_to_map((int8_t)message->payload[1], (int8_t)message->payload[2],
-               message->payload[3]);
+  if (mapping::Get((int8_t)message->payload[1], (int8_t)message->payload[2]) ==
+      MAPPING_POSITION_EMPTY) {
+    mapping::Set((int8_t)message->payload[1], (int8_t)message->payload[2],
+                 GAME_MAP_SET_NEW_VALUE((int8_t)message->payload[3] + 1));
   }
 
   return true;
@@ -124,7 +123,8 @@ void StartMapping() {
   propagation_timer_.set(GAME_MAP_PROPAGATION_TIMEOUT);
 
   // We are the mapping origin. Add ourselves to the map.
-  add_local_to_map();
+  mapping::Set(position::Local().x, position::Local().y,
+               GAME_MAP_SET_NEW_VALUE(blink::state::GetPlayer() + 1));
 }
 
 bool GetMapping() { return (!propagation_timer_.isExpired()); }
@@ -133,21 +133,26 @@ void ComputeMapStats() {
   memset(&stats_, 0, sizeof(Statistics));
 
   byte max_player_blinks = 0;
-  for (byte i = 0; i < index_; ++i) {
-    const Data& map_data = map_[i];
+
+  mapping::Iterator iterator;
+  int8_t x;
+  int8_t y;
+  while (byte value = mapping::GetNextValidPosition(&iterator, &x, &y) !=
+                      MAPPING_POSITION_EMPTY) {
+    byte map_player = value - 1;
 
     // Update player blink count.
-    stats_.player[map_data.player].blink_count++;
+    stats_.player[map_player].blink_count++;
 
-    if (map_data.player != GAME_PLAYER_NO_PLAYER) {
+    if (map_player != GAME_PLAYER_NO_PLAYER) {
       // Update number of players.
-      if (stats_.player[map_data.player].blink_count == 1) {
+      if (stats_.player[map_player].blink_count == 1) {
         stats_.player_count++;
       }
 
       // Keep track of currently winning players.
-      byte player_mask = 1 << map_data.player;
-      byte player_blink_count = stats_.player[map_data.player].blink_count;
+      byte player_mask = 1 << map_player;
+      byte player_blink_count = stats_.player[map_player].blink_count;
 
       if (player_blink_count >= max_player_blinks) {
         stats_.winning_players_mask =
@@ -159,29 +164,29 @@ void ComputeMapStats() {
     }
 
     // Update player can move.
-    for (byte j = 0; j < index_; ++j) {
-      if ((map_[j].player == GAME_PLAYER_NO_PLAYER) &&
-          (position::coordinates::Distance(
-               {(int8_t)map_data.x, (int8_t)map_data.y},
-               {(int8_t)map_[j].x, (int8_t)map_[j].y}) <= 2)) {
-        stats_.player[map_data.player].can_move = true;
+    mapping::Iterator iterator2;
+    int8_t x2;
+    int8_t y2;
+    while (byte value =
+               mapping::GetNextValidPositionAround(
+                   x, y, 2, &iterator2, &x2, &y2) != MAPPING_POSITION_EMPTY) {
+      byte map_player_2 = value - 1;
+      if (map_player_2 == GAME_PLAYER_NO_PLAYER) {
+        stats_.player[map_player].can_move = true;
         break;
       }
     }
 
     // Update empty space in range.
+    //
+    // TODO(bga): Double chjeck this.
     if (!(stats_.local_blink_empty_space_in_range)) {
       stats_.local_blink_empty_space_in_range =
-          ((map_data.player == GAME_PLAYER_NO_PLAYER) &&
-           (position::Distance(position::Coordinates{
-                (int8_t)map_data.x, (int8_t)map_data.y}) <= 2));
+          ((map_player == GAME_PLAYER_NO_PLAYER) &&
+           (position::Distance(position::Coordinates{x, y}) <= 2));
     }
   }
 }
-
-const Data* Get() { return map_; }
-
-byte GetSize() { return index_; }
 
 void SetMoveOrigin(position::Coordinates coordinates) {
   move_data_.origin = coordinates;
@@ -221,9 +226,6 @@ bool ValidState() {
 }
 
 void Reset() {
-  index_ = 0;
-  propagation_index_ = 0;
-
   ComputeMapStats();
 
   game::map::upload::Reset();
