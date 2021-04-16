@@ -19,8 +19,8 @@ namespace game {
 
 namespace message {
 
-static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
-                                bool loop) {
+void rcv_message_handler(byte message_id, byte src_face, byte* payload,
+                         bool loop) {
   (void)src_face;
 
   if (loop) {
@@ -53,8 +53,8 @@ static void rcv_message_handler(byte message_id, byte src_face, byte* payload,
   }
 }
 
-static byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
-                                byte* payload) {
+byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
+                         byte* payload) {
   (void)src_face;
   (void)payload;
 
@@ -84,10 +84,6 @@ static bool sendMessage(byte message_id, const byte* payload,
   memcpy(message.payload, payload, payload_size);
 
   return broadcast::manager::Send(&message);
-}
-
-void Setup() {
-  broadcast::manager::Setup(rcv_message_handler, fwd_message_handler);
 }
 
 bool SendGameStateChange() {

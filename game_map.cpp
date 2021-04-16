@@ -8,7 +8,6 @@
 #include "game_message.h"
 #include "game_state.h"
 #include "game_state_play.h"
-#include "src/blinks-broadcast/handler.h"
 #include "src/blinks-broadcast/manager.h"
 #include "src/blinks-orientation/orientation.h"
 
@@ -91,12 +90,18 @@ static void update_blinks(position::Coordinates coordinates, byte player,
   }
 }
 
-void consume(const broadcast::Message* message, byte local_absolute_face) {
+bool external_message_handler(byte local_absolute_face,
+                              const broadcast::Message* message) {
+  if (message->header.id != MESSAGE_EXTERNAL_PROPAGATE_COORDINATES) {
+    return false;
+  }
+
   propagation_timer_.set(GAME_MAP_PROPAGATION_TIMEOUT);
 
   if (index_ == 0) {
-    // We do not have anything on our map, so we need to initialize our
-    // local data and add it to the map.
+    // We do not have anything on our map, so we
+    // need to initialize our local data and add
+    // it to the map.
     orientation::Setup(message->payload[0], local_absolute_face);
     position::Setup(orientation::RelativeLocalFace(local_absolute_face),
                     (int8_t)message->payload[1], (int8_t)message->payload[2]);
@@ -104,18 +109,13 @@ void consume(const broadcast::Message* message, byte local_absolute_face) {
     add_local_to_map();
   }
 
-  if (find_entry_in_map((int8_t)message->payload[1],
-                        (int8_t)message->payload[2])) {
-    return;
+  if (!find_entry_in_map((int8_t)message->payload[1],
+                         (int8_t)message->payload[2])) {
+    add_to_map((int8_t)message->payload[1], (int8_t)message->payload[2],
+               message->payload[3]);
   }
 
-  add_to_map((int8_t)message->payload[1], (int8_t)message->payload[2],
-             message->payload[3]);
-}
-
-void Setup() {
-  broadcast::message::handler::Set(
-      {MESSAGE_EXTERNAL_PROPAGATE_COORDINATES, consume});
+  return true;
 }
 
 void Process() { maybe_propagate(); }

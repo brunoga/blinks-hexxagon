@@ -1,8 +1,8 @@
 #include <blinklib.h>
-#include <hexxagon_config.h>
 
 #include "blink_state.h"
 #include "blink_state_face.h"
+#include "config/hexxagon_config.h"
 #include "game_map.h"
 #include "game_map_upload.h"
 #include "game_message.h"
@@ -18,10 +18,7 @@
     "This code requires a custom blinklib. See https://github.com/brunoga/blinklib/releases/latest"
 #endif
 
-void setup() {
-  game::message::Setup();
-  game::map::Setup();
-}
+void setup() {}
 
 void loop() {
   blink::state::face::handler::ProcessTop();

@@ -16,7 +16,11 @@ namespace game {
 
 namespace message {
 
-void Setup();
+void rcv_message_handler(byte message_id, byte src_face, byte* payload,
+                         bool loop);
+
+byte fwd_message_handler(byte message_id, byte src_face, byte dst_face,
+                         byte* payload);
 
 bool SendGameStateChange();
 

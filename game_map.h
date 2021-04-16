@@ -4,6 +4,7 @@
 #include <blinklib.h>
 
 #include "game_player.h"
+#include "src/blinks-broadcast/message.h"
 #include "src/blinks-position/position.h"
 
 #define GAME_MAP_MAX_BLINKS 128
@@ -28,10 +29,8 @@ struct Statistics {
   byte winning_players_mask;
 };
 
-void Setup();
-
-// Process should be called at the top of the mapping loop and will handle all
-// incoming mapping messages.
+// Process should be called at the top of the mapping loop and will handle
+// all incoming mapping messages.
 void Process();
 
 // Starts the mapping process. The Blink that calls it will be the coordinate
