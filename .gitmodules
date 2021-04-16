@@ -16,3 +16,6 @@
 [submodule "blinks-position"]
 	path = src/blinks-position
 	url = https://github.com/brunoga/blinks-position
+[submodule "src/blinks-mapping"]
+	path = src/blinks-mapping
+	url = https://github.com/brunoga/blinks-mapping
