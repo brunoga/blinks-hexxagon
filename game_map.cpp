@@ -23,7 +23,7 @@
 // as we only use 5 values anyway).
 #define GAME_MAP_SET_NEW_VALUE(v) ((v) | 0b10000000)
 #define GAME_MAP_IS_NEW_VALUE(v) ((v)&0b10000000)
-#define GAME_MAP_RESET_NEW_VALUE(v) ((v)&0b011111111)
+#define GAME_MAP_RESET_NEW_VALUE(v) ((v)&0b01111111)
 
 namespace game {
 
@@ -42,11 +42,11 @@ struct MoveData {
 
 static MoveData move_data_;
 
-static bool propagate_value(int8_t x, int8_t y, byte value) {
-  if (GAME_MAP_IS_NEW_VALUE(value)) {
-    byte player = GAME_MAP_RESET_NEW_VALUE(value) - 1;
-    if (game::message::SendExternalPropagateCoordinates(x, y, player)) {
-      mapping::Set(x, y, player + 1);
+static bool propagate_value(int8_t x, int8_t y, byte maybe_new_value) {
+  if (GAME_MAP_IS_NEW_VALUE(maybe_new_value)) {
+    byte value = GAME_MAP_RESET_NEW_VALUE(maybe_new_value);
+    if (game::message::SendExternalPropagateCoordinates(x, y, value)) {
+      mapping::Set(x, y, value);
     }
 
     return true;
@@ -66,8 +66,7 @@ static void maybe_propagate() {
   mapping::Iterator iterator;
   int8_t x;
   int8_t y;
-  while (byte value = mapping::GetNextValidPosition(&iterator, &x, &y) !=
-                      MAPPING_POSITION_EMPTY) {
+  while (byte value = mapping::GetNextValidPosition(&iterator, &x, &y)) {
     if (propagate_value(x, y, value)) break;
   }
 }
@@ -81,8 +80,7 @@ static void update_blinks(position::Coordinates coordinates, byte player,
     int8_t x;
     int8_t y;
     while (byte value = mapping::GetNextValidPositionAround(
-                            coordinates.x, coordinates.y, 1, &iterator, &x,
-                            &y) != MAPPING_POSITION_EMPTY) {
+               coordinates.x, coordinates.y, 1, &iterator, &x, &y)) {
       byte map_player = value - 1;
       if (map_player != GAME_PLAYER_NO_PLAYER) mapping::Set(x, y, player + 1);
     }
@@ -108,10 +106,9 @@ bool external_message_handler(byte local_absolute_face,
                  GAME_MAP_SET_NEW_VALUE(blink::state::GetPlayer() + 1));
   }
 
-  if (mapping::Get((int8_t)message->payload[1], (int8_t)message->payload[2]) ==
-      MAPPING_POSITION_EMPTY) {
+  if (!mapping::Get((int8_t)message->payload[1], (int8_t)message->payload[2])) {
     mapping::Set((int8_t)message->payload[1], (int8_t)message->payload[2],
-                 GAME_MAP_SET_NEW_VALUE((int8_t)message->payload[3] + 1));
+                 GAME_MAP_SET_NEW_VALUE((int8_t)message->payload[3]));
   }
 
   return true;
@@ -137,8 +134,7 @@ void ComputeMapStats() {
   mapping::Iterator iterator;
   int8_t x;
   int8_t y;
-  while (byte value = mapping::GetNextValidPosition(&iterator, &x, &y) !=
-                      MAPPING_POSITION_EMPTY) {
+  while (byte value = mapping::GetNextValidPosition(&iterator, &x, &y)) {
     byte map_player = value - 1;
 
     // Update player blink count.
@@ -167,9 +163,8 @@ void ComputeMapStats() {
     mapping::Iterator iterator2;
     int8_t x2;
     int8_t y2;
-    while (byte value =
-               mapping::GetNextValidPositionAround(
-                   x, y, 2, &iterator2, &x2, &y2) != MAPPING_POSITION_EMPTY) {
+    while (byte value = mapping::GetNextValidPositionAround(x, y, 2, &iterator2,
+                                                            &x2, &y2)) {
       byte map_player_2 = value - 1;
       if (map_player_2 == GAME_PLAYER_NO_PLAYER) {
         stats_.player[map_player].can_move = true;
@@ -226,9 +221,10 @@ bool ValidState() {
 }
 
 void Reset() {
-  ComputeMapStats();
-
   game::map::upload::Reset();
+  mapping::Reset();
+
+  ComputeMapStats();
 }
 
 }  // namespace map
