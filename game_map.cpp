@@ -64,7 +64,7 @@ static void maybe_propagate() {
   }
 
   mapping::AllValidPositions(
-      [](int8_t x, int8_t y, byte* value, void* context) -> bool {
+      [](int8_t x, int8_t y, byte* value, void*) -> bool {
         if (propagate_value(x, y, *value)) return false;
         return true;
       },
@@ -80,7 +80,7 @@ static void update_blinks(position::Coordinates coordinates, byte player,
   if (update_neighbors) {
     mapping::AllValidPositionsAround(
         coordinates.x, coordinates.y, 1,
-        [](int8_t x, int8_t y, byte* value, void* context) -> bool {
+        [](int8_t, int8_t, byte* value, void* context) -> bool {
           if (*value - 1 != GAME_PLAYER_NO_PLAYER) *value = *((byte*)context);
           return true;
         },
@@ -163,7 +163,7 @@ void ComputeMapStats() {
         // Update player can move.
         mapping::AllValidPositionsAround(
             x, y, 2,
-            [](int8_t x, int8_t y, byte* value, void* context) -> bool {
+            [](int8_t, int8_t, byte* value, void* context) -> bool {
               byte player = *((byte*)context);
               byte map_player = *value - 1;
               if (map_player == GAME_PLAYER_NO_PLAYER) {

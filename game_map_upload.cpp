@@ -48,6 +48,8 @@ bool Process() {
               // TODO(bga): Need to resend the same position. There is currently
               // no way to do that.
             }
+
+            return false;
           },
           &current_ai_face)) {
     map_uploaded_ = true;
