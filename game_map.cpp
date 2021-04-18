@@ -71,8 +71,9 @@ static void maybe_propagate() {
       nullptr);
 }
 
-static void update_blinks(position::Coordinates coordinates, byte player,
-                          bool update_neighbors) {
+static void __attribute__((noinline))
+update_blinks(position::Coordinates coordinates, byte player,
+              bool update_neighbors) {
   byte value = player + 1;
 
   mapping::Set(coordinates.x, coordinates.y, value);
