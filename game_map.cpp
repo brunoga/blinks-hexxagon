@@ -63,27 +63,28 @@ static void maybe_propagate() {
     return;
   }
 
-  mapping::Iterator iterator;
-  int8_t x;
-  int8_t y;
-  while (byte value = mapping::GetNextValidPosition(&iterator, &x, &y)) {
-    if (propagate_value(x, y, value)) break;
-  }
+  mapping::AllValidPositions(
+      [](int8_t x, int8_t y, byte* value, void* context) -> bool {
+        if (propagate_value(x, y, *value)) return false;
+        return true;
+      },
+      nullptr);
 }
 
 static void update_blinks(position::Coordinates coordinates, byte player,
                           bool update_neighbors) {
-  mapping::Set(coordinates.x, coordinates.y, player + 1);
+  byte value = player + 1;
+
+  mapping::Set(coordinates.x, coordinates.y, value);
 
   if (update_neighbors) {
-    mapping::Iterator iterator;
-    int8_t x;
-    int8_t y;
-    while (byte value = mapping::GetNextValidPositionAround(
-               coordinates.x, coordinates.y, 1, &iterator, &x, &y)) {
-      byte map_player = value - 1;
-      if (map_player != GAME_PLAYER_NO_PLAYER) mapping::Set(x, y, player + 1);
-    }
+    mapping::AllValidPositionsAround(
+        coordinates.x, coordinates.y, 1,
+        [](int8_t x, int8_t y, byte* value, void* context) -> bool {
+          if (*value - 1 != GAME_PLAYER_NO_PLAYER) *value = *((byte*)context);
+          return true;
+        },
+        &value);
   }
 }
 
@@ -131,56 +132,60 @@ void ComputeMapStats() {
 
   byte max_player_blinks = 0;
 
-  mapping::Iterator iterator;
-  int8_t x;
-  int8_t y;
-  while (byte value = mapping::GetNextValidPosition(&iterator, &x, &y)) {
-    byte map_player = value - 1;
+  mapping::AllValidPositions(
+      [](int8_t x, int8_t y, byte* value, void* context) -> bool {
+        byte map_player = *value - 1;
 
-    // Update player blink count.
-    stats_.player[map_player].blink_count++;
+        byte* max_player_blinks = (byte*)context;
 
-    if (map_player != GAME_PLAYER_NO_PLAYER) {
-      // Update number of players.
-      if (stats_.player[map_player].blink_count == 1) {
-        stats_.player_count++;
-      }
+        // Update player blink count.
+        stats_.player[map_player].blink_count++;
 
-      // Keep track of currently winning players.
-      byte player_mask = 1 << map_player;
-      byte player_blink_count = stats_.player[map_player].blink_count;
+        if (map_player != GAME_PLAYER_NO_PLAYER) {
+          // Update number of players.
+          if (stats_.player[map_player].blink_count == 1) {
+            stats_.player_count++;
+          }
 
-      if (player_blink_count >= max_player_blinks) {
-        stats_.winning_players_mask =
-            player_blink_count == max_player_blinks
-                ? stats_.winning_players_mask | player_mask
-                : player_mask;
-        max_player_blinks = player_blink_count;
-      }
-    }
+          // Keep track of currently winning players.
+          byte player_mask = 1 << map_player;
+          byte player_blink_count = stats_.player[map_player].blink_count;
 
-    // Update player can move.
-    mapping::Iterator iterator2;
-    int8_t x2;
-    int8_t y2;
-    while (byte value = mapping::GetNextValidPositionAround(x, y, 2, &iterator2,
-                                                            &x2, &y2)) {
-      byte map_player_2 = value - 1;
-      if (map_player_2 == GAME_PLAYER_NO_PLAYER) {
-        stats_.player[map_player].can_move = true;
-        break;
-      }
-    }
+          if (player_blink_count >= *max_player_blinks) {
+            stats_.winning_players_mask =
+                player_blink_count == *max_player_blinks
+                    ? stats_.winning_players_mask | player_mask
+                    : player_mask;
+            *max_player_blinks = player_blink_count;
+          }
+        }
 
-    // Update empty space in range.
-    //
-    // TODO(bga): Double chjeck this.
-    if (!(stats_.local_blink_empty_space_in_range)) {
-      stats_.local_blink_empty_space_in_range =
-          ((map_player == GAME_PLAYER_NO_PLAYER) &&
-           (position::Distance(position::Coordinates{x, y}) <= 2));
-    }
-  }
+        // Update player can move.
+        mapping::AllValidPositionsAround(
+            x, y, 2,
+            [](int8_t x, int8_t y, byte* value, void* context) -> bool {
+              byte player = *((byte*)context);
+              byte map_player = *value - 1;
+              if (map_player == GAME_PLAYER_NO_PLAYER) {
+                stats_.player[player].can_move = true;
+                return false;
+              }
+              return true;
+            },
+            &map_player);
+
+        // Update empty space in range.
+        //
+        // TODO(bga): Double chjeck this.
+        if (!(stats_.local_blink_empty_space_in_range)) {
+          stats_.local_blink_empty_space_in_range =
+              ((map_player == GAME_PLAYER_NO_PLAYER) &&
+               (position::Distance(position::Coordinates{x, y}) <= 2));
+        }
+
+        return true;
+      },
+      &max_player_blinks);
 }
 
 void SetMoveOrigin(position::Coordinates coordinates) {
